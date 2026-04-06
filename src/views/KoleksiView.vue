@@ -352,7 +352,7 @@ const collection = ref([
   border: none;
   font-size: 0.8rem;
   font-weight: 700;
-  color: #7D5731; /* Warna cokelat sesuai desain inline */
+  color: #7d5731; /* Warna cokelat sesuai desain inline */
   cursor: pointer;
   outline: none;
   font-family: inherit;

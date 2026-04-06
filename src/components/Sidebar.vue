@@ -6,11 +6,7 @@
     </div>
 
     <nav class="sidebar-nav">
-      <RouterLink
-        to="/beranda"
-        class="nav-item"
-        :class="{ active: activeMainMenu === '/beranda' }"
-      >
+      <RouterLink to="/beranda" class="nav-item" :class="{ active: activeMainMenu === '/beranda' }">
         <svg
           class="nav-icon"
           viewBox="0 0 24 24"
@@ -28,11 +24,7 @@
         BERANDA
       </RouterLink>
 
-      <RouterLink
-        to="/koleksi"
-        class="nav-item"
-        :class="{ active: activeMainMenu === '/koleksi' }"
-      >
+      <RouterLink to="/koleksi" class="nav-item" :class="{ active: activeMainMenu === '/koleksi' }">
         <svg
           class="nav-icon"
           viewBox="0 0 24 24"
@@ -50,11 +42,7 @@
         KOLEKSI SAYA
       </RouterLink>
 
-      <RouterLink
-        to="/buku"
-        class="nav-item"
-        :class="{ active: activeMainMenu === '/buku' }"
-      >
+      <RouterLink to="/buku" class="nav-item" :class="{ active: activeMainMenu === '/buku' }">
         <svg
           class="nav-icon"
           viewBox="0 0 24 24"
@@ -109,37 +97,34 @@ watch(
 
     // 1. Rute Utama (Menyala & Menyimpan Konteks)
     const mainRoutes = ['/beranda', '/koleksi', '/buku']
-    
+
     // 2. Rute Anak (Meminjam Konteks Menu Induk)
     // Menggunakan kata kunci pendek agar mencakup /edit-parfum, /tambah-parfum, dll
     const subRoutes = ['/detail', '/edit', '/tambah', '/kesesuaian']
-    
+
     // 3. Rute Netral (Memaksa Sidebar Mati Total)
     const neutralRoutes = ['/profil']
 
-    const isSubRoute = subRoutes.some(r => path.startsWith(r))
-    const isNeutralRoute = neutralRoutes.some(r => path.startsWith(r))
+    const isSubRoute = subRoutes.some((r) => path.startsWith(r))
+    const isNeutralRoute = neutralRoutes.some((r) => path.startsWith(r))
 
     if (mainRoutes.includes(path)) {
       // KONDISI 1: Di Menu Utama -> Nyalakan & Simpan
       activeMainMenu.value = path
       localStorage.setItem('lastActiveMenu', path)
-    } 
-    else if (isNeutralRoute) {
+    } else if (isNeutralRoute) {
       // KONDISI 2: Di Profil -> PAKSA MATI
       activeMainMenu.value = ''
-    } 
-    else if (isSubRoute) {
+    } else if (isSubRoute) {
       // KONDISI 3: Di Detail/Edit/Tambah -> Panggil menu induk terakhir
       const savedMenu = localStorage.getItem('lastActiveMenu')
       activeMainMenu.value = savedMenu || '/beranda'
-    } 
-    else {
+    } else {
       // KONDISI 4: Fallback aman jika masuk ke rute yang tidak dikenal
       activeMainMenu.value = ''
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 </script>
 

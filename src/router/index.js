@@ -48,21 +48,21 @@ const router = createRouter({
       name: 'buku',
       component: BukuView,
     },
-    { 
-      path: '/edit-parfum', 
-      name: 'edit-parfum', 
-      component: EditParfumView 
+    {
+      path: '/edit-parfum',
+      name: 'edit-parfum',
+      component: EditParfumView,
     },
-    { 
-      path: '/kesesuaian', 
-      name: 'kesesuaian', 
-      component: KesesuianView 
+    {
+      path: '/kesesuaian',
+      name: 'kesesuaian',
+      component: KesesuianView,
     },
     {
       path: '/profil',
       name: 'profil',
-      component: ProfilView
-    }
+      component: ProfilView,
+    },
   ],
 })
 
