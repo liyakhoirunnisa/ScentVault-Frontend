@@ -5,7 +5,18 @@
     <main class="main-content">
       <Topbar>
         <div class="search-bar">
-          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <svg
+            class="search-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
           <input type="text" placeholder="Cari Koleksi Anda..." />
         </div>
       </Topbar>
@@ -46,19 +57,11 @@
           </div>
           <div class="sort-dropdown">
             <span class="sort-label">Urutkan:</span>
-            <button class="sort-btn">
-              Baru Ditambahkan
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <polyline points="6 9 12 15 18 9"></polyline>
-              </svg>
-            </button>
+            <select v-model="activeSort" class="sort-select-basic">
+              <option v-for="option in sortOptions" :key="option" :value="option">
+                {{ option }}
+              </option>
+            </select>
           </div>
         </div>
 
@@ -155,10 +158,13 @@ import imgParfum2 from '@/assets/parfum-wild-orchid.jpeg'
 import imgParfum3 from '@/assets/parfum-oud-immortel.jpeg'
 import imgParfum4 from '@/assets/parfum-velvet-vanilla.jpeg'
 
-
 // Data Filter
 const filters = ['Semua', 'Bunga', 'Kayu', 'Segar', 'Manis']
 const activeFilter = ref('Semua')
+
+// Data Sort
+const sortOptions = ['Terbaru', 'Terlama']
+const activeSort = ref('Terbaru')
 
 // Data Bohongan (Mock Data) menyesuaikan desain
 const collection = ref([
@@ -261,7 +267,7 @@ const collection = ref([
 .page-title {
   font-size: 2.2rem;
   font-weight: 800;
-  color: #7D5731;
+  color: #7d5731;
   line-height: 1.1;
   margin-bottom: 5px;
 }
@@ -308,7 +314,7 @@ const collection = ref([
 .filter-pills {
   display: flex;
   gap: 5px;
-  background-color: #EEEEEA;
+  background-color: #eeeeea;
   padding: 5px;
   border-radius: 30px;
 }
@@ -319,7 +325,7 @@ const collection = ref([
   border-radius: 20px;
   font-size: 0.8rem;
   font-weight: 500;
-  color: #5D605C;
+  color: #5d605c;
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -340,21 +346,39 @@ const collection = ref([
   color: #888;
   font-weight: 600;
 }
-.sort-btn {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  background: none;
+
+.sort-select-basic {
+  background: transparent;
   border: none;
   font-size: 0.8rem;
   font-weight: 700;
-  color: #7D5731;
+  color: #7D5731; /* Warna cokelat sesuai desain inline */
   cursor: pointer;
+  outline: none;
+  font-family: inherit;
+  padding: 0;
 }
+
+.sort-select-basic option {
+  color: #333;
+  font-weight: normal;
+}
+
 .sort-btn svg {
   width: 14px;
   height: 14px;
   stroke-width: 3px;
+}
+.sort-btn svg.rotate {
+  transform: rotate(180deg);
+}
+
+.sort-menu-item:hover {
+  background-color: #f5f5f5;
+}
+.sort-menu-item.active {
+  background-color: #eee;
+  font-weight: 600;
 }
 
 /* =========================================
@@ -470,8 +494,8 @@ const collection = ref([
   flex: 1;
 }
 .tag-pill {
-  background-color: #FCDCCF;
-  color: #634D43;
+  background-color: #fcdccf;
+  color: #634d43;
   font-size: 0.65rem;
   font-weight: 700;
   padding: 4px 12px;
@@ -489,12 +513,12 @@ const collection = ref([
   border-radius: 30px;
   font-size: 0.8rem;
   font-weight: 700;
-  color: #7D5731;
+  color: #7d5731;
   transition: all 0.2s;
 }
 .btn-outline-detail:hover {
-  border-color: #7D5731;
-  color: #7D5731;
+  border-color: #7d5731;
+  color: #7d5731;
   background-color: transparent;
 }
 

@@ -115,7 +115,7 @@ watch(
     const subRoutes = ['/detail', '/edit', '/tambah', '/kesesuaian']
     
     // 3. Rute Netral (Memaksa Sidebar Mati Total)
-    const neutralRoutes = ['/profil', '/notifikasi']
+    const neutralRoutes = ['/profil']
 
     const isSubRoute = subRoutes.some(r => path.startsWith(r))
     const isNeutralRoute = neutralRoutes.some(r => path.startsWith(r))
@@ -126,7 +126,7 @@ watch(
       localStorage.setItem('lastActiveMenu', path)
     } 
     else if (isNeutralRoute) {
-      // KONDISI 2: Di Profil/Notifikasi -> PAKSA MATI
+      // KONDISI 2: Di Profil -> PAKSA MATI
       activeMainMenu.value = ''
     } 
     else if (isSubRoute) {

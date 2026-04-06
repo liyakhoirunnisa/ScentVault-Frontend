@@ -6,6 +6,10 @@
       <Topbar />
 
       <div class="content-body">
+        <div class="page-header">
+          <h1 class="page-title">Profil Pengguna</h1>
+        </div>
+
         <div class="profile-hero-card">
           <div class="hero-avatar-wrapper">
             <img
@@ -185,13 +189,10 @@
           </div>
 
           <h3 class="modal-title">Yakin Ingin Simpan<br />Perubahan?</h3>
-          <p class="modal-desc">
-            Data profil Anda akan diperbarui dan<br />tersimpan di sistem ScentVault.
-          </p>
 
           <div class="modal-actions-vertical">
-            <button class="btn-gradient w-100" @click="confirmSave">IYA, SIMPAN</button>
-            <button class="btn-outline-brown w-100" @click="closeSaveModal">BATAL</button>
+            <button class="btn-gradient w-100" @click="confirmSave">IYA</button>
+            <button class="btn-outline-brown w-100" @click="closeSaveModal">TIDAK</button>
           </div>
         </div>
       </div>
@@ -251,7 +252,7 @@ const closeSaveModal = () => {
 }
 .content-body {
   flex: 1;
-  padding: 40px 60px;
+  padding: 10px 50px 50px 50px;
   overflow-y: auto;
 }
 .content-body::-webkit-scrollbar {
@@ -259,6 +260,23 @@ const closeSaveModal = () => {
 }
 .content-body::-webkit-scrollbar-thumb {
   border-radius: 4px;
+}
+
+/* =========================================
+   JUDUL HALAMAN
+   ========================================= */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 35px;
+}
+.page-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #7D5731;
+  line-height: 1.1;
+  margin-bottom: 5px;
 }
 
 /* =========================================
@@ -540,7 +558,7 @@ const closeSaveModal = () => {
 
 .modal-card {
   background-color: #ffffff;
-  width: 400px;
+  width: 350px;
   padding: 40px 30px;
   border-radius: 20px;
   text-align: center;
@@ -589,7 +607,7 @@ const closeSaveModal = () => {
   font-weight: 800;
   color: #7d5731;
   line-height: 1.3;
-  margin-bottom: 12px;
+  margin-bottom: 30px;
 }
 
 .modal-desc {

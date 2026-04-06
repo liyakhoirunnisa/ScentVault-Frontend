@@ -8,7 +8,6 @@ import TambahParfumView from '../views/TambahParfumView.vue'
 import BukuView from '../views/BukuView.vue'
 import EditParfumView from '../views/EditParfumView.vue'
 import KesesuianView from '../views/KesesuaianView.vue'
-import NotifikasiView from '../views/NotifikasiView.vue'
 import ProfilView from '../views/ProfilView.vue'
 
 const router = createRouter({
@@ -58,11 +57,6 @@ const router = createRouter({
       path: '/kesesuaian', 
       name: 'kesesuaian', 
       component: KesesuianView 
-    },
-    { 
-      path: '/notifikasi', 
-      name: 'notifikasi', 
-      component: NotifikasiView 
     },
     {
       path: '/profil',

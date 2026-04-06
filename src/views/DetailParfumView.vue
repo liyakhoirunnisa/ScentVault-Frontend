@@ -363,9 +363,6 @@ const recommendations = [
   overflow: hidden;
 }
 
-/* KUNCI: Seluruh CSS .sidebar, .sidebar-header, dll TELAH DIHAPUS 
-   karena sudah diurus oleh Sidebar.vue secara global */
-
 /* =========================================
    Kanvas Utama (Header & Scroll)
    ========================================= */

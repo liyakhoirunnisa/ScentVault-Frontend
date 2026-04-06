@@ -368,7 +368,7 @@ const favorites = ref([
 }
 .content-body {
   flex: 1;
-  padding: 30px 50px 50px 50px;
+  padding: 10px 50px 50px 50px;
   overflow-y: auto;
 }
 .content-body::-webkit-scrollbar {

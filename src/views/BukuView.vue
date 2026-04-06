@@ -329,7 +329,7 @@ const diaryEntries = ref([
   margin-bottom: 40px;
 }
 .page-title {
-  font-size: 2.4rem;
+  font-size: 2.2rem;
   font-weight: 800;
   color: #7d5731;
   line-height: 1.1;
