@@ -9,6 +9,10 @@ import BukuView from '../views/BukuView.vue'
 import EditParfumView from '../views/EditParfumView.vue'
 import KesesuianView from '../views/KesesuaianView.vue'
 import ProfilView from '../views/ProfilView.vue'
+import KonfigurasiAturan from '../views/KonfigurasiAturan.vue'
+import ProfileAdminView from '../views/ProfileAdminView.vue'
+import ManajemenPengguna from '../views/ManajemenPengguna.vue'
+import TambahPengguna from '../views/TambahPengguna.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -63,6 +67,31 @@ const router = createRouter({
       name: 'profil',
       component: ProfilView,
     },
+    {
+      path: '/konfigurasi-aturan',
+      name: 'KonfigurasiAturan',
+      component: KonfigurasiAturan,
+      meta: { layout: 'admin' },
+    },
+    {
+      path: '/profil-admin',
+      name: 'ProfileAdminView',
+      component: ProfileAdminView,
+      meta: { layout: 'admin' },
+    },
+    {
+      path: '/manajemen-pengguna',
+      name: 'ManajemenPengguna',
+      component: ManajemenPengguna,
+      meta: { layout: 'admin' },
+    },
+    {
+      path: '/tambah-pengguna',
+      name: 'TambahPengguna',
+      component: TambahPengguna,
+      meta: { layout: 'admin' },
+    },
+
   ],
 })
 
