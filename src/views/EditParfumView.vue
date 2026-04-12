@@ -71,6 +71,27 @@
                 <input type="text" class="form-control" v-model="formData.brand" />
               </div>
             </div>
+
+            <div class="rating-section">
+              <label>PERINGKAT KESELURUHAN</label>
+              <div class="rating-display">
+                <div class="stars-interactive">
+                  <svg
+                    v-for="star in 5"
+                    :key="star"
+                    @click="formData.rating = star"
+                    class="star-icon"
+                    :class="{ active: star <= formData.rating }"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+                    ></path>
+                  </svg>
+                </div>
+                <span class="rating-text">{{ formData.rating }}.0 / 5</span>
+              </div>
+            </div>
           </div>
 
           <div class="right-column">
@@ -222,25 +243,30 @@
 
       <div v-if="showEditModal" class="modal-overlay" @click.self="closeEditModal">
         <div class="modal-card">
-          
           <div class="success-icon-wrapper">
             <div class="success-icon-inner">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#FFFFFF"
+                stroke-width="3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
                 <polyline points="20 6 9 17 4 12"></polyline>
               </svg>
             </div>
           </div>
-          
-          <h3 class="modal-title">Yakin Ingin Simpan<br>Perubahan?</h3>
+
+          <h3 class="modal-title">Yakin Ingin Simpan<br />Perubahan?</h3>
           <p class="modal-desc">
-            Parfum baru Anda kini telah tersimpan dengan<br>aman di brankas digital.
+            Parfum baru Anda kini telah tersimpan dengan<br />aman di brankas digital.
           </p>
-          
+
           <div class="modal-actions-vertical">
             <button class="btn-gradient w-100" @click="confirmSave">IYA</button>
             <button class="btn-outline-brown w-100" @click="closeEditModal">TIDAK</button>
           </div>
-          
         </div>
       </div>
     </main>
@@ -261,6 +287,7 @@ const formData = ref({
   brand: 'Byredo',
   category: 'Oriental Woody',
   concentration: 'Eau de Parfum',
+  rating: 0,
   description:
     'Oud Immortel adalah penghormatan kepada oud, kayu tradisional yang sangat penting secara budaya. Aroma ini menggabungkan oud dengan patchouli dan papirus untuk memberikan karakter kayu yang smoky, sementara limoncello dan cardamom memberikan pembukaan yang segar dan tajam.',
   topNotes: ['Limoncello', 'Incense', 'Cardamom'],
@@ -285,7 +312,7 @@ const promptSave = () => {
 
 // Fungsi ketika pengguna klik "IYA" di dalam modal
 const confirmSave = () => {
-  console.log("Data berhasil diubah!", formData.value)
+  console.log('Data berhasil diubah!', formData.value)
   showEditModal.value = false
   router.push('/detail') // Navigasi kembali ke detail
 }
@@ -447,6 +474,62 @@ const closeEditModal = () => {
 }
 
 /* =========================================
+   GAYA RATING KESELURUHAN
+   ========================================= */
+.rating-section {
+  background-color: #ffffff;
+  border-radius: 20px;
+  padding: 25px 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+  margin-top: 30px; /* Jarak dari opsi konsentrasi di atasnya */
+}
+
+.rating-section label {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #888;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 15px;
+}
+
+.rating-display {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.stars-interactive {
+  display: flex;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.star-icon {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: #b0b0b0; /* Warna abu-abu untuk bintang kosong */
+  stroke-width: 2;
+  stroke-linejoin: round;
+  transition: all 0.2s ease;
+}
+
+/* Mengubah warna bintang menjadi emas padat saat aktif */
+.star-icon.active {
+  fill: #dca52d;
+  stroke: #dca52d;
+}
+
+.rating-text {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #7d5731;
+  margin-left: 5px;
+}
+
+/* =========================================
    KOLOM KANAN (FORM DETAIL)
    ========================================= */
 .form-card {
@@ -604,7 +687,7 @@ const closeEditModal = () => {
 }
 .note-pill {
   background-color: #fcdccf;
-  color: #634D43;
+  color: #634d43;
   font-size: 0.75rem;
   font-weight: 600;
   padding: 6px 8px 6px 14px;
@@ -645,7 +728,7 @@ const closeEditModal = () => {
 .btn-add-small {
   background-color: #f4f4f0;
   border: none;
-  color: #7D5731;
+  color: #7d5731;
   font-size: 0.65rem;
   font-weight: 700;
   padding: 8px 16px;
@@ -678,7 +761,7 @@ const closeEditModal = () => {
   padding: 12px 35px;
   font-size: 0.85rem;
   font-weight: 500;
-  color: #7D5731;
+  color: #7d5731;
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -722,7 +805,7 @@ const closeEditModal = () => {
 }
 
 .modal-card {
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   width: 400px;
   padding: 40px 30px;
   border-radius: 20px;
@@ -732,14 +815,20 @@ const closeEditModal = () => {
 }
 
 @keyframes modalFadeIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .success-icon-wrapper {
   width: 70px;
   height: 70px;
-  background-color: #F4F4F0; /* Krem muda */
+  background-color: #f4f4f0; /* Krem muda */
   border-radius: 50%;
   display: flex;
   justify-content: center;
@@ -750,7 +839,7 @@ const closeEditModal = () => {
 .success-icon-inner {
   width: 36px;
   height: 36px;
-  background-color: #7D5731; /* Cokelat pekat */
+  background-color: #7d5731; /* Cokelat pekat */
   border-radius: 50%;
   display: flex;
   justify-content: center;
@@ -764,7 +853,7 @@ const closeEditModal = () => {
 .modal-title {
   font-size: 1.4rem;
   font-weight: 800;
-  color: #7D5731;
+  color: #7d5731;
   line-height: 1.3;
   margin-bottom: 12px;
 }
@@ -792,17 +881,17 @@ const closeEditModal = () => {
 
 .btn-outline-brown {
   background-color: transparent;
-  border: 1px solid #E5E5E5;
+  border: 1px solid #e5e5e5;
   border-radius: 30px;
-  color: #7D5731;
+  color: #7d5731;
   letter-spacing: 0.5px;
   text-transform: uppercase;
   cursor: pointer;
   transition: all 0.2s;
 }
 .btn-outline-brown:hover {
-  border-color: #7D5731;
-  background-color: #FAFAFA;
+  border-color: #7d5731;
+  background-color: #fafafa;
 }
 
 /* Responsif */

@@ -21,10 +21,6 @@
 
           <div class="hero-info">
             <h1 class="hero-name">Elena Vance</h1>
-            <div class="hero-meta">
-              <span class="badge-role">SENIOR CURATOR</span>
-              <span class="join-date">Bergabung sejak Januari 2023</span>
-            </div>
             <div class="hero-actions">
               <button class="btn-gradient">Edit Foto</button>
             </div>
@@ -76,66 +72,27 @@
             <p class="stat-label">ULASAN TERBIT</p>
           </div>
 
-          <div class="stat-card">
-            <div class="stat-icon">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path
-                  d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
-                ></path>
-              </svg>
-            </div>
-            <h2 class="stat-number">15</h2>
-            <p class="stat-label">AROMA FAVORIT</p>
-          </div>
         </div>
 
         <div class="settings-card">
           <h3 class="settings-title">Pengaturan Akun</h3>
 
-          <div class="form-row-2">
+          <div class="settings-grid">
             <div class="input-group">
               <label>NAMA LENGKAP</label>
               <input type="text" class="form-control" v-model="userData.name" />
             </div>
+
             <div class="input-group">
               <label>EMAIL</label>
               <input type="email" class="form-control" v-model="userData.email" />
             </div>
-          </div>
 
-          <div class="input-group">
-            <label>UBAH KATA SANDI</label>
-            <div class="password-wrapper">
-              <svg
-                class="icon-left"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-              </svg>
-
-              <input
-                :type="showPassword ? 'text' : 'password'"
-                class="form-control input-password"
-                v-model="userData.password"
-                placeholder="••••••••"
-              />
-
-              <button class="btn-toggle-password" @click="showPassword = !showPassword">
+            <div class="input-group">
+              <label>UBAH KATA SANDI</label>
+              <div class="password-wrapper">
                 <svg
-                  v-if="!showPassword"
+                  class="icon-left"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -143,11 +100,51 @@
                   stroke-linecap="round"
                   stroke-linejoin="round"
                 >
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                  <circle cx="12" cy="12" r="3"></circle>
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                 </svg>
+                <input
+                  :type="showPassword ? 'text' : 'password'"
+                  class="form-control input-password"
+                  v-model="userData.password"
+                  placeholder="••••••••"
+                />
+                <button class="btn-toggle-password" @click="showPassword = !showPassword">
+                  <svg
+                    v-if="!showPassword"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                  <svg
+                    v-else
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
+                    ></path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label>KONFIRMASI KATA SANDI</label>
+              <div class="password-wrapper">
                 <svg
-                  v-else
+                  class="icon-left"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -155,15 +152,125 @@
                   stroke-linecap="round"
                   stroke-linejoin="round"
                 >
-                  <path
-                    d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
-                  ></path>
-                  <line x1="1" y1="1" x2="23" y2="23"></line>
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                  <polyline points="9 12 11 14 15 10"></polyline>
                 </svg>
-              </button>
+                <input
+                  :type="showConfirmPassword ? 'text' : 'password'"
+                  class="form-control input-password"
+                  v-model="userData.password_confirmation"
+                  placeholder="••••••••"
+                />
+                <button
+                  class="btn-toggle-password"
+                  @click="showConfirmPassword = !showConfirmPassword"
+                >
+                  <svg
+                    v-if="!showConfirmPassword"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                  <svg
+                    v-else
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
+                    ></path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label>PILIH PROVINSI</label>
+              <div class="select-wrapper">
+                <select class="form-control custom-select" v-model="userData.provinsi">
+                  <option value="" disabled selected>Pilih Provinsi</option>
+                  <option v-for="prov in provinsis" :key="prov" :value="prov">{{ prov }}</option>
+                </select>
+                <svg
+                  class="select-arrow"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label>PILIH KABUPATEN/KOTA</label>
+              <div class="select-wrapper">
+                <select class="form-control custom-select" v-model="userData.kabupaten">
+                  <option value="" disabled selected>Pilih Kabupaten/Kota</option>
+                  <option v-for="kab in kabupatens" :key="kab" :value="kab">{{ kab }}</option>
+                </select>
+                <svg
+                  class="select-arrow"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label>PILIH KECAMATAN</label>
+              <div class="select-wrapper">
+                <select class="form-control custom-select" v-model="userData.kecamatan">
+                  <option value="" disabled selected>Pilih Kecamatan</option>
+                  <option v-for="kec in kecamatans" :key="kec" :value="kec">{{ kec }}</option>
+                </select>
+                <svg
+                  class="select-arrow"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label>PILIH KELURAHAN/DESA</label>
+              <div class="select-wrapper">
+                <select class="form-control custom-select" v-model="userData.kelurahan">
+                  <option value="" disabled selected>Pilih Kelurahan/Desa</option>
+                  <option v-for="kel in kelurahans" :key="kel" :value="kel">{{ kel }}</option>
+                </select>
+                <svg class="select-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </div>
             </div>
           </div>
-
           <div class="form-actions">
             <button class="btn-outline-cancel" @click="$router.back()">Batal</button>
             <button class="btn-gradient" @click="promptSave">Simpan Perubahan</button>
@@ -210,9 +317,21 @@ const userData = ref({
   name: 'Elena Vance',
   email: 'Elenavance@gmail.com',
   password: '',
+  password_confirmation: '',
+  provinsi: 'DKI Jakarta',
+  kabupaten: 'Jakarta Selatan',
+  kecamatan: 'Tebet',
+  kelurahan: 'Tebet Timur',
 })
 
+// Data Dummy untuk Lokasi (Bisa diganti dengan API Area Indonesia nanti)
+const provinsis = ref(['DKI Jakarta', 'Jawa Barat', 'Jawa Tengah', 'Jawa Timur', 'Bali'])
+const kabupatens = ref(['Jakarta Selatan', 'Bandung', 'Semarang', 'Surabaya', 'Denpasar'])
+const kecamatans = ref(['Tebet', 'Coblong', 'Banyumanik', 'Gubeng', 'Kuta'])
+const kelurahans = ref(['Tebet Barat', 'Tebet Timur', 'Kebon Baru', 'Manggarai'])
+
 const showPassword = ref(false)
+const showConfirmPassword = ref(false)
 
 // STATE UNTUK MENGONTROL MODAL KONFIRMASI SIMPAN
 const showSaveModal = ref(false)
@@ -274,7 +393,7 @@ const closeSaveModal = () => {
 .page-title {
   font-size: 2.2rem;
   font-weight: 800;
-  color: #7D5731;
+  color: #7d5731;
   line-height: 1.1;
   margin-bottom: 5px;
 }
@@ -283,7 +402,7 @@ const closeSaveModal = () => {
    KARTU HERO PROFIL
    ========================================= */
 .profile-hero-card {
-  background-color: #f4f4f0;
+  background: linear-gradient(135deg, #f4f4f0 0%, #fdfdfd 100%); /* Latar gradasi terang lembut */
   border-radius: 24px;
   padding: 30px;
   display: flex;
@@ -307,37 +426,27 @@ const closeSaveModal = () => {
 .hero-info {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
 }
 .hero-name {
   font-size: 2.5rem;
   font-weight: 800;
   color: #7d5731;
-  margin-bottom: 12px;
+  margin-bottom: 40px;
   letter-spacing: -0.5px;
+  line-height: 1;
 }
-.hero-meta {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-bottom: 25px;
-}
-.badge-role {
-  background-color: #fcdccf;
-  color: #634d43;
-  font-size: 0.65rem;
-  font-weight: 800;
-  padding: 6px 14px;
-  border-radius: 20px;
-  letter-spacing: 1px;
-}
-.join-date {
-  font-size: 0.85rem;
-  color: #888;
-  font-weight: 500;
-}
+
 .hero-actions {
   display: flex;
   gap: 15px;
+}
+
+.hero-actions .btn-gradient {
+  padding: 8px 24px;
+  font-size: 0.8rem;
+  border-radius: 20px;
 }
 
 .btn-gradient {
@@ -365,7 +474,7 @@ const closeSaveModal = () => {
    ========================================= */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 30px;
   margin-bottom: 30px;
 }
@@ -421,6 +530,15 @@ const closeSaveModal = () => {
   margin-bottom: 30px;
 }
 
+/* Mengatur seluruh form menjadi 2 kolom */
+.settings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 30px;
+  row-gap: 5px; /* Menjaga jarak antar baris tetap proporsional */
+  margin-bottom: 25px;
+}
+
 .form-row-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -454,6 +572,41 @@ const closeSaveModal = () => {
 .form-control:focus {
   border-color: #7d5731;
   outline: none;
+}
+
+.select-wrapper {
+  position: relative;
+  width: 100%;
+}
+.custom-select {
+  padding: 16px 40px 16px 20px;
+  background-color: #ffffff;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: #333;
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.01);
+  outline: none;
+}
+.custom-select:focus {
+  border-color: #7d5731;
+}
+.select-arrow {
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: #888;
+  pointer-events: none;
 }
 
 /* Khusus Input Kata Sandi */

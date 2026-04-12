@@ -19,11 +19,10 @@
               <line x1="19" y1="12" x2="5" y2="12"></line>
               <polyline points="12 19 5 12 12 5"></polyline>
             </svg>
-            
           </button>
 
           <div class="action-buttons">
-           <button class="btn-action btn-edit" @click="$router.push('/edit-parfum')">
+            <button class="btn-action btn-edit" @click="$router.push('/edit-parfum')">
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -144,125 +143,8 @@
                 </div>
               </div>
             </div>
-
-            <div class="specs-card">
-              <div class="spec-item">
-                <svg
-                  class="spec-icon"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
-                  <polyline points="3 3 3 8 8 8"></polyline>
-                  <path d="M12 7v5l4 2"></path>
-                </svg>
-                <span class="spec-label">KETAHANAN</span>
-                <span class="spec-value">10-12 jam</span>
-              </div>
-
-              <div class="spec-item">
-                <svg
-                  class="spec-icon"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M4 6c2-1.5 4-1.5 6 0s4 1.5 6 0 4-1.5 6 0"></path>
-                  <path d="M4 12c2-1.5 4-1.5 6 0s4 1.5 6 0 4-1.5 6 0"></path>
-                  <path d="M4 18c2-1.5 4-1.5 6 0s4 1.5 6 0 4-1.5 6 0"></path>
-                </svg>
-                <span class="spec-label">PANCARAN</span>
-                <span class="spec-value">Kuat</span>
-              </div>
-
-              <div class="spec-item">
-                <svg
-                  class="spec-icon"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <circle cx="12" cy="12" r="4"></circle>
-                  <line x1="12" y1="2" x2="12" y2="4"></line>
-                  <line x1="12" y1="20" x2="12" y2="22"></line>
-                  <line x1="4.93" y1="4.93" x2="6.34" y2="6.34"></line>
-                  <line x1="17.66" y1="17.66" x2="19.07" y2="19.07"></line>
-                  <line x1="2" y1="12" x2="4" y2="12"></line>
-                  <line x1="20" y1="12" x2="22" y2="12"></line>
-                  <line x1="4.93" y1="19.07" x2="6.34" y2="17.66"></line>
-                  <line x1="17.66" y1="6.34" x2="19.07" y2="4.93"></line>
-                </svg>
-                <span class="spec-label">TERBAIK UNTUK</span>
-                <span class="spec-value">Malam</span>
-              </div>
-
-              <div class="spec-item">
-                <svg
-                  class="spec-icon"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M12 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"></path>
-                  <line x1="15" y1="5" x2="19" y2="5"></line>
-                  <line x1="15" y1="9" x2="17" y2="9"></line>
-                </svg>
-                <span class="spec-label">MUSIM</span>
-                <span class="spec-value">Gugur /<br />Dingin</span>
-              </div>
-            </div>
-
-            <div class="journal-note-card">
-              <div class="journal-note-header">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M12 20h9"></path>
-                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-                </svg>
-                Catatan Buku Harian Aroma
-              </div>
-              <p>
-                "Dipakai hari ini untuk pembukaan galeri. Sangat cocok dipadukan dengan mantel
-                kasmir gelap. Tegas tanpa terasa berlebihan. Menerima tiga pujian sebelum jam kedua
-                berakhir."
-              </p>
-            </div>
           </div>
         </div>
-
-        <section class="recommendations-bottom">
-          <h3 class="section-title">Mungkin Anda juga menyukai</h3>
-          <div class="rec-grid">
-            <div class="rec-item" v-for="item in recommendations" :key="item.name">
-              <div class="rec-img-box">
-                <img :src="item.img" :alt="item.name" />
-              </div>
-              <div class="rec-info">
-                <span class="rec-brand">{{ item.brand }}</span>
-                <h5 class="rec-name">{{ item.name }}</h5>
-              </div>
-            </div>
-          </div>
-        </section>
       </div>
 
       <div v-if="showDeleteModal" class="modal-overlay" @click.self="closeDeleteModal">
@@ -326,30 +208,6 @@ const confirmDelete = () => {
   showDeleteModal.value = false
   // (Opsional) router.push('/beranda') jika ingin langsung kembali ke beranda
 }
-
-// Mock data untuk rekomendasi agar HTML lebih bersih
-const recommendations = [
-  {
-    brand: 'BYREDO',
-    name: 'Black Saffron',
-    img: imgRec1,
-  },
-  {
-    brand: 'DIPTYQUE',
-    name: 'Tam Dao',
-    img: imgRec2,
-  },
-  {
-    brand: 'LE LABO',
-    name: 'Santal 33',
-    img: imgRec3,
-  },
-  {
-    brand: 'AESOP',
-    name: 'Hwyl Eau de Parfum',
-    img: imgRec4,
-  },
-]
 </script>
 
 <style scoped>
@@ -749,122 +607,6 @@ Product Layout (Kiri: Gambar, Kanan: Info)
   font-weight: 700;
   color: #444;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.01);
-}
-
-/* Specs Card */
-.specs-card {
-  display: flex;
-  justify-content: space-between;
-  background-color: #ffffff;
-  border-radius: 16px;
-  padding: 25px 30px;
-  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.03);
-  margin-bottom: 30px;
-}
-.spec-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-}
-.spec-icon {
-  width: 24px;
-  height: 24px;
-  stroke: #7d5731;
-  margin-bottom: 10px;
-}
-.spec-label {
-  font-size: 0.65rem;
-  font-weight: 500;
-  color: #a0a0a0;
-  letter-spacing: 0.5px;
-  margin-bottom: 5px;
-  text-transform: uppercase;
-}
-.spec-value {
-  font-size: 0.95rem;
-  font-weight: 800;
-  color: #1a1a1a;
-  line-height: 1.2;
-}
-
-/* Journal Note Card */
-.journal-note-card {
-  background-color: #f8f5f1; /* Warna krem pucat */
-  border-radius: 12px;
-  padding: 25px;
-}
-.journal-note-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 0.85rem;
-  font-weight: 800;
-  color: #5e5844;
-  margin-bottom: 15px;
-}
-.journal-note-header svg {
-  width: 16px;
-  height: 16px;
-  stroke: #5e5844;
-}
-.journal-note-card p {
-  font-size: 0.9rem;
-  font-style: italic;
-  color: #555;
-  line-height: 1.6;
-  margin: 0;
-}
-
-/* =========================================
-   Rekomendasi Bawah
-   ========================================= */
-.section-title {
-  font-size: 1.2rem;
-  font-weight: 800;
-  color: #1a1a1a;
-  margin-bottom: 25px;
-}
-
-.rec-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
-}
-.rec-item {
-  cursor: pointer;
-}
-.rec-img-box {
-  width: 100%;
-  aspect-ratio: 1;
-  background-color: #111;
-  border-radius: 12px;
-  overflow: hidden;
-  margin-bottom: 15px;
-}
-.rec-img-box img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s;
-}
-.rec-item:hover .rec-img-box img {
-  transform: scale(1.05);
-}
-
-.rec-brand {
-  font-size: 0.65rem;
-  font-weight: 800;
-  color: #7d5731;
-  letter-spacing: 1px;
-  display: block;
-  margin-bottom: 4px;
-}
-.rec-name {
-  font-size: 0.95rem;
-  font-weight: 800;
-  color: #1a1a1a;
-  margin: 0;
 }
 
 /* Responsif */

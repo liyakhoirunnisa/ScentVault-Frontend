@@ -19,32 +19,6 @@
             <p>Masukkan kredensial Anda untuk mengakses koleksi Anda</p>
           </div>
 
-          <button class="btn-google" type="button">
-            <svg class="icon-google" viewBox="0 0 24 24">
-              <path
-                fill="#4285F4"
-                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-              />
-              <path
-                fill="#34A853"
-                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-              />
-              <path
-                fill="#FBBC05"
-                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-              />
-              <path
-                fill="#EA4335"
-                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-              />
-            </svg>
-            Masuk dengan Google
-          </button>
-
-          <div class="divider">
-            <span>ATAU DENGAN EMAIL</span>
-          </div>
-
           <form @submit.prevent="handleLogin" class="auth-form">
             <div class="form-group">
               <label for="email">ALAMAT EMAIL</label>
@@ -79,14 +53,46 @@
                 <a href="#" class="forgot-link">LUPA KATA SANDI?</a>
               </div>
               <div class="input-wrapper">
-                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                
-                <input :type="showPassword ? 'text' : 'password'" id="password" v-model="form.password" placeholder="••••••••" required>
-                
-                <svg class="toggle-password-icon" @click="showPassword = !showPassword" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path v-if="!showPassword" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <svg
+                  class="input-icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+
+                <input
+                  :type="showPassword ? 'text' : 'password'"
+                  id="password"
+                  v-model="form.password"
+                  placeholder="••••••••"
+                  required
+                />
+
+                <svg
+                  class="toggle-password-icon"
+                  @click="showPassword = !showPassword"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    v-if="!showPassword"
+                    d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
+                  ></path>
                   <circle v-if="!showPassword" cx="12" cy="12" r="3"></circle>
-                  <path v-if="showPassword" d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                  <path
+                    v-if="showPassword"
+                    d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
+                  ></path>
                   <line v-if="showPassword" x1="1" y1="1" x2="23" y2="23"></line>
                 </svg>
               </div>
@@ -116,11 +122,6 @@
       <div class="footer-left">
         <h3 class="footer-logo">ScentVault</h3>
         <p>© 2024 SCENTVAULT. CRAFTED FOR THE DIGITAL ATELIER.</p>
-      </div>
-      <div class="footer-right">
-        <a href="#">KEBIJAKAN PRIVASI</a>
-        <a href="#">KETENTUAN LAYANAN</a>
-        <a href="#">KONTAK</a>
       </div>
     </footer>
   </div>
@@ -251,70 +252,24 @@ const handleLogin = async () => {
   overflow-y: hidden;
 }
 
+.form-header {
+  margin-bottom: 25px;
+  padding-bottom: 25px;
+  border-bottom: 1px solid #ebebeb;
+}
+
 .form-header h2 {
-  font-size: 1.6rem;
+  font-size: 1.8rem;
   font-weight: 800;
-  color: #1a1a1a;
+  color: #2c2c2c;
   line-height: 1.2;
-  margin-bottom: 5px;
+  margin-bottom: 8px;
 }
 
 .form-header p {
-  font-size: 0.85rem;
-  color: #666;
-  margin-bottom: 15px;
-}
-
-/* =========================================
-   Elemen Formulir & Tombol
-   ========================================= */
-.btn-google {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  padding: 12px;
-  background-color: #f0f2f1;
-  border: none;
-  border-radius: 10px;
-  font-family: inherit;
-  font-weight: 700;
   font-size: 0.8rem;
-  color: #4a4a4a;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.btn-google:hover {
-  background-color: #e2e5e4;
-}
-
-.icon-google {
-  width: 20px;
-  height: 20px;
-  margin-right: 12px;
-}
-
-.divider {
-  display: flex;
-  align-items: center;
-  text-align: center;
-  margin: 15px 0;
-}
-
-.divider::before,
-.divider::after {
-  content: '';
-  flex: 1;
-  border-bottom: 1px solid #e5e5e5;
-}
-
-.divider span {
-  padding: 0 15px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #a0a0a0;
-  letter-spacing: 1px;
+  color: #888;
+  line-height: 1.5;
 }
 
 .form-group {
@@ -338,12 +293,9 @@ const handleLogin = async () => {
 
 .forgot-link {
   font-size: 0.75rem;
-  font-weight: 700;
-  color: #a0a0a0;
+  font-weight: 600;
+  color: #7d5731;
   text-decoration: none;
-}
-.forgot-link:hover {
-  color: #986d4d;
 }
 
 .input-wrapper {
@@ -363,9 +315,9 @@ const handleLogin = async () => {
 .input-wrapper input {
   width: 100%;
   padding: 12px 42px 12px 42px;
-  background-color: #f0f2f1;
+  background-color: #e7e9e4;
   border: 2px solid transparent;
-  border-radius: 10px;
+  border-radius: 12px;
   font-family: inherit;
   font-size: 0.9rem;
   color: #333;
@@ -389,13 +341,13 @@ const handleLogin = async () => {
   right: 14px; /* Menempatkan ikon di sisi kanan input */
   width: 20px;
   height: 20px;
-  color: #A0A0A0;
+  color: #a0a0a0;
   cursor: pointer;
   transition: color 0.2s;
 }
 
 .toggle-password-icon:hover {
-  color: #986D4D; /* Efek menyala saat di-hover */
+  color: #986d4d; /* Efek menyala saat di-hover */
 }
 
 /* Custom Checkbox */
@@ -451,7 +403,7 @@ const handleLogin = async () => {
 .btn-submit {
   width: 100%;
   padding: 14px;
-  background: linear-gradient(135deg, #b58b66 0%, #986d4d 100%);
+  background: linear-gradient(to right, #8b6042 0%, #e0bd9e 100%);
   border: none;
   border-radius: 30px;
   color: #ffffff;
@@ -516,19 +468,6 @@ const handleLogin = async () => {
   letter-spacing: 0.5px;
 }
 
-.footer-right a {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #888;
-  text-decoration: none;
-  margin-left: 30px;
-  transition: color 0.2s;
-}
-
-.footer-right a:hover {
-  color: #986d4d;
-}
-
 /* =========================================
    Responsif (Mobile View)
    ========================================= */
@@ -547,9 +486,6 @@ const handleLogin = async () => {
     flex-direction: column;
     text-align: center;
     gap: 20px;
-  }
-  .footer-right a {
-    margin: 0 10px;
   }
 }
 </style>

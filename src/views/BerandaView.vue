@@ -49,27 +49,6 @@
                 stroke-linecap="round"
                 stroke-linejoin="round"
               >
-                <polygon
-                  points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
-                ></polygon>
-              </svg>
-              <span class="stat-badge">KRITIK</span>
-            </div>
-            <h3 class="stat-number">42</h3>
-            <p class="stat-label">Total Ulasan</p>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-header">
-              <svg
-                class="stat-icon"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#7D5731"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
                 <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
                 <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
               </svg>
@@ -105,43 +84,58 @@
           </section>
 
           <section class="journal-area">
-            <div class="section-header-flex">
-              <h3 class="section-title">Buku Harian Terbaru</h3>
-              <a href="#" class="link-all">Lihat Semua</a>
-            </div>
-            <div class="journal-list">
-              <div class="journal-item" v-for="journal in recentJournals" :key="journal.id">
-                <div class="journal-icon-box">
-                  <component
-                    :is="journal.icon"
-                    class="j-icon"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="#7D5731"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </div>
-                <div class="journal-info">
-                  <div class="j-head">
-                    <h5>{{ journal.title }}</h5>
-                    <span class="j-time">{{ journal.time }}</span>
+            <h3 class="section-title">Buku Harian Terbaru</h3>
+            
+            <div class="entries-list">
+              <div class="entry-card" v-for="entry in recentJournals" :key="entry.id">
+                
+                <div class="entry-card-top">
+                  <div class="entry-title-group">
+                    <h4 class="entry-perfume-name">{{ entry.perfumeName }}</h4>
+                    <span class="entry-subtitle">{{ entry.subtitle }}</span>
                   </div>
-                  <p class="j-desc">{{ journal.desc }}</p>
+                  <div class="entry-date-group">
+                    <span class="entry-date-text">{{ entry.date }}</span>
+                  </div>
                 </div>
+
+                <div class="entry-card-content">
+                  <div class="entry-icon-box">
+                    <svg v-if="entry.iconType === 'sun'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="5"></circle>
+                      <line x1="12" y1="1" x2="12" y2="3"></line>
+                      <line x1="12" y1="21" x2="12" y2="23"></line>
+                      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                      <line x1="1" y1="12" x2="3" y2="12"></line>
+                      <line x1="21" y1="12" x2="23" y2="12"></line>
+                      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                    <svg v-else-if="entry.iconType === 'moon'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg v-else-if="entry.iconType === 'cloud'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path>
+                    </svg>
+                  </div>
+                  <div class="entry-quote-text">
+                    "{{ entry.quote }}"
+                  </div>
+                </div>
+
               </div>
+            </div>
+
+            <div class="list-footer-link" @click="$router.push('/buku')">
+              <span>BUKA SEMUA CATATAN</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
             </div>
           </section>
         </div>
-        <section class="inspiration-area">
-          <h3 class="section-title">Inspirasi Atelier</h3>
-          <div class="inspiration-grid">
-            <div class="insp-img-wrap" v-for="(img, index) in inspirations" :key="index">
-              <img :src="img.url" :alt="'Inspirasi ' + index" />
-            </div>
-          </div>
-        </section>
       </div>
     </main>
   </div>
@@ -151,11 +145,6 @@
 import Sidebar from '@/components/Sidebar.vue'
 import Topbar from '@/components/Topbar.vue'
 import { h } from 'vue'
-
-import imgInsp1 from '@/assets/inspiration1.png'
-import imgInsp2 from '@/assets/inspiration2.png'
-import imgInsp3 from '@/assets/inspiration3.png'
-import imgInsp4 from '@/assets/inspiration4.png'
 
 const svgProps = { viewBox: '0 0 24 24', xmlns: 'http://www.w3.org/2000/svg' }
 
@@ -176,31 +165,33 @@ const IconSun = () =>
     h('line', { x1: '18.36', y1: '5.64', x2: '19.78', y2: '4.22' }),
   ])
 
+// Data riwayat disesuaikan dengan gambar desain
 const recentJournals = [
   {
     id: 1,
-    title: 'Rainy Morning Mist',
-    time: '2 JAM YANG LALU',
-    desc: '"Melapiskan Santal 33 dengan sedikit sentuhan sitrus...',
-    icon: IconCloud,
+    perfumeName: 'Santal 33',
+    subtitle: 'KANTOR • CERAH',
+    date: '12/10/2025',
+    iconType: 'sun',
+    quote: 'Aroma kayu cendana yang ikonik memberikan kesan profesional namun tetap ramah. Sangat cocok untuk rapat pembukaan galeri hari ini.'
   },
   {
     id: 2,
-    title: 'Pilihan Gala Malam',
-    time: 'KEMARIN',
-    desc: '"Tobacco Vanille. Pilihan klasik untuk pembukaan galeri...',
-    icon: IconMoon,
+    perfumeName: 'Baccarat',
+    subtitle: 'RESTO • SEJUK',
+    date: '10/01/2025',
+    iconType: 'moon',
+    quote: 'Perpaduan mawar dan oud yang sangat megah. Memberikan rasa percaya diri ekstra saat berjalan di karpet merah malam ini.'
   },
   {
     id: 3,
-    title: 'Brunch Hari Minggu',
-    time: '2 HARI YANG LALU',
-    desc: '"Gypsy Water oleh Byredo. Ringan, beraroma kayu...',
-    icon: IconSun,
-  },
+    perfumeName: 'Lacoco',
+    subtitle: 'PANTAI • BERAWAN',
+    date: '08/11/2024',
+    iconType: 'cloud',
+    quote: 'Kesegaran sitrus yang sempurna untuk udara siang yang cerah. Sangat ringan dan tidak mengganggu saat menikmati kopi di teras.'
+  }
 ]
-
-const inspirations = [{ url: imgInsp1 }, { url: imgInsp2 }, { url: imgInsp3 }, { url: imgInsp4 }]
 </script>
 
 <style scoped>
@@ -277,7 +268,7 @@ const inspirations = [{ url: imgInsp1 }, { url: imgInsp2 }, { url: imgInsp3 }, {
 }
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 20px;
   margin-bottom: 40px;
 }
@@ -398,118 +389,129 @@ const inspirations = [{ url: imgInsp1 }, { url: imgInsp2 }, { url: imgInsp3 }, {
 .btn-detail:hover {
   transform: translateY(-2px);
 }
-.section-header-flex {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 20px;
-}
-.link-all {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #986d4d;
-  text-decoration: none;
-  margin-bottom: 2px;
-}
-.journal-list {
+/* =========================================
+   LIST CATATAN (Gaya Baru)
+   ========================================= */
+.entries-list {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 20px;
 }
-.journal-item {
-  display: flex;
-  align-items: center;
-  background-color: #f4f4f4;
-  padding: 15px;
-  border-radius: 12px;
-}
-.journal-icon-box {
-  width: 45px;
-  height: 45px;
+
+.entry-card {
   background-color: #ffffff;
-  border-radius: 10px;
+  border-radius: 16px;
+  padding: 25px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+  transition: transform 0.2s;
+}
+.entry-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+}
+
+.entry-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  padding-left: 50px;
+}
+
+.entry-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.entry-perfume-name {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #333;
+}
+.entry-subtitle {
+  font-size: 0.6rem;
+  color: #a0a0a0;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.entry-date-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+.entry-date-text {
+  font-size: 0.65rem;
+  color: #b0b0b0;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.entry-card-content {
+  display: flex;
+  gap: 15px;
+  align-items: stretch;
+}
+
+.entry-icon-box {
+  width: 35px;
+  height: 35px;
+  border-radius: 8px;
+  background-color: #f4f4f0;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-right: 15px;
   flex-shrink: 0;
 }
-.j-icon {
-  width: 20px;
-  height: 20px;
-  stroke: #7d5731;
-  fill: none;
+.entry-icon-box svg {
+  width: 16px;
+  height: 16px;
+  stroke: #888;
 }
-.j-icon path,
-.j-icon circle,
-.j-icon line {
-  stroke: inherit;
-  fill: inherit;
-}
-.journal-info {
-  flex: 1;
-  overflow: hidden;
-}
-.j-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 4px;
-}
-.j-head h5 {
+
+.entry-quote-text {
   font-size: 0.85rem;
-  font-weight: 800;
-  color: #333;
-  margin: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.j-time {
-  font-size: 0.55rem;
-  font-weight: 800;
-  color: #a0a0a0;
-  letter-spacing: 0.5px;
-}
-.j-desc {
-  font-size: 0.75rem;
   color: #666;
-  margin: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.7;
+  border-left: 2px solid #eaddd5;
+  padding-left: 15px;
 }
-.inspiration-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+
+/* Link Footer */
+.list-footer-link {
+  text-align: center;
+  margin-top: 35px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
 }
-.insp-img-wrap {
-  width: 100%;
-  height: 200px;
-  border-radius: 16px;
-  overflow: hidden;
+.list-footer-link span {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #b0b0b0;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: color 0.2s;
 }
-.insp-img-wrap:nth-child(even) {
-  margin-top: 20px;
-  height: 180px;
+.list-footer-link svg {
+  width: 14px;
+  height: 14px;
+  stroke: #b0b0b0;
+  transition: stroke 0.2s;
 }
-.insp-img-wrap img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-}
-.insp-img-wrap:hover img {
-  transform: scale(1.05);
+.list-footer-link:hover span, 
+.list-footer-link:hover svg {
+  color: #7d5731;
+  stroke: #7d5731;
 }
 
 @media (max-width: 1100px) {
-  .split-section {
-    grid-template-columns: 1fr;
-  }
-  .recom-card {
-    height: auto;
+  .entry-card-top {
+    padding-left: 0; 
   }
 }
 </style>

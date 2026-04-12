@@ -59,6 +59,26 @@
                 </button>
               </div>
             </div>
+            <div class="rating-section">
+              <label>PERINGKAT KESELURUHAN</label>
+              <div class="rating-display">
+                <div class="stars-interactive">
+                  <svg
+                    v-for="star in 5"
+                    :key="star"
+                    @click="formData.rating = star"
+                    class="star-icon"
+                    :class="{ active: star <= formData.rating }"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+                    ></path>
+                  </svg>
+                </div>
+                <span class="rating-text">{{ formData.rating }}.0 / 5</span>
+              </div>
+            </div>
           </div>
 
           <div class="right-column">
@@ -87,7 +107,7 @@
               <label>KATEGORI AROMA</label>
               <div class="select-wrapper">
                 <select class="form-control select-custom" v-model="formData.category">
-                  <option value="" disabled selected>Pilih kategori...</option>
+                  <option value="" disabled selected>Pilih kategori</option>
                   <option>Floral</option>
                   <option>Fruity</option>
                   <option>Woody</option>
@@ -253,6 +273,7 @@ const formData = ref({
   brand: '',
   category: '',
   concentration: 'EDP',
+  rating: 0,
   description: '',
   topNotes: ['Bergamot', 'Lemon'],
   heartNotes: ['Lavender'],
@@ -348,8 +369,8 @@ const resetForm = () => {
    ========================================= */
 .form-grid {
   display: grid;
-  grid-template-columns: 1fr 2.2fr;
-  gap: 35px;
+  grid-template-columns: 1fr 2.1fr;
+  gap: 40px;
   align-items: start;
 }
 
@@ -422,6 +443,62 @@ const resetForm = () => {
 .pill-btn.active {
   border-color: #7d5731;
   color: #7d5731;
+}
+
+/* =========================================
+   TAMBAHAN: GAYA RATING KESELURUHAN
+   ========================================= */
+.rating-section {
+  background-color: #ffffff;
+  border-radius: 20px;
+  padding: 25px 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+  margin-top: 30px; /* Jarak dari opsi konsentrasi di atasnya */
+}
+
+.rating-section label {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #888;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 15px;
+}
+
+.rating-display {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.stars-interactive {
+  display: flex;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.star-icon {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: #b0b0b0; /* Warna abu-abu untuk bintang kosong */
+  stroke-width: 2;
+  stroke-linejoin: round;
+  transition: all 0.2s ease;
+}
+
+/* Mengubah warna bintang menjadi emas padat saat aktif */
+.star-icon.active {
+  fill: #dca52d;
+  stroke: #dca52d;
+}
+
+.rating-text {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #7d5731;
+  margin-left: 5px;
 }
 
 /* =========================================

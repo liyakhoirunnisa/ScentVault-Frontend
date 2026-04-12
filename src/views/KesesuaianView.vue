@@ -285,24 +285,6 @@
           </div>
         </div>
 
-        <section class="favorites-section">
-          <div class="section-header">
-            <h3 class="section-title">Favorit Atelier</h3>
-            <p class="section-subtitle">Pilihan populer berdasarkan kondisi cuaca hari ini.</p>
-          </div>
-
-          <div class="favorites-grid">
-            <div class="fav-card" v-for="(item, index) in favorites" :key="index">
-              <div class="fav-img-wrapper">
-                <img :src="item.image" :alt="item.name" />
-              </div>
-              <div class="fav-info">
-                <h4 class="fav-name">{{ item.name }}</h4>
-                <span class="fav-brand">{{ item.brand }}</span>
-              </div>
-            </div>
-          </div>
-        </section>
       </div>
     </main>
   </div>
@@ -319,34 +301,6 @@ const filters = ref({
   time: 'Pagi',
   environment: 'All Around',
 })
-
-// Data mock untuk favorit bawah (Gunakan URL gambar Unsplash sementara jika aset lokal belum ada)
-const favorites = ref([
-  {
-    name: 'Sycamore Exclusif',
-    brand: 'CHANEL',
-    image:
-      'https://images.unsplash.com/photo-1599557467364-7729f2762b32?auto=format&fit=crop&w=300&q=80',
-  },
-  {
-    name: "Bal d'Afrique",
-    brand: 'BYREDO',
-    image:
-      'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=300&q=80',
-  },
-  {
-    name: 'Bergamote 22',
-    brand: 'LE LABO',
-    image:
-      'https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=300&q=80',
-  },
-  {
-    name: 'Philosykos',
-    brand: 'DIPTYQUE',
-    image:
-      'https://images.unsplash.com/photo-1616949755610-8b9aaf093414?auto=format&fit=crop&w=300&q=80',
-  },
-])
 </script>
 
 <style scoped>
@@ -555,7 +509,6 @@ const favorites = ref([
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 20px;
 }
 .hero-bottle {
   width: 100%;
@@ -566,7 +519,7 @@ const favorites = ref([
 .hero-info-side {
   flex: 1;
   background-color: #ffffff;
-  padding: 50px 40px;
+  padding: 20px 30px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -620,74 +573,6 @@ const favorites = ref([
   font-weight: 700;
   padding: 8px 18px;
   border-radius: 20px;
-  letter-spacing: 1px;
-}
-
-/* =========================================
-   FAVORIT ATELIER BAWAH
-   ========================================= */
-.favorites-section {
-  margin-top: 40px;
-}
-.section-header {
-  margin-bottom: 25px;
-}
-.section-title {
-  font-size: 1.6rem;
-  font-weight: 800;
-  color: #1a1a1a;
-  margin-bottom: 5px;
-}
-.section-subtitle {
-  font-size: 0.85rem;
-  color: #666;
-}
-
-.favorites-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 25px;
-}
-.fav-card {
-  background-color: #ffffff;
-  border-radius: 16px;
-  padding: 15px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-.fav-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-}
-.fav-img-wrapper {
-  width: 100%;
-  aspect-ratio: 4/3;
-  border-radius: 12px;
-  overflow: hidden;
-  margin-bottom: 15px;
-  background-color: #111;
-}
-.fav-img-wrapper img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s;
-}
-.fav-card:hover .fav-img-wrapper img {
-  transform: scale(1.05);
-}
-.fav-name {
-  font-size: 0.95rem;
-  font-weight: 800;
-  color: #1a1a1a;
-  margin-bottom: 4px;
-}
-.fav-brand {
-  font-size: 0.65rem;
-  font-weight: 700;
-  color: #888;
-  text-transform: uppercase;
   letter-spacing: 1px;
 }
 

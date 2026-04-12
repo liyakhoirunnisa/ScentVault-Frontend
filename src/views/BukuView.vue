@@ -46,11 +46,7 @@
                     <circle cx="15" cy="9.5" r="1" fill="currentColor" stroke="none"></circle>
                     <path d="M8.5 14c1.5 1.5 5.5 1.5 7 0"></path>
                   </svg>
-                  <select class="form-control select-custom with-pad">
-                    <option>Santal 33</option>
-                    <option>Oud Immortel</option>
-                    <option>Ambre Nuit</option>
-                  </select>
+                  <select class="form-control select-custom with-pad" v-model="newEntry.perfumeName"></select>
                   <svg
                     class="chevron"
                     viewBox="0 0 24 24"
@@ -80,11 +76,7 @@
                     >
                       <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path>
                     </svg>
-                    <select class="form-control select-custom with-pad">
-                      <option>Tenang</option>
-                      <option>Hujan</option>
-                      <option>Cerah</option>
-                    </select>
+                    <select class="form-control select-custom with-pad" v-model="newEntry.weather"></select>
                     <svg
                       class="chevron"
                       viewBox="0 0 24 24"
@@ -115,138 +107,68 @@
                       <line x1="8" y1="2" x2="8" y2="6"></line>
                       <line x1="3" y1="10" x2="21" y2="10"></line>
                     </svg>
-                    <input type="text" class="form-control with-pad" placeholder="Misal: Kantor" />
+                    <input type="text" class="form-control with-pad" placeholder="Misal: Kantor" v-model="newEntry.place" />
                   </div>
                 </div>
               </div>
 
               <div class="input-group">
                 <label>CATATAN AROMA</label>
-                <textarea
-                  class="form-control textarea-custom"
-                  placeholder='"Aroma kayu cendana yang ikonik memberikan kesan profesional namun tetap ramah. Sangat cocok untuk rapat pembukaan galeri hari ini."'
-                ></textarea>
+                <textarea class="form-control textarea-custom" placeholder='"Isi catatan."' v-model="newEntry.quote"></textarea>
               </div>
 
-              <button class="btn-gradient w-100">SIMPAN ENTRI</button>
+              <button class="btn-gradient w-100" @click="submitEntry">SIMPAN ENTRI</button>
             </div>
           </div>
 
           <div class="right-column">
-            <div class="reflections-header">
-              <div class="title-wrap">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
-                  <polyline points="3 3 3 8 8 8"></polyline>
-                  <path d="M12 7v5l4 2"></path>
-                </svg>
-                <h3>Refleksi Masa Lalu</h3>
-              </div>
-              <span class="badge-count">{{ diaryEntries.length }} ENTRI</span>
+            <div class="list-header">
+              <h3>List Catatan</h3>
             </div>
 
-            <div class="entries-list">
-              <div class="entry-card" v-for="entry in diaryEntries" :key="entry.id">
-                <div class="entry-card-header">
-                  <div class="entry-info-wrap">
-                    <img :src="entry.image" :alt="entry.perfumeName" class="entry-img" />
-                    <div class="entry-meta">
-                      <h4 class="entry-title">
-                        {{ entry.perfumeName }} <span class="entry-brand">{{ entry.brand }}</span>
-                      </h4>
-                      <span class="entry-date">{{ entry.date }} • {{ entry.time }}</span>
-                    </div>
+            <transition-group name="fade-slide" tag="div" class="entries-list">
+              <div class="entry-card" v-for="entry in displayedEntries" :key="entry.id">
+                
+                <div class="entry-card-top">
+                  <div class="entry-title-group">
+                    <h4 class="entry-perfume-name">{{ entry.perfumeName }}</h4>
+                    <span class="entry-subtitle">{{ entry.place }} • {{ entry.time }}</span>
                   </div>
-                  <button class="btn-delete-entry">
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
-                      <polyline points="3 6 5 6 21 6"></polyline>
-                      <path
-                        d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
-                      ></path>
-                      <line x1="10" y1="11" x2="10" y2="17"></line>
-                      <line x1="14" y1="11" x2="14" y2="17"></line>
-                    </svg>
-                  </button>
+                  <div class="entry-date-group">
+                    <span class="entry-date-text">{{ entry.date }}</span>
+                    <button class="btn-delete-small">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 6h18"></path>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                      </svg>
+                    </button>
+                  </div>
                 </div>
 
-                <div class="entry-tags">
-                  
-                  <span class="tag-pill">
-                    <svg v-if="entry.mood === 'TENANG'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                      <circle cx="9" cy="9" r="4"></circle>
-                      <line x1="9" y1="13" x2="9" y2="18"></line>
-                      <rect x="15" y="6" width="3" height="12" rx="1"></rect>
-                      <line x1="15" y1="8" x2="13" y2="8"></line>
-                      <line x1="15" y1="11" x2="13" y2="11"></line>
-                      <line x1="15" y1="14" x2="13" y2="14"></line>
-                    </svg>
-                    <svg v-else-if="entry.mood === 'ENERJIK'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                      <circle cx="12" cy="12" r="9"></circle>
-                      <circle cx="9" cy="9.5" r="1" fill="currentColor" stroke="none"></circle>
-                      <circle cx="15" cy="9.5" r="1" fill="currentColor" stroke="none"></circle>
-                      <path d="M8.5 14c1.5 1.5 5.5 1.5 7 0"></path>
-                    </svg>
-                    {{ entry.mood }}
-                  </span>
-                  
-                  <span class="tag-pill">
-                    <svg v-if="entry.weather === 'HUJAN'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
-                      <path d="M8 17l-2 3"></path>
-                      <path d="M12 17l-2 3"></path>
-                      <path d="M16 17l-2 3"></path>
-                    </svg>
-                    <svg v-else-if="entry.weather === 'BERAWAN'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M12 2v2"></path>
-                      <path d="m4.93 4.93 1.41 1.41"></path>
-                      <path d="M20 12h2"></path>
-                      <path d="m19.07 4.93-1.41 1.41"></path>
-                      <path d="M15.947 8.688A5 5 0 0 0 7 9.5"></path>
-                      <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path>
-                    </svg>
-                    {{ entry.weather }}
-                  </span>
-                  
-                  <span class="tag-pill">
-                    <svg v-if="entry.event === 'MALAM SANTAI'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <div class="entry-card-content">
+                  <div class="entry-icon-box">
+                    <svg v-if="entry.iconType === 'moon'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                       <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                     </svg>
-                    <svg v-else-if="entry.event === 'ACARA GALERI'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                      <circle cx="13.5" cy="6.5" r=".5" fill="currentColor" stroke="none"></circle>
-                      <circle cx="17.5" cy="10.5" r=".5" fill="currentColor" stroke="none"></circle>
-                      <circle cx="8.5" cy="7.5" r=".5" fill="currentColor" stroke="none"></circle>
-                      <circle cx="6.5" cy="12.5" r=".5" fill="currentColor" stroke="none"></circle>
-                      <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path>
+                    <svg v-else-if="entry.iconType === 'cloud'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path>
                     </svg>
-                    {{ entry.event }}
-                  </span>
+                  </div>
+                  
+                  <div class="entry-quote-text">
+                    "{{ entry.quote }}"
+                  </div>
                 </div>
 
-                <p class="entry-quote">"{{ entry.quote }}"</p>
               </div>
-            </div>
+            </transition-group>
 
-            <div class="diary-footer">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 19.5V6c-1.5-1-4-1.5-7-1.5v14c3 0 5.5.5 7 1.5z"></path>
-                <path d="M12 19.5V6c1.5-1 4-1.5 7-1.5v14c-3 0-5.5.5-7 1.5z"></path>
-                <polygon points="12 6 16 2.5 16 12.5 12 16" fill="currentColor" stroke="none"></polygon>
+            <div class="list-footer-link" v-if="diaryEntries.length > 2" @click="toggleEntries">
+              <span>{{ showAllEntries ? 'TUTUP CATATAN' : 'BUKA SEMUA CATATAN' }}</span>
+              <svg :class="{ 'rotate-icon': showAllEntries }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
               </svg>
-              <p>Tuliskan lebih banyak cerita...</p>
             </div>
           </div>
         </div>
@@ -256,7 +178,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import Topbar from '@/components/Topbar.vue'
 import Sidebar from '@/components/Sidebar.vue'
 
@@ -264,33 +186,87 @@ import Sidebar from '@/components/Sidebar.vue'
 const diaryEntries = ref([
   {
     id: 1,
-    perfumeName: 'By the Fireplace',
-    brand: 'MAISON MARGIELA',
-    date: '12 Okt 2023',
-    time: '07:30 PM',
-    image:
-      'https://images.unsplash.com/photo-1588405748880-12d1d2a59f75?auto=format&fit=crop&w=150&q=80',
-    mood: 'TENANG',
-    weather: 'HUJAN',
-    event: 'MALAM SANTAI',
-    quote:
-      'Bau kayu terbakar dan vanila yang manis menyatu sempurna dengan rintik hujan di luar. Memberikan kenyamanan yang luar biasa.',
+    perfumeName: 'Baccarat',
+    place: 'RESTO',
+    time: 'MALAM',
+    date: '10/01/2025',
+    iconType: 'moon',
+    quote: 'Perpaduan mawar dan oud yang sangat megah. Memberikan rasa percaya diri ekstra saat berjalan di karpet merah malam ini.'
   },
   {
     id: 2,
-    perfumeName: "Bal d'Afrique",
-    brand: 'BYREDO',
-    date: '08 Okt 2023',
-    time: '11:15 AM',
-    image:
-      'https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=150&q=80',
-    mood: 'ENERJIK',
-    weather: 'BERAWAN',
-    event: 'ACARA GALERI',
-    quote:
-      'Membawa nuansa ceria di tengah hari yang sedikit mendung. Campuran vetiver dan marigold-nya sangat unik dan modern.',
+    perfumeName: 'Lacoco',
+    place: 'PANTAI',
+    time: 'SIANG',
+    date: '08/11/2024',
+    iconType: 'cloud',
+    quote: 'Kesegaran sitrus yang sempurna untuk udara siang yang cerah. Sangat ringan dan tidak mengganggu saat menikmati kopi di teras.'
   },
+  {
+    id: 3, // Data ke-3 agar tombol View More muncul
+    perfumeName: 'Ambre Nuit',
+    place: 'KANTOR',
+    time: 'PAGI',
+    date: '02/09/2024',
+    iconType: 'cloud',
+    quote: 'Aroma amber yang hangat namun bersih. Membantu memberikan ketenangan ekstra sebelum presentasi penting dengan klien.'
+  }
 ])
+
+// STATE UNTUK FORM CATATAN BARU
+const newEntry = ref({
+  perfumeName: 'Santal 33',
+  weather: 'Cerah',
+  place: '',
+  quote: ''
+})
+
+// FUNGSI UNTUK MENYIMPAN ENTRI BARU
+const submitEntry = () => {
+  // Mencegah simpan jika catatan kosong
+  if (!newEntry.value.quote.trim()) {
+    alert("Silakan isi catatan aroma Anda terlebih dahulu!");
+    return;
+  }
+
+  // Menentukan ikon sederhana berdasarkan cuaca
+  const isCloudy = ['Berawan', 'Mendung', 'Hujan'].includes(newEntry.value.weather);
+  
+  // Mendapatkan tanggal hari ini
+  const today = new Date();
+  const formattedDate = today.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+  // Membuat objek data baru
+  const entryToAdd = {
+    id: Date.now(), // ID unik dari waktu saat ini
+    perfumeName: newEntry.value.perfumeName,
+    place: newEntry.value.place.toUpperCase() || 'LOKASI BARU',
+    time: 'SAAT INI',
+    date: formattedDate,
+    iconType: isCloudy ? 'cloud' : 'moon',
+    quote: newEntry.value.quote
+  };
+
+  // Memasukkan data baru ke urutan PALING ATAS dari array
+  diaryEntries.value.unshift(entryToAdd);
+
+  // Mengosongkan form kembali setelah berhasil disimpan
+  newEntry.value.place = '';
+  newEntry.value.quote = '';
+}
+
+// STATE UNTUK VIEW MORE
+const showAllEntries = ref(false)
+
+// COMPUTED: Memotong array menjadi 2 jika showAllEntries bernilai false
+const displayedEntries = computed(() => {
+  return showAllEntries.value ? diaryEntries.value : diaryEntries.value.slice(0, 2)
+})
+
+// FUNGSI TOGGLE: Saat tombol di-klik
+const toggleEntries = () => {
+  showAllEntries.value = !showAllEntries.value
+}
 </script>
 
 <style scoped>
@@ -346,7 +322,7 @@ const diaryEntries = ref([
    ========================================= */
 .diary-grid {
   display: grid;
-  grid-template-columns: 1fr 1.8fr; /* Sesuai proporsi desain Figma */
+  grid-template-columns: 1fr 1.3fr; /* Sesuai proporsi desain Figma */
   gap: 40px;
   align-items: start;
 }
@@ -369,7 +345,7 @@ const diaryEntries = ref([
 .card-header-title svg {
   width: 20px;
   height: 20px;
-  stroke: #7D5731;
+  stroke: #7d5731;
 }
 .card-header-title h3 {
   font-size: 1.2rem;
@@ -479,53 +455,26 @@ const diaryEntries = ref([
 }
 
 /* =========================================
-   KOLOM KANAN: DAFTAR REFLEKSI
+   KOLOM KANAN: LIST CATATAN
    ========================================= */
-.reflections-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.list-header {
   margin-bottom: 25px;
-  padding-bottom: 15px;
-  border-bottom: 2px solid #e5e5e5;
 }
-.title-wrap {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.title-wrap svg {
-  width: 22px;
-  height: 22px;
-  stroke: #7d5731;
-}
-.title-wrap h3 {
+.list-header h3 {
   font-size: 1.2rem;
   font-weight: 800;
-  color: #1a1a1a;
-}
-
-.badge-count {
-  background-color: #eeeeea;
-  color: #888;
-  font-size: 0.65rem;
-  font-weight: 800;
-  padding: 4px 10px;
-  border-radius: 12px;
-  letter-spacing: 1px;
+  color: #333;
 }
 
 .entries-list {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  margin-bottom: 40px;
 }
 
-/* Kartu Entri / Riwayat */
 .entry-card {
   background-color: #ffffff;
-  border-radius: 20px;
+  border-radius: 16px;
   padding: 25px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
   transition: transform 0.2s;
@@ -535,118 +484,155 @@ const diaryEntries = ref([
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
 }
 
-.entry-card-header {
+/* Bagian Atas Kartu (Judul & Tanggal) */
+.entry-card-top {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
+  padding-left: 50px; /* Menyelaraskan teks dengan quote di bawahnya */
 }
-.entry-info-wrap {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-.entry-img {
-  width: 50px;
-  height: 50px;
-  border-radius: 10px;
-  object-fit: cover;
-  background-color: #111;
-}
-.entry-meta {
+
+.entry-title-group {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
-.entry-title {
-  font-size: 1.05rem;
+.entry-perfume-name {
+  font-size: 1rem;
   font-weight: 800;
-  color: #1a1a1a;
+  color: #333;
 }
-.entry-brand {
-  font-size: 0.65rem;
-  color: #888;
+.entry-subtitle {
+  font-size: 0.6rem;
+  color: #a0a0a0;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
-  margin-left: 5px;
-}
-.entry-date {
-  font-size: 0.75rem;
-  color: #888;
-  font-weight: 500;
 }
 
-.btn-delete-entry {
-  background: none;
-  border: none;
-  color: #d1d5db;
-  cursor: pointer;
-  transition: color 0.2s;
-  padding: 5px;
-}
-.btn-delete-entry:hover {
-  color: #a73b21;
-}
-.btn-delete-entry svg {
-  width: 18px;
-  height: 18px;
-}
-
-.entry-tags {
+.entry-date-group {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 15px;
-}
-.tag-pill {
-  background-color: #faf4f0; /* Krem sangat pucat */
-  border: 1px solid #ebe0d8; /* Garis outline tipis */
-  color: #9a6a4e; /* Cokelat hangat */
-  font-size: 0.65rem;
-  font-weight: 700;
-  padding: 6px 14px;
-  border-radius: 20px;
-  display: inline-flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-end;
   gap: 6px;
+}
+.entry-date-text {
+  font-size: 0.65rem;
+  color: #b0b0b0;
+  font-weight: 600;
   letter-spacing: 0.5px;
 }
-.tag-pill svg {
+.btn-delete-small {
+  background: none;
+  border: none;
+  color: #c0c0c0;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s;
+}
+.btn-delete-small:hover {
+  color: #d32f2f;
+}
+.btn-delete-small svg {
   width: 14px;
   height: 14px;
-  stroke: #9a6a4e; /* Sinkron dengan teks */
-}
-.entry-quote {
-  font-size: 0.9rem;
-  font-style: italic;
-  color: #303330;
-  line-height: 1.6;
 }
 
-/* Footer / State Kosong */
-.diary-footer {
-  display: flex; 
-  flex-direction: column; 
-  align-items: center; 
-  justify-content: center; 
-  gap: 12px; 
-  padding: 40px 0; 
+/* Bagian Bawah Kartu (Ikon & Quote) */
+.entry-card-content {
+  display: flex;
+  gap: 15px;
+  align-items: stretch; /* Memastikan garis vertikal menyesuaikan tinggi teks */
 }
-.diary-footer svg { 
-  width: 48px; 
-  height: 48px; 
-  color: #D4C5B9; 
+
+.entry-icon-box {
+  width: 35px;
+  height: 35px;
+  border-radius: 8px;
+  background-color: #f4f4f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
 }
-.diary-footer p { 
-  font-size: 0.95rem; 
-  font-weight: 600; 
-  color: #D4C5B9; 
+.entry-icon-box svg {
+  width: 16px;
+  height: 16px;
+  stroke: #888;
 }
+
+.entry-quote-text {
+  font-size: 0.85rem;
+  color: #666;
+  line-height: 1.7;
+  border-left: 2px solid #eaddd5; /* Garis vertikal estetis */
+  padding-left: 15px;
+}
+
+/* Link Footer */
+.list-footer-link {
+  text-align: center;
+  margin-top: 35px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+.list-footer-link span {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #b0b0b0;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: color 0.2s;
+}
+.list-footer-link svg {
+  width: 14px;
+  height: 14px;
+  stroke: #b0b0b0;
+  transition: stroke 0.2s;
+}
+.list-footer-link:hover span, 
+.list-footer-link:hover svg {
+  color: #7d5731;
+  stroke: #7d5731;
+}
+
+/* Animasi Putar untuk Ikon Panah View More */
+.list-footer-link svg.rotate-icon {
+  transform: rotate(180deg);
+}
+
+/* =========================================
+   ANIMASI TRANSISI LIST (VIEW MORE)
+   ========================================= */
+/* Durasi dan jenis transisi */
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* State awal saat masuk, dan state akhir saat keluar */
+.fade-slide-enter-from,
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-20px); /* Muncul dari sedikit di atas / hilang ke atas */
+}
+
+/* Memastikan elemen yang bergeser posisinya juga dianimasikan dengan mulus */
+.fade-slide-move {
+  transition: transform 0.5s ease;
+}
+
 /* Responsif */
 @media (max-width: 1100px) {
   .diary-grid {
     grid-template-columns: 1fr;
+  }
+  .entry-card-top {
+    padding-left: 0; /* Menghilangkan indentasi di layar kecil */
   }
 }
 </style>

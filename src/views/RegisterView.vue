@@ -21,32 +21,6 @@
               <p>Mulailah perjalanan Anda ke dunia wewangian mewah</p>
             </div>
 
-            <button class="btn-google" type="button">
-              <svg class="icon-google" viewBox="0 0 24 24">
-                <path
-                  fill="#4285F4"
-                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                />
-                <path
-                  fill="#34A853"
-                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                />
-                <path
-                  fill="#FBBC05"
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                />
-                <path
-                  fill="#EA4335"
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                />
-              </svg>
-              Daftar dengan Google
-            </button>
-
-            <div class="divider">
-              <span>ATAU</span>
-            </div>
-
             <form @submit.prevent="handleRegister" class="auth-form">
               <div class="form-group">
                 <label for="name">NAMA LENGKAP</label>
@@ -199,6 +173,90 @@
               </div>
               <p v-if="passwordError" class="error-text">Kata sandi tidak cocok.</p>
 
+              <div class="form-group">
+                <label for="provinsi">PROVINSI</label>
+                <div class="select-wrapper">
+                  <select id="provinsi" v-model="form.provinsi" class="custom-select" required>
+                    <option value="" disabled selected>Pilih Provinsi</option>
+                    <option v-for="prov in provinsis" :key="prov" :value="prov">{{ prov }}</option>
+                  </select>
+                  <svg
+                    class="select-arrow"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="kabupaten">KABUPATEN/KOTA</label>
+                <div class="select-wrapper">
+                  <select id="kabupaten" v-model="form.kabupaten" class="custom-select" required>
+                    <option value="" disabled selected>Pilih Kabupaten/Kota</option>
+                    <option v-for="kab in kabupatens" :key="kab" :value="kab">{{ kab }}</option>
+                  </select>
+                  <svg
+                    class="select-arrow"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="kecamatan">KECAMATAN</label>
+                <div class="select-wrapper">
+                  <select id="kecamatan" v-model="form.kecamatan" class="custom-select" required>
+                    <option value="" disabled selected>Pilih Kecamatan</option>
+                    <option v-for="kec in kecamatans" :key="kec" :value="kec">{{ kec }}</option>
+                  </select>
+                  <svg
+                    class="select-arrow"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="Kelurahan">KELURAHAN/DESA</label>
+                <div class="select-wrapper">
+                  <select id="kelurahan" v-model="form.kelurahan" class="custom-select" required>
+                    <option value="" disabled selected>Pilih Kelurahan/Desa</option>
+                    <option v-for="kel in kelurahans" :key="kel" :value="kel">{{ kel }}</option>
+                  </select>
+                  <svg
+                    class="select-arrow"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </div>
+              </div>
+
               <div class="form-group checkbox-group">
                 <label class="checkbox-label">
                   <input type="checkbox" v-model="form.agreeTerms" required />
@@ -216,24 +274,6 @@
             </form>
 
             <p class="login-link">Sudah punya akun? <RouterLink to="/">Masuk</RouterLink></p>
-
-            <div class="preferences-section">
-              <div class="divider-sub">
-                <span>TONA PILIHAN</span>
-              </div>
-              <div class="tone-pills">
-                <button
-                  v-for="tone in availableTones"
-                  :key="tone"
-                  type="button"
-                  class="pill"
-                  :class="{ active: form.selectedTones.includes(tone) }"
-                  @click="toggleTone(tone)"
-                >
-                  {{ tone }}
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -244,34 +284,38 @@
         <h3 class="footer-logo">ScentVault</h3>
         <p>© 2024 SCENTVAULT. CRAFTED FOR THE DIGITAL ATELIER.</p>
       </div>
-      <div class="footer-right">
-        <a href="#">KEBIJAKAN PRIVASI</a>
-        <a href="#">KETENTUAN LAYANAN</a>
-        <a href="#">KONTAK</a>
-      </div>
     </footer>
   </div>
 </template>
 
 <script setup>
 import { reactive, ref, computed } from 'vue'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const form = reactive({
   name: '',
   email: '',
   password: '',
   password_confirmation: '',
+  provinsi: '',
+  kabupaten: '',
+  kecamatan: '',
+  kelurahan: '',
   agreeTerms: false,
-  selectedTones: [], // Menyimpan pilihan aroma pengguna
 })
 
 const isLoading = ref(false)
-const availableTones = ['KAYU', 'BUNGA', 'SITRUS', 'AMBER']
 
 // UNTUK FITUR MATA (EYE ICON)
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
+
+// Data Dummy untuk Lokasi (Bisa diganti dengan API Area Indonesia nanti)
+const provinsis = ref(['DKI Jakarta', 'Jawa Barat', 'Jawa Tengah', 'Jawa Timur', 'Bali'])
+const kabupatens = ref(['Jakarta Selatan', 'Bandung', 'Semarang', 'Surabaya', 'Denpasar'])
+const kecamatans = ref(['Tebet', 'Coblong', 'Banyumanik', 'Gubeng', 'Kuta'])
 
 // Logika reaktif untuk mengecek kecocokan kata sandi
 const passwordError = computed(() => {
@@ -281,28 +325,18 @@ const passwordError = computed(() => {
   return false
 })
 
-// Fungsi untuk memilih/membatalkan pilihan Tona
-const toggleTone = (tone) => {
-  const index = form.selectedTones.indexOf(tone)
-  if (index === -1) {
-    form.selectedTones.push(tone) // Tambahkan jika belum ada
-  } else {
-    form.selectedTones.splice(index, 1) // Hapus jika sudah ada
-  }
-}
-
 const handleRegister = async () => {
   if (passwordError.value) {
     alert('Mohon pastikan konfirmasi kata sandi Anda sama.')
     return
   }
-
   isLoading.value = true
   console.log('Mengirim data registrasi:', form)
 
   setTimeout(() => {
     isLoading.value = false
-    alert('Data Registrasi & Pilihan Tona berhasil ditangkap! Cek Console.')
+    alert('Registrasi Berhasil!')
+    router.push('/')
   }, 1500)
 }
 </script>
@@ -436,53 +470,6 @@ const handleRegister = async () => {
 /* =========================================
    Elemen Formulir
    ========================================= */
-.btn-google {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  padding: 12px;
-  background-color: #f0f2f1;
-  border: none;
-  border-radius: 10px;
-  font-family: inherit;
-  font-weight: 700;
-  font-size: 0.8rem;
-  color: #4a4a4a;
-  cursor: pointer;
-  margin-bottom: 10px;
-  transition: background-color 0.2s;
-}
-.btn-google:hover {
-  background-color: #e2e5e4;
-}
-
-.icon-google {
-  width: 18px;
-  height: 18px;
-  margin-right: 12px;
-}
-
-.divider {
-  display: flex;
-  align-items: center;
-  text-align: center;
-  margin: 20px 0;
-}
-.divider::before,
-.divider::after {
-  content: '';
-  flex: 1;
-  border-bottom: 1px solid #eaeaea;
-}
-.divider span {
-  padding: 0 15px;
-  font-size: 0.65rem;
-  font-weight: 700;
-  color: #a0a0a0;
-  letter-spacing: 1px;
-}
-
 .form-group {
   margin-bottom: 15px;
 }
@@ -547,6 +534,49 @@ const handleRegister = async () => {
   color: #986d4d;
 }
 
+.select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.custom-select {
+  width: 100%;
+  padding: 14px 40px 14px 20px;
+  background-color: #efefef;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  font-family: inherit;
+  font-size: 0.85rem;
+
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.custom-select:focus {
+  background-color: #ffffff;
+  border-color: #b08d70;
+  box-shadow: 0 0 0 3px rgba(176, 141, 112, 0.1);
+}
+
+.custom-select:invalid {
+  color: #0000000;
+}
+
+.select-arrow {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: #666;
+  pointer-events: none;
+}
+
 /* Custom Checkbox */
 .checkbox-group {
   margin-top: 15px;
@@ -599,7 +629,7 @@ const handleRegister = async () => {
 .btn-submit {
   width: 100%;
   padding: 14px;
-  background: linear-gradient(135deg, #b58b66 0%, #986d4d 100%);
+  background: linear-gradient(to right, #8b6042 0%, #e0bd9e 100%);
   border: none;
   border-radius: 30px; /* Bentuk pil sesuai desain */
   color: #ffffff;
@@ -641,55 +671,6 @@ const handleRegister = async () => {
 }
 
 /* =========================================
-   Preferensi Tona (Pills)
-   ========================================= */
-.preferences-section {
-  margin-top: 30px;
-}
-.divider-sub {
-  text-align: center;
-  border-top: 1px solid #eaeaea;
-  position: relative;
-  margin-bottom: 20px;
-}
-.divider-sub span {
-  background: white;
-  padding: 0 10px;
-  position: relative;
-  top: -8px;
-  font-size: 0.65rem;
-  font-weight: 700;
-  color: #b0b0b0;
-  letter-spacing: 1px;
-}
-
-.tone-pills {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-.pill {
-  padding: 6px 16px;
-  background-color: #faeee5; /* Warna kulit/peach terang */
-  color: #b58b66;
-  border: none;
-  border-radius: 20px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.pill:hover {
-  background-color: #f0dece;
-}
-.pill.active {
-  background-color: #986d4d;
-  color: white;
-}
-
-/* =========================================
    Footer
    ========================================= */
 .auth-footer {
@@ -714,18 +695,5 @@ const handleRegister = async () => {
   font-weight: 500;
   letter-spacing: 0.5px;
   margin: 0;
-}
-
-.footer-right a {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #888;
-  text-decoration: none;
-  margin-left: 30px;
-  transition: color 0.2s;
-}
-
-.footer-right a:hover {
-  color: #986d4d;
 }
 </style>
