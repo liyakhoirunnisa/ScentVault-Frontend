@@ -2,11 +2,15 @@
   <aside class="sidebar">
     <div class="sidebar-header">
       <h1 class="brand-logo">ScentVault</h1>
-      <p class="brand-subtitle">ATELIER DIGITAL</p>
+      <p class="brand-subtitle">ADMIN ATELIER</p>
     </div>
 
     <nav class="sidebar-nav">
-      <RouterLink to="/beranda" class="nav-item" :class="{ active: activeMainMenu === '/beranda' }">
+      <RouterLink
+        to="/konfigurasi-aturan"
+        class="nav-item"
+        :class="{ active: activeMainMenu === '/konfigurasi-aturan' }"
+      >
         <svg
           class="nav-icon"
           viewBox="0 0 24 24"
@@ -16,15 +20,27 @@
           stroke-linecap="round"
           stroke-linejoin="round"
         >
-          <rect x="4" y="4" width="6" height="6" rx="1"></rect>
-          <rect x="14" y="4" width="6" height="6" rx="1"></rect>
-          <rect x="14" y="14" width="6" height="6" rx="1"></rect>
-          <rect x="4" y="14" width="6" height="6" rx="1"></rect>
+          <circle cx="12" cy="12" r="3"></circle>
+          <path
+            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33
+               1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51
+               1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82
+               1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1
+               1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33
+               h0A1.65 1.65 0 0 0 10 3.09V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51
+               1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82
+               V9c0 .66.26 1.3.73 1.77.47.47 1.11.73 1.77.73a2 2 0 1 1 0 4h-.09
+               a1.65 1.65 0 0 0-1.51 1z"
+          ></path>
         </svg>
-        BERANDA
+        Konfigurasi Aturan
       </RouterLink>
 
-      <RouterLink to="/koleksi" class="nav-item" :class="{ active: activeMainMenu === '/koleksi' }">
+      <RouterLink
+        to="/manajemen-pengguna"
+        class="nav-item"
+        :class="{ active: activeMainMenu === '/manajemen-pengguna' }"
+      >
         <svg
           class="nav-icon"
           viewBox="0 0 24 24"
@@ -34,15 +50,19 @@
           stroke-linecap="round"
           stroke-linejoin="round"
         >
-          <rect x="5" y="4" width="14" height="16" rx="1"></rect>
-          <line x1="5" y1="12" x2="19" y2="12"></line>
-          <rect x="7" y="8" width="4" height="4"></rect>
-          <rect x="7" y="16" width="4" height="4"></rect>
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
         </svg>
-        KOLEKSI SAYA
+        Manajemen Pengguna
       </RouterLink>
 
-      <RouterLink to="/buku" class="nav-item" :class="{ active: activeMainMenu === '/buku' }">
+      <RouterLink
+        to="/integrasi-data"
+        class="nav-item"
+        :class="{ active: activeMainMenu === '/integrasi-data' }"
+      >
         <svg
           class="nav-icon"
           viewBox="0 0 24 24"
@@ -52,17 +72,15 @@
           stroke-linecap="round"
           stroke-linejoin="round"
         >
-          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
-          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
-          <line x1="14" y1="7" x2="18" y2="7"></line>
-          <line x1="14" y1="11" x2="18" y2="11"></line>
-          <line x1="14" y1="15" x2="18" y2="15"></line>
+          <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+          <path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"></path>
+          <path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"></path>
         </svg>
-        BUKU HARIAN AROMA
+        Integrasi Data
       </RouterLink>
 
       <div class="sidebar-footer">
-        <button class="btn-logout">
+        <button class="btn-logout" type="button">
           <svg
             viewBox="0 0 24 24"
             fill="none"
@@ -92,35 +110,35 @@ const activeMainMenu = ref('')
 watch(
   () => route.path,
   (newPath) => {
-    // Ubah ke huruf kecil untuk mencegah error karena huruf kapital
     const path = newPath.toLowerCase()
 
-    // 1. Rute Utama (Menyala & Menyimpan Konteks)
-    const mainRoutes = ['/beranda', '/koleksi', '/buku']
+    const mainRoutes = [
+      '/konfigurasi-aturan',
+      '/manajemen-pengguna',
+      '/integrasi-data',
+    ]
 
-    // 2. Rute Anak (Meminjam Konteks Menu Induk)
-    // Menggunakan kata kunci pendek agar mencakup /edit-parfum, /tambah-parfum, dll
     const subRoutes = ['/detail', '/edit', '/tambah', '/kesesuaian']
-
-    // 3. Rute Netral (Memaksa Sidebar Mati Total)
     const neutralRoutes = ['/profil']
+
+    const matchedMainRoute = mainRoutes.find(
+      (r) => path === r || path.startsWith(`${r}/`)
+    )
 
     const isSubRoute = subRoutes.some((r) => path.startsWith(r))
     const isNeutralRoute = neutralRoutes.some((r) => path.startsWith(r))
 
-    if (mainRoutes.includes(path)) {
-      // KONDISI 1: Di Menu Utama -> Nyalakan & Simpan
-      activeMainMenu.value = path
-      localStorage.setItem('lastActiveMenu', path)
+    if (matchedMainRoute) {
+      activeMainMenu.value = matchedMainRoute
+      localStorage.setItem('lastActiveMenu', matchedMainRoute)
     } else if (isNeutralRoute) {
-      // KONDISI 2: Di Profil -> PAKSA MATI
       activeMainMenu.value = ''
     } else if (isSubRoute) {
-      // KONDISI 3: Di Detail/Edit/Tambah -> Panggil menu induk terakhir
       const savedMenu = localStorage.getItem('lastActiveMenu')
-      activeMainMenu.value = savedMenu || '/beranda'
+      activeMainMenu.value = mainRoutes.includes(savedMenu || '')
+        ? savedMenu
+        : '/konfigurasi-aturan'
     } else {
-      // KONDISI 4: Fallback aman jika masuk ke rute yang tidak dikenal
       activeMainMenu.value = ''
     }
   },
