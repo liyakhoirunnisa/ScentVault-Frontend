@@ -8,7 +8,6 @@
           ScentVault.
         </p>
       </div>
-
       <div class="head-actions">
         <router-link to="/tambah-pengguna" class="btn btn-primary">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -21,10 +20,6 @@
           </svg>
           <span>Tambah Pengguna</span>
         </router-link>
-
-        <button class="btn btn-outline" type="button" @click="handleBulkAction">
-          Alat Operasi Masal
-        </button>
       </div>
     </section>
 
@@ -34,16 +29,6 @@
         :key="user.id"
         class="user-card"
       >
-        <button class="card-menu" type="button" aria-label="Opsi pengguna">
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path
-              d="M12 5.5a1.5 1.5 0 1 0 0 .001M12 12a1.5 1.5 0 1 0 0 .001M12 18.5a1.5 1.5 0 1 0 0 .001"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-            />
-          </svg>
-        </button>
 
         <div class="user-top">
           <div class="avatar-wrap">
@@ -57,26 +42,17 @@
               <span v-else>{{ getInitials(user.name) }}</span>
             </div>
 
-            <span
-              class="avatar-status"
-              :class="user.status === 'active' ? 'is-active' : 'is-inactive'"
-            />
+
           </div>
 
           <div class="user-meta">
-            <span class="role-badge">{{ user.role }}</span>
+            <span class="role-badge">{{ formatRole(user.role) }}</span>
             <h3>{{ user.name }}</h3>
             <p>{{ user.email }}</p>
           </div>
         </div>
 
-        <div
-          class="status-pill"
-          :class="user.status === 'active' ? 'active' : 'inactive'"
-        >
-          <span class="status-pill-dot" />
-          {{ user.status === 'active' ? 'AKTIF' : 'TIDAK AKTIF' }}
-        </div>
+
 
         <div class="card-divider" />
 
@@ -133,7 +109,7 @@
       </article>
     </section>
 
-    <nav class="pagination" aria-label="Pagination pengguna">
+    <nav class="pagination" aria-label="Pagination pengguna" v-if="totalPages > 1">
       <button
         class="page-arrow"
         type="button"
@@ -183,14 +159,18 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref, inject } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+const searchQuery = inject('globalSearch', ref(''))
 
 const currentPage = ref(1)
 const perPage = 5
-
 const imageErrors = ref({})
 
-const users = ref([
+const defaultUsers = [
   {
     id: 1,
     name: 'Clara Amandine',
@@ -295,14 +275,30 @@ const users = ref([
     status: 'inactive',
     image: 'https://i.pravatar.cc/120?img=50',
   },
-])
+]
 
-const totalPages = computed(() => Math.ceil(users.value.length / perPage))
+const users = ref([])
+
+const loadUsers = () => {
+  const savedUsers = JSON.parse(localStorage.getItem('scentvault_users') || '[]')
+  users.value = [...savedUsers, ...defaultUsers]
+}
+
+onMounted(() => {
+  loadUsers()
+})
+
+const filteredUsers = computed(() => {
+  if (!searchQuery.value) return users.value
+  return users.value.filter(u => u.name.toLowerCase().includes(searchQuery.value.toLowerCase()))
+})
+
+const totalPages = computed(() => Math.ceil(filteredUsers.value.length / perPage))
 
 const paginatedUsers = computed(() => {
   const start = (currentPage.value - 1) * perPage
   const end = start + perPage
-  return users.value.slice(start, end)
+  return filteredUsers.value.slice(start, end)
 })
 
 const prevPage = () => {
@@ -322,27 +318,49 @@ const getInitials = (name) => {
     .toUpperCase()
 }
 
+const formatRole = (role) => {
+  const map = {
+    kurator: 'Kurator',
+    admin: 'Admin',
+    operator: 'Operator',
+    Kurator: 'Kurator',
+    Admin: 'Admin',
+    Operator: 'Operator',
+  }
+  return map[role] || role
+}
+
 const markImageError = (userId) => {
   imageErrors.value[userId] = true
 }
 
-const handleAddUser = () => {
-  console.log('Tambah pengguna')
-}
-
-const handleBulkAction = () => {
-  console.log('Alat operasi masal')
-}
-
 const viewUser = (user) => {
-  console.log('View user:', user)
+  console.log('Membuka profil: ' + user.name)
+
+  router.push({
+    path: `/manajemen-pengguna/detail/${user.id}`,
+  })
 }
 
 const editUser = (user) => {
-  console.log('Edit user:', user)
+  console.log('Membuka profil: ' + user.name)
+
+  router.push({
+    path: `/manajemen-pengguna/edit/${user.id}`,
+  })
 }
 
 const deleteUser = (user) => {
+  const savedUsers = JSON.parse(localStorage.getItem('scentvault_users') || '[]')
+  const updatedSavedUsers = savedUsers.filter((item) => item.id !== user.id)
+
+  localStorage.setItem('scentvault_users', JSON.stringify(updatedSavedUsers))
+  users.value = users.value.filter((item) => item.id !== user.id)
+
+  if (currentPage.value > totalPages.value) {
+    currentPage.value = Math.max(1, totalPages.value)
+  }
+
   console.log('Delete user:', user)
 }
 </script>
@@ -418,6 +436,7 @@ const deleteUser = (user) => {
   align-items: center;
   gap: 10px;
   cursor: pointer;
+  text-decoration: none;
   transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
 }
 
@@ -434,12 +453,6 @@ const deleteUser = (user) => {
   color: #fff;
   background: linear-gradient(90deg, #8b6138 0%, #e9bf84 100%);
   box-shadow: 0 16px 30px rgba(139, 97, 56, 0.18);
-}
-
-.btn-outline {
-  color: var(--primary-dark);
-  border-color: var(--primary-dark);
-  background: transparent;
 }
 
 .users-grid {

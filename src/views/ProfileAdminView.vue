@@ -1,31 +1,17 @@
 <template>
   <section class="admin-profile-view">
     <div class="profile-shell">
-      <div class="top-toolbar">
-        <div class="toolbar-profile">
-          <div class="toolbar-copy">
-            <strong>Profil Admin</strong>
-            <span>{{ adminProfile.role.toUpperCase() }}</span>
-          </div>
-          <div class="toolbar-avatar">{{ adminInitials }}</div>
-        </div>
-      </div>
-
       <header class="page-header">
-        <h1>Profil Admin</h1>
+        <h1>Profile Admin</h1>
       </header>
 
       <section class="hero-card">
-        <div class="hero-avatar">{{ adminInitials }}</div>
+        <div class="hero-avatar">
+          <img src="https://i.pravatar.cc/150?img=11" alt="Foto Profil" />
+        </div>
 
         <div class="hero-content">
           <h2>{{ adminProfile.fullName }}</h2>
-
-          <div class="hero-meta">
-            <span class="role-badge">{{ adminProfile.role.toUpperCase() }}</span>
-            <span class="member-since">Mengelola panel sejak Januari 2024</span>
-          </div>
-
           <button class="edit-photo-btn" type="button">Edit Foto</button>
         </div>
       </section>
@@ -34,65 +20,38 @@
         <article v-for="stat in adminStats" :key="stat.key" class="stat-card">
           <div class="stat-icon">
             <svg
-              v-if="stat.key === 'rules'"
+              v-if="stat.key === 'collections'"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="currentColor"
+              stroke="#8a6035"
               stroke-width="2"
               stroke-linecap="round"
               stroke-linejoin="round"
             >
-              <circle cx="12" cy="12" r="3"></circle>
-              <path
-                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33
-                   1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51
-                   1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82
-                   1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1
-                   1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33
-                   1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51
-                   1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82
-                   1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
-              ></path>
+              <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
             </svg>
-
             <svg
-              v-else-if="stat.key === 'users'"
+              v-else-if="stat.key === 'reviews'"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="currentColor"
+              stroke="#8a6035"
               stroke-width="2"
               stroke-linecap="round"
               stroke-linejoin="round"
             >
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-              <circle cx="9" cy="7" r="4"></circle>
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-            </svg>
-
-            <svg
-              v-else
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
-              <path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"></path>
-              <path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"></path>
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              <path d="M12 7v4"></path>
+              <path d="M12 15h.01"></path>
             </svg>
           </div>
 
-          <span class="stat-tag">{{ stat.tag }}</span>
           <h3>{{ stat.value }}</h3>
           <p>{{ stat.label }}</p>
         </article>
       </div>
 
       <form class="settings-card" @submit.prevent="saveAdminProfile">
-        <h3>Pengaturan Akun Admin</h3>
+        <h3>Pengaturan Akun</h3>
 
         <div class="form-grid">
           <div class="form-group">
@@ -101,7 +60,7 @@
               id="fullName"
               v-model="adminProfile.fullName"
               type="text"
-              placeholder="Nama admin"
+              placeholder="Elena Vance"
             />
           </div>
 
@@ -111,75 +70,74 @@
               id="email"
               v-model="adminProfile.email"
               type="email"
-              placeholder="Email admin"
+              placeholder="Elenavance@gmail.com"
             />
           </div>
 
           <div class="form-group">
-            <label for="role">Jabatan</label>
-            <input
-              id="role"
-              v-model="adminProfile.role"
-              type="text"
-              placeholder="Jabatan admin"
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="phone">Nomor Kontak</label>
-            <input
-              id="phone"
-              v-model="adminProfile.phone"
-              type="text"
-              placeholder="Nomor kontak"
-            />
-          </div>
-
-          <div class="form-group full-width">
-            <label for="password">Ubah Kata Sandi</label>
-
-            <div class="password-field">
+            <label for="password">Kata Sandi</label>
+            <div class="input-icon-wrap">
+              <svg class="left-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
               <input
                 id="password"
                 v-model="adminProfile.password"
-                :type="showPassword ? 'text' : 'password'"
-                placeholder="Masukkan kata sandi baru"
+                type="password"
               />
+            </div>
+          </div>
 
-              <button
-                class="password-toggle"
-                type="button"
-                @click="showPassword = !showPassword"
-                :aria-label="showPassword ? 'Sembunyikan password' : 'Tampilkan password'"
-              >
-                <svg
-                  v-if="!showPassword"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"></path>
-                  <circle cx="12" cy="12" r="3"></circle>
-                </svg>
+          <div class="form-group">
+            <label for="passwordConfirm">Konfirmasi Kata Sandi</label>
+            <input
+              id="passwordConfirm"
+              v-model="adminProfile.passwordConfirm"
+              type="password"
+            />
+          </div>
 
-                <svg
-                  v-else
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C5 20 1 12 1 12a21.8 21.8 0 0 1 5.06-5.94"></path>
-                  <path d="M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.68 21.68 0 0 1-3.17 4.59"></path>
-                  <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"></path>
-                  <path d="M1 1l22 22"></path>
-                </svg>
-              </button>
+          <div class="form-group">
+            <label for="role">Pilih Peran</label>
+            <div class="select-wrap">
+              <select id="role" v-model="adminProfile.role">
+                <option value="" disabled></option>
+                <option value="kurator">Kurator</option>
+                <option value="admin">Admin</option>
+              </select>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="provinsi">Provinsi</label>
+            <div class="select-wrap">
+              <select id="provinsi" v-model="adminProfile.provinsi"><option value="" disabled></option></select>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="kabupaten">Kabupaten/Kota</label>
+            <div class="select-wrap">
+              <select id="kabupaten" v-model="adminProfile.kabupaten"><option value="" disabled></option></select>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="kecamatan">Kecamatan</label>
+            <div class="select-wrap">
+              <select id="kecamatan" v-model="adminProfile.kecamatan"><option value="" disabled></option></select>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="kelurahan">Kelurahan/Desa</label>
+            <div class="select-wrap">
+              <select id="kelurahan" v-model="adminProfile.kelurahan"><option value="" disabled></option></select>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
             </div>
           </div>
         </div>
@@ -194,6 +152,40 @@
         </div>
       </form>
     </div>
+
+    <transition name="modal-fade">
+      <div
+        v-if="showModal"
+        class="modal-overlay"
+        @click.self="closeModal"
+      >
+        <div class="success-modal" role="dialog" aria-modal="true" aria-labelledby="success-title">
+          <div class="success-icon-wrap">
+            <div class="success-icon-glow"></div>
+            <div class="success-icon">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  d="M7 12.5l3.2 3.2L17.5 8.5"
+                  stroke="currentColor"
+                  stroke-width="2.2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </div>
+          </div>
+
+          <h2 id="success-title">Perubahan Berhasil Disimpan</h2>
+          <p>Profile telah diperbarui secara otomatis di seluruh sistem ScentVault.</p>
+
+          <div class="modal-actions">
+            <button class="btn btn-primary modal-btn" type="button" @click="closeModal">
+              SELESAI
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
   </section>
 </template>
 
@@ -201,20 +193,28 @@
 import { computed, reactive, ref } from 'vue'
 
 const defaultProfile = {
-  fullName: 'Arkana Virel',
-  email: 'admin@scentvault.com',
-  role: 'Kepala Kurator',
-  phone: '+62 812 4500 8899',
-  password: 'adminsecure123',
+  fullName: 'Brando',
+  email: 'Elenavance@gmail.com',
+  role: 'admin',
+  password: '',
+  passwordConfirm: '',
+  provinsi: '',
+  kabupaten: '',
+  kecamatan: '',
+  kelurahan: '',
 }
 
 const adminProfile = reactive({ ...defaultProfile })
-const showPassword = ref(false)
+
+const showModal = ref(false)
+
+const closeModal = () => {
+  showModal.value = false
+}
 
 const adminStats = ref([
-  { key: 'rules', value: 18, label: 'Aturan Aktif', tag: 'SISTEM' },
-  { key: 'users', value: 42, label: 'Pengguna Dikelola', tag: 'PENGGUNA' },
-  { key: 'integrations', value: 7, label: 'Integrasi Data', tag: 'KONEKSI' },
+  { key: 'collections', value: 128, label: 'TOTAL KOLEKSI' },
+  { key: 'reviews', value: 42, label: 'ULASAN TERBIT' },
 ])
 
 const adminInitials = computed(() =>
@@ -228,11 +228,11 @@ const adminInitials = computed(() =>
 
 const resetProfile = () => {
   Object.assign(adminProfile, defaultProfile)
-  showPassword.value = false
 }
 
 const saveAdminProfile = () => {
   console.log('Admin profile saved:', { ...adminProfile })
+  showModal.value = true
 }
 </script>
 
@@ -282,21 +282,15 @@ const saveAdminProfile = () => {
   letter-spacing: 0.8px;
 }
 
-.toolbar-avatar,
 .hero-avatar {
-  background: linear-gradient(180deg, #20445d 0%, #102635 100%);
-  color: #ffffff;
-  display: grid;
-  place-items: center;
-  font-weight: 800;
-  box-shadow: 0 12px 24px rgba(16, 38, 53, 0.2);
+  overflow: hidden;
+  background: transparent;
 }
 
-.toolbar-avatar {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  font-size: 1rem;
+.hero-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .page-header {
@@ -379,7 +373,7 @@ const saveAdminProfile = () => {
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(220px, 1fr));
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
   gap: 22px;
   margin-bottom: 26px;
 }
@@ -401,19 +395,6 @@ const saveAdminProfile = () => {
 .stat-icon svg {
   width: 24px;
   height: 24px;
-}
-
-.stat-tag {
-  position: absolute;
-  top: 22px;
-  right: 22px;
-  padding: 7px 12px;
-  border-radius: 999px;
-  background: #f1efeb;
-  color: #b0aaa3;
-  font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 0.8px;
 }
 
 .stat-card h3 {
@@ -491,30 +472,59 @@ const saveAdminProfile = () => {
   box-shadow: 0 0 0 3px rgba(125, 87, 49, 0.12);
 }
 
-.password-field {
+.input-icon-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.left-icon {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  color: #a39c96;
+}
+
+.input-icon-wrap input {
+  padding-left: 42px !important;
+}
+
+.select-wrap {
   position: relative;
 }
 
-.password-field input {
-  padding-right: 56px;
+.select-wrap select {
+  width: 100%;
+  height: 52px;
+  border: none;
+  outline: none;
+  border-radius: 14px;
+  padding: 0 18px;
+  box-sizing: border-box;
+  background: #ffffff;
+  color: #43312a;
+  font-size: 0.95rem;
+  font-weight: 600;
+  appearance: none;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease;
 }
 
-.password-toggle {
+.select-wrap select:focus {
+  box-shadow: 0 0 0 3px rgba(125, 87, 49, 0.12);
+}
+
+.select-wrap svg {
   position: absolute;
   top: 50%;
-  right: 14px;
+  right: 18px;
   transform: translateY(-50%);
-  width: 34px;
-  height: 34px;
-  border: none;
-  background: transparent;
-  color: #91867c;
-  cursor: pointer;
-}
-
-.password-toggle svg {
   width: 18px;
   height: 18px;
+  color: #a39c96;
+  pointer-events: none;
 }
 
 .form-actions {
@@ -590,5 +600,100 @@ const saveAdminProfile = () => {
   .btn {
     width: 100%;
   }
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(33, 27, 21, 0.45);
+  backdrop-filter: blur(4px);
+}
+
+.success-modal {
+  width: min(100%, 462px);
+  padding: 42px 36px 34px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 26px 60px rgba(41, 31, 21, 0.16);
+  text-align: center;
+}
+
+.success-icon-wrap {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 16px;
+}
+
+.success-icon-glow {
+  position: absolute;
+  inset: 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(101, 214, 122, 0.24) 0%, rgba(101, 214, 122, 0) 72%);
+}
+
+.success-icon {
+  position: absolute;
+  inset: 14px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #4caf62;
+  border: 4px solid currentColor;
+  background: #e7f7eb;
+}
+
+.success-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.success-modal h2 {
+  margin: 0 0 12px;
+  color: #2f2c29;
+  font-size: clamp(1.4rem, 2vw, 1.6rem);
+  line-height: 1.35;
+  font-weight: 800;
+}
+
+.success-modal p {
+  max-width: 320px;
+  margin: 0 auto;
+  color: #7a726b;
+  font-size: 0.92rem;
+  line-height: 1.65;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 28px;
+}
+
+.modal-btn {
+  width: 100%;
+  max-width: 280px;
+  letter-spacing: 0.08em;
+  font-size: 0.8rem;
+}
+
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+}
+
+.modal-fade-enter-from .success-modal,
+.modal-fade-leave-to .success-modal {
+  transform: translateY(10px) scale(0.98);
 }
 </style>

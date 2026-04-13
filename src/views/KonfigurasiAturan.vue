@@ -137,22 +137,6 @@
                   </svg>
 
                   <svg
-                    v-else-if="cycle.key === 'sore'"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                    <path d="M3 18h18" />
-                    <path d="M7 18a5 5 0 0 1 10 0" />
-                    <path d="M12 9V4" />
-                    <path d="m5 11 2 2" />
-                    <path d="m19 11-2 2" />
-                  </svg>
-
-                  <svg
                     v-else
                     viewBox="0 0 24 24"
                     fill="none"
@@ -305,11 +289,55 @@
         </div>
       </section>
     </div>
+
+    <transition name="modal-fade">
+      <div
+        v-if="showModal"
+        class="modal-overlay"
+        @click.self="closeModal"
+      >
+        <div class="success-modal" role="dialog" aria-modal="true" aria-labelledby="success-title">
+          <div class="success-icon-wrap">
+            <div class="success-icon-glow"></div>
+            <div class="success-icon">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  d="M7 12.5l3.2 3.2L17.5 8.5"
+                  stroke="currentColor"
+                  stroke-width="2.2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </div>
+          </div>
+
+          <h2 id="success-title">{{ modalContent.title }}</h2>
+          <p>{{ modalContent.message }}</p>
+
+          <div class="modal-actions">
+            <button class="btn btn-solid modal-btn" type="button" @click="closeModal">
+              SELESAI
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
   </section>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+
+const showModal = ref(false)
+const modalContent = ref({
+  title: '',
+  message: '',
+})
+
+const closeModal = () => {
+  showModal.value = false
+}
 
 const temperatureRanges = ref([
   { key: 'dingin', label: 'Rentang Dingin (°C)', min: 24, max: 28 },
@@ -320,16 +348,25 @@ const temperatureRanges = ref([
 const timeCycles = ref([
   { key: 'pagi', label: 'Pagi', start: '06:00', end: '10:00' },
   { key: 'siang', label: 'Siang', start: '10:01', end: '15:00' },
-  { key: 'sore', label: 'Sore', start: '15:00', end: '18:00' },
   { key: 'malam', label: 'Malam', start: '18:00', end: '05:59' },
 ])
 
 const saveTemperatureSettings = () => {
   console.log('Temperature settings saved:', temperatureRanges.value)
+  modalContent.value = {
+    title: 'Perubahan Suhu Berhasil Disimpan',
+    message: 'Parameter sensor suhu telah diperbarui secara global di seluruh sistem Digital Atelier.'
+  }
+  showModal.value = true
 }
 
 const saveTimeSettings = () => {
   console.log('Time cycle settings saved:', timeCycles.value)
+  modalContent.value = {
+    title: 'Konfigurasi Waktu Berhasil Diperbarui',
+    message: 'Interval waktu operasional untuk kurasi aroma telah berhasil disinkronkan.'
+  }
+  showModal.value = true
 }
 </script>
 
@@ -698,5 +735,100 @@ const saveTimeSettings = () => {
     width: 100%;
     max-width: 160px;
   }
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(33, 27, 21, 0.45);
+  backdrop-filter: blur(4px);
+}
+
+.success-modal {
+  width: min(100%, 462px);
+  padding: 42px 36px 34px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 26px 60px rgba(41, 31, 21, 0.16);
+  text-align: center;
+}
+
+.success-icon-wrap {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 16px;
+}
+
+.success-icon-glow {
+  position: absolute;
+  inset: 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(101, 214, 122, 0.24) 0%, rgba(101, 214, 122, 0) 72%);
+}
+
+.success-icon {
+  position: absolute;
+  inset: 14px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #4caf62;
+  border: 4px solid currentColor;
+  background: #e7f7eb;
+}
+
+.success-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.success-modal h2 {
+  margin: 0 0 12px;
+  color: #2f2c29;
+  font-size: clamp(1.4rem, 2vw, 1.6rem);
+  line-height: 1.35;
+  font-weight: 800;
+}
+
+.success-modal p {
+  max-width: 320px;
+  margin: 0 auto;
+  color: #7a726b;
+  font-size: 0.92rem;
+  line-height: 1.65;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 28px;
+}
+
+.modal-btn {
+  width: 100%;
+  max-width: 280px;
+  letter-spacing: 0.08em;
+  font-size: 0.8rem;
+}
+
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+}
+
+.modal-fade-enter-from .success-modal,
+.modal-fade-leave-to .success-modal {
+  transform: translateY(10px) scale(0.98);
 }
 </style>

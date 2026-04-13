@@ -24,7 +24,7 @@
           </div>
 
           <div class="field-group">
-            <label for="email">Email Resmi</label>
+            <label for="email">Email</label>
             <input
               id="email"
               v-model="form.email"
@@ -34,32 +34,7 @@
           </div>
 
           <div class="field-group">
-            <label for="role">Peran Akses</label>
-            <div class="select-wrap">
-              <select id="role" v-model="form.role">
-                <option value="" disabled>Pilih Peran</option>
-                <option
-                  v-for="option in roleOptions"
-                  :key="option.value"
-                  :value="option.value"
-                >
-                  {{ option.label }}
-                </option>
-              </select>
-              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path
-                  d="M7 10l5 5 5-5"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            </div>
-          </div>
-
-          <div class="field-group">
-            <label for="password">Kata Sandi Sementara</label>
+            <label for="password">Kata Sandi</label>
             <div class="password-wrap">
               <input
                 id="password"
@@ -93,27 +68,118 @@
               </button>
             </div>
           </div>
-        </div>
 
-        <div class="status-panel">
-          <div class="status-copy">
-            <h3>Status Akun</h3>
-            <p>Aktifkan segera setelah dibuat?</p>
+          <div class="field-group">
+            <label for="passwordConfirm">Konfirmasi Kata Sandi</label>
+            <div class="password-wrap">
+              <input
+                id="passwordConfirm"
+                v-model="form.passwordConfirm"
+                :type="showPasswordConfirm ? 'text' : 'password'"
+                placeholder="••••••••"
+              />
+              <button
+                class="input-action"
+                type="button"
+                :aria-label="showPasswordConfirm ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'"
+                @click="showPasswordConfirm = !showPasswordConfirm"
+              >
+                <svg v-if="!showPasswordConfirm" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path
+                    d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                  />
+                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8" />
+                </svg>
+                <svg v-else viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path
+                    d="M3 3l18 18M10.6 10.6A2 2 0 0 0 13.4 13.4M9.88 5.09A10.94 10.94 0 0 1 12 5c6.5 0 10 7 10 7a17.34 17.34 0 0 1-4.06 4.62M6.1 6.1C3.56 7.76 2 12 2 12a17.3 17.3 0 0 0 7.9 5.9"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </button>
+            </div>
           </div>
 
-          <div class="status-toggle-wrap">
-            <button
-              type="button"
-              class="status-toggle"
-              :class="{ active: form.isActive }"
-              :aria-pressed="form.isActive"
-              @click="form.isActive = !form.isActive"
-            >
-              <span class="toggle-thumb" />
-            </button>
-            <span class="toggle-label">{{ form.isActive ? 'AKTIF' : 'NONAKTIF' }}</span>
+          <div class="field-group">
+            <label for="role">Pilih Peran</label>
+            <div class="select-wrap">
+              <select id="role" v-model="form.role">
+                <option value="" disabled></option>
+                <option
+                  v-for="option in roleOptions"
+                  :key="option.value"
+                  :value="option.value"
+                >
+                  {{ option.label }}
+                </option>
+              </select>
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  d="M7 10l5 5 5-5"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label for="provinsi">Provinsi</label>
+            <div class="select-wrap">
+              <select id="provinsi" v-model="form.provinsi">
+                <option value="" disabled></option>
+              </select>
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M7 10l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label for="kabupaten">Kabupaten/Kota</label>
+            <div class="select-wrap">
+              <select id="kabupaten" v-model="form.kabupaten">
+                <option value="" disabled></option>
+              </select>
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M7 10l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label for="kecamatan">Kecamatan</label>
+            <div class="select-wrap">
+              <select id="kecamatan" v-model="form.kecamatan">
+                <option value="" disabled></option>
+              </select>
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M7 10l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label for="kelurahan">Kelurahan/Desa</label>
+            <div class="select-wrap">
+              <select id="kelurahan" v-model="form.kelurahan">
+                <option value="" disabled></option>
+              </select>
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M7 10l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
           </div>
         </div>
+
+
 
         <div class="form-actions">
           <button class="btn btn-primary" type="submit">
@@ -141,41 +207,163 @@
         </div>
       </form>
     </section>
+
+    <transition name="modal-fade">
+      <div
+        v-if="showSuccessModal"
+        class="modal-overlay"
+        @click.self="closeModal"
+      >
+        <div class="success-modal" role="dialog" aria-modal="true" aria-labelledby="success-title">
+          <div class="success-icon-wrap">
+            <div class="success-icon-glow"></div>
+            <div class="success-icon">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  d="M7 12.5l3.2 3.2L17.5 8.5"
+                  stroke="currentColor"
+                  stroke-width="2.2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </div>
+          </div>
+
+          <h2 id="success-title">Pengguna Berhasil Ditambahkan</h2>
+          <p>
+            Kredensial akses telah dikirimkan ke alamat email yang didaftarkan.
+          </p>
+
+          <div class="modal-actions">
+            <button class="btn btn-primary modal-btn" type="button" @click="goToList">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  d="M15 18l-6-6 6-6"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              <span>Kembali ke Daftar</span>
+            </button>
+
+            <button class="btn btn-ghost modal-btn" type="button" @click="handleAddAnother">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  d="M12 5v14M5 12h14"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M16 19a4 4 0 0 0-8 0"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                />
+                <circle cx="12" cy="9" r="3" stroke="currentColor" stroke-width="2" />
+              </svg>
+              <span>Tambah Lagi</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
   </main>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const showPassword = ref(false)
+const showPasswordConfirm = ref(false)
+const showSuccessModal = ref(false)
 
 const roleOptions = [
   { value: 'kurator', label: 'Kurator' },
   { value: 'admin', label: 'Admin' },
-  { value: 'operator', label: 'Operator' },
 ]
 
-const form = ref({
+const defaultForm = () => ({
   name: '',
   email: '',
   role: '',
   password: '',
-  isActive: true,
+  passwordConfirm: '',
+  provinsi: '',
+  kabupaten: '',
+  kecamatan: '',
+  kelurahan: '',
 })
 
+const form = ref(defaultForm())
+
+const resetForm = () => {
+  form.value = defaultForm()
+  showPassword.value = false
+  showPasswordConfirm.value = false
+}
+
+const saveUserToLocalStorage = () => {
+  const existingUsers = JSON.parse(localStorage.getItem('scentvault_users') || '[]')
+
+  const selectedRole = roleOptions.find((item) => item.value === form.value.role)
+
+  const newUser = {
+    id: Date.now(),
+    name: form.value.name.trim(),
+    email: form.value.email.trim(),
+    role: selectedRole ? selectedRole.label : form.value.role,
+    status: 'active',
+    image: '',
+    image: '',
+  }
+
+  existingUsers.unshift(newUser)
+  localStorage.setItem('scentvault_users', JSON.stringify(existingUsers))
+}
+
 const handleSubmit = () => {
-  console.log('Submit tambah pengguna:', form.value)
+  if (
+    !form.value.name.trim() ||
+    !form.value.email.trim() ||
+    !form.value.role ||
+    !form.value.password.trim() ||
+    !form.value.passwordConfirm.trim() ||
+    form.value.password !== form.value.passwordConfirm
+  ) {
+    if (form.value.password !== form.value.passwordConfirm) {
+      alert('Kata sandi dan konfirmasi kata sandi tidak cocok.')
+    } else {
+      alert('Mohon lengkapi semua field terlebih dahulu.')
+    }
+    return
+  }
+
+  saveUserToLocalStorage()
+  showSuccessModal.value = true
 }
 
 const handleCancel = () => {
-  form.value = {
-    name: '',
-    email: '',
-    role: '',
-    password: '',
-    isActive: true,
-  }
-  showPassword.value = false
+  resetForm()
+}
+
+const closeModal = () => {
+  showSuccessModal.value = false
+}
+
+const handleAddAnother = () => {
+  closeModal()
+  resetForm()
+}
+
+const goToList = () => {
+  closeModal()
+  router.push('/manajemen-pengguna')
 }
 </script>
 
@@ -197,8 +385,9 @@ const handleCancel = () => {
   --primary: #8b6138;
   --primary-dark: #7d5731;
   --primary-soft: #e9bf84;
-  --btn-soft: #f4f1eb;
   --white: #ffffff;
+  --success: #4caf62;
+  --success-soft: #e7f7eb;
 
   min-height: 100%;
   padding: 48px 56px;
@@ -291,7 +480,9 @@ const handleCancel = () => {
 }
 
 .select-wrap svg,
-.input-action svg {
+.input-action svg,
+.btn svg,
+.success-icon svg {
   width: 18px;
   height: 18px;
 }
@@ -414,16 +605,12 @@ const handleCancel = () => {
   font-size: 1rem;
   font-weight: 800;
   cursor: pointer;
+  text-decoration: none;
   transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
 }
 
 .btn:hover {
   transform: translateY(-1px);
-}
-
-.btn svg {
-  width: 18px;
-  height: 18px;
 }
 
 .btn-primary {
@@ -437,6 +624,104 @@ const handleCancel = () => {
   color: var(--primary-dark);
   border-color: rgba(125, 87, 49, 0.14);
   background: transparent;
+}
+
+.btn-ghost {
+  color: #4a433d;
+  background: #efefea;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(33, 27, 21, 0.28);
+  backdrop-filter: blur(3px);
+}
+
+.success-modal {
+  width: min(100%, 462px);
+  padding: 42px 36px 34px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 26px 60px rgba(41, 31, 21, 0.16);
+  text-align: center;
+}
+
+.success-icon-wrap {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 16px;
+}
+
+.success-icon-glow {
+  position: absolute;
+  inset: 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(101, 214, 122, 0.24) 0%, rgba(101, 214, 122, 0) 72%);
+}
+
+.success-icon {
+  position: absolute;
+  inset: 14px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--success);
+  border: 3px solid currentColor;
+  background: var(--success-soft);
+}
+
+.success-modal h2 {
+  margin: 0 0 12px;
+  color: #2f2c29;
+  font-size: clamp(1.8rem, 2vw, 2.25rem);
+  line-height: 1.02;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.success-modal p {
+  max-width: 300px;
+  margin: 0 auto;
+  color: #7a726b;
+  font-size: 0.98rem;
+  line-height: 1.65;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.modal-btn {
+  min-width: 152px;
+  padding-inline: 18px;
+  font-size: 0.86rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+}
+
+.modal-fade-enter-from .success-modal,
+.modal-fade-leave-to .success-modal {
+  transform: translateY(10px) scale(0.98);
 }
 
 @media (max-width: 1024px) {
@@ -461,13 +746,20 @@ const handleCancel = () => {
     border-radius: 22px;
   }
 
-  .form-actions {
+  .form-actions,
+  .modal-actions {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .btn {
+  .btn,
+  .modal-btn {
     width: 100%;
+  }
+
+  .success-modal {
+    padding: 34px 22px 24px;
+    border-radius: 24px;
   }
 }
 </style>
