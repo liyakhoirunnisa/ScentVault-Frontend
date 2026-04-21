@@ -108,9 +108,7 @@ const integrations = ref([
   --gray-soft: #f1eee9;
   --chip-bg: #f4f0ea;
 
-  min-height: 100%;
-  padding: 44px 32px 60px;
-  background: var(--bg);
+  background: transparent;
 }
 
 .page-head {
@@ -127,8 +125,9 @@ const integrations = ref([
 
 .page-copy h1 {
   margin: 0 0 10px;
-  color: var(--title);
-  font-size: clamp(2rem, 2.5vw, 2.9rem);
+  color: #7d5731;
+  font-family: 'Manrope', sans-serif;
+  font-size: 35.2px;
   line-height: 1.05;
   font-weight: 800;
   letter-spacing: -0.03em;
@@ -382,7 +381,7 @@ const integrations = ref([
 
 @media (max-width: 768px) {
   .integration-page {
-    padding: 32px 20px 48px;
+    /* Padding handled by global layout */
   }
 
   .integration-grid {

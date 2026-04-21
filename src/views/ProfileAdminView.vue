@@ -239,10 +239,9 @@ const saveAdminProfile = () => {
 <style scoped>
 .admin-profile-view {
   width: 100%;
-  min-height: 100vh;
-  padding: 42px 56px 48px;
   box-sizing: border-box;
-  background: #f7f5f1;
+  background: transparent;
+  font-family: 'Manrope', sans-serif;
 }
 
 .profile-shell {
@@ -298,9 +297,10 @@ const saveAdminProfile = () => {
 }
 
 .page-header h1 {
-  margin: 0;
-  font-size: clamp(2rem, 2.8vw, 2.55rem);
-  color: #8a6035;
+  margin: 0 0 10px;
+  font-size: 35.2px;
+  color: #7d5731;
+  font-family: 'Manrope', sans-serif;
   font-weight: 800;
 }
 
@@ -576,7 +576,7 @@ const saveAdminProfile = () => {
 
 @media (max-width: 720px) {
   .admin-profile-view {
-    padding: 32px 20px 40px;
+    /* Padding handled globally */
   }
 
   .top-toolbar {

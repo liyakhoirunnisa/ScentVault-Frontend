@@ -388,9 +388,7 @@ const deleteUser = (user) => {
   --gray: #9d9a96;
   --gray-soft: #ece9e5;
 
-  min-height: 100%;
-  padding: 48px 56px;
-  background: var(--bg);
+  background: transparent;
 }
 
 .page-head {
@@ -403,8 +401,9 @@ const deleteUser = (user) => {
 
 .page-head h1 {
   margin: 0 0 10px;
-  color: var(--title);
-  font-size: clamp(2rem, 2.4vw, 2.8rem);
+  color: #7d5731;
+  font-family: 'Manrope', sans-serif;
+  font-size: 35.2px;
   line-height: 1.05;
   font-weight: 800;
   letter-spacing: -0.03em;
@@ -699,7 +698,7 @@ const deleteUser = (user) => {
 
 @media (max-width: 768px) {
   .users-page {
-    padding: 32px 20px;
+    /* Padding handled globally */
   }
 
   .users-grid {

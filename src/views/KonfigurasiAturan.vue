@@ -373,10 +373,8 @@ const saveTimeSettings = () => {
 <style scoped>
 .rules-view {
   width: 100%;
-  min-height: 100vh;
-  padding: 48px 56px 40px;
   box-sizing: border-box;
-  background: #f7f5f1;
+  background: transparent;
 }
 
 .rules-shell {
@@ -389,10 +387,11 @@ const saveTimeSettings = () => {
 }
 
 .page-header h1 {
-  margin: 0 0 12px;
-  font-size: clamp(2rem, 2.8vw, 2.6rem);
+  margin: 0 0 10px;
+  font-size: 35.2px;
   line-height: 1.1;
-  color: #8a6035;
+  color: #7d5731;
+  font-family: 'Manrope', sans-serif;
   font-weight: 800;
 }
 
@@ -714,7 +713,7 @@ const saveTimeSettings = () => {
 
 @media (max-width: 640px) {
   .rules-view {
-    padding: 32px 20px;
+    /* Padding handled globally */
   }
 
   .range-inputs {
