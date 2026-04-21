@@ -598,9 +598,8 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .user-detail-page {
-  min-height: 100%;
-  padding: 32px;
-  background: var(--bg, #f7f5f1);
+  box-sizing: border-box;
+  background: transparent;
 }
 
 .user-card {
@@ -671,11 +670,12 @@ onBeforeUnmount(() => {
 }
 
 .user-name {
-  margin: 0;
-  font-size: 2rem;
+  margin: 0 0 10px;
+  font-size: 35.2px;
   line-height: 1.1;
   font-weight: 700;
-  color: #2f2925;
+  color: #7d5731;
+  font-family: 'Manrope', sans-serif;
 }
 
 .status-badge {
@@ -982,7 +982,7 @@ onBeforeUnmount(() => {
 
 @media (max-width: 520px) {
   .user-detail-page {
-    padding: 14px;
+    /* Padding handled globally */
   }
 
   .user-card {

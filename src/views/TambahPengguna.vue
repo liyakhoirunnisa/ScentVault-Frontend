@@ -389,9 +389,7 @@ const goToList = () => {
   --success: #4caf62;
   --success-soft: #e7f7eb;
 
-  min-height: 100%;
-  padding: 48px 56px;
-  background: var(--bg);
+  background: transparent;
 }
 
 .page-header {
@@ -399,9 +397,10 @@ const goToList = () => {
 }
 
 .page-header h1 {
-  margin: 0 0 12px;
-  color: var(--title);
-  font-size: clamp(2.35rem, 3vw, 3.35rem);
+  margin: 0 0 10px;
+  color: #7d5731;
+  font-family: 'Manrope', sans-serif;
+  font-size: 35.2px;
   line-height: 1.02;
   font-weight: 800;
   letter-spacing: -0.04em;
@@ -738,7 +737,7 @@ const goToList = () => {
 
 @media (max-width: 768px) {
   .add-user-page {
-    padding: 32px 20px;
+    /* Padding handled globally */
   }
 
   .user-form {
