@@ -32,30 +32,19 @@
               <div class="input-group">
                 <label>PILIH PARFUM</label>
                 <div class="input-with-icon">
-                  <svg
-                    class="left-icon"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
+                  <svg class="left-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="9"></circle>
                     <circle cx="9" cy="9.5" r="1" fill="currentColor" stroke="none"></circle>
                     <circle cx="15" cy="9.5" r="1" fill="currentColor" stroke="none"></circle>
                     <path d="M8.5 14c1.5 1.5 5.5 1.5 7 0"></path>
                   </svg>
-                  <select class="form-control select-custom with-pad" v-model="newEntry.perfumeName"></select>
-                  <svg
-                    class="chevron"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
+                  
+                  <select class="form-control select-custom with-pad" v-model="newEntry.perfume_id">
+                    <option value="" disabled>Cari koleksi...</option>
+                    <option v-for="p in perfumes" :key="p.id" :value="p.id">{{ p.name }}</option>
+                  </select>
+                  
+                  <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="6 9 12 15 18 9"></polyline>
                   </svg>
                 </div>
@@ -65,56 +54,46 @@
                 <div class="input-group">
                   <label>CUACA</label>
                   <div class="input-with-icon">
-                    <svg
-                      class="left-icon"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
+                    <svg class="left-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path>
                     </svg>
-                    <select class="form-control select-custom with-pad" v-model="newEntry.weather"></select>
-                    <svg
-                      class="chevron"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
+
+                    <select class="form-control select-custom with-pad" v-model="newEntry.weather">
+                      <option value="" disabled>Kondisi saat ini</option>
+                      <option v-for="w in weathers" :key="w" :value="w">{{ w }}</option>
+                    </select>
+
+                    <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
                   </div>
                 </div>
+                
                 <div class="input-group">
                   <label>ACARA</label>
                   <div class="input-with-icon">
-                    <svg
-                      class="left-icon"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
+                    <svg class="left-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                       <line x1="16" y1="2" x2="16" y2="6"></line>
                       <line x1="8" y1="2" x2="8" y2="6"></line>
                       <line x1="3" y1="10" x2="21" y2="10"></line>
                     </svg>
-                    <input type="text" class="form-control with-pad" placeholder="Misal: Kantor" v-model="newEntry.place" />
+
+                    <select class="form-control select-custom with-pad" v-model="newEntry.occasion_id">
+                      <option value="" disabled>Tujuan hari ini</option>
+                      <option v-for="o in occasions" :key="o.id" :value="o.id">{{ o.name }}</option>
+                    </select>
+                    
+                    <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
                   </div>
                 </div>
               </div>
 
               <div class="input-group">
                 <label>CATATAN AROMA</label>
-                <textarea class="form-control textarea-custom" placeholder='"Isi catatan."' v-model="newEntry.quote"></textarea>
+                <textarea class="form-control textarea-custom" placeholder="Tulis catatan singkat di sini..." v-model="newEntry.notes_review"></textarea>
               </div>
 
               <button class="btn-gradient w-100" @click="submitEntry">SIMPAN ENTRI</button>
@@ -131,12 +110,12 @@
                 
                 <div class="entry-card-top">
                   <div class="entry-title-group">
-                    <h4 class="entry-perfume-name">{{ entry.perfumeName }}</h4>
-                    <span class="entry-subtitle">{{ entry.place }} • {{ entry.time }}</span>
+                    <h4 class="entry-perfume-name">{{ entry.perfume?.name }}</h4>
+                    <span class="entry-subtitle">{{ entry.occasion?.name }} � {{ entry.weather }}</span>
                   </div>
                   <div class="entry-date-group">
-                    <span class="entry-date-text">{{ entry.date }}</span>
-                    <button class="btn-delete-small">
+                    <span class="entry-date-text">{{ formatDate(entry.created_at) }}</span>
+                    <button class="btn-delete-small" @click="deleteEntry(entry.id)">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M3 6h18"></path>
                         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -147,16 +126,57 @@
 
                 <div class="entry-card-content">
                   <div class="entry-icon-box">
-                    <svg v-if="entry.iconType === 'moon'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    <svg v-if="entry.weather === 'Cerah'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="5"></circle>
+                      <line x1="12" y1="1" x2="12" y2="3"></line>
+                      <line x1="12" y1="21" x2="12" y2="23"></line>
+                      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                      <line x1="1" y1="12" x2="3" y2="12"></line>
+                      <line x1="21" y1="12" x2="23" y2="12"></line>
+                      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                     </svg>
-                    <svg v-else-if="entry.iconType === 'cloud'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+
+                    <svg v-else-if="entry.weather === 'Berawan'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                       <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path>
+                      <path d="M22 12h-1"></path>
+                      <path d="M19.07 4.93l-.71.71"></path>
+                      <path d="M12 2v1"></path>
+                      <path d="M4.93 4.93l.71.71"></path>
+                    </svg>
+
+                    <svg v-else-if="entry.weather === 'Mendung'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path>
+                    </svg>
+
+                    <svg v-else-if="entry.weather === 'Hujan'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M16 13v8"></path>
+                      <path d="M8 13v8"></path>
+                      <path d="M12 15v8"></path>
+                      <path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25"></path>
+                    </svg>
+
+                    <svg v-else-if="entry.weather === 'Sejuk'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"></path>
+                    </svg>
+
+                    <svg v-else-if="entry.weather === 'Dingin'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M2 12h20"></path>
+                      <path d="M12 2v20"></path>
+                      <path d="m20 16-4-4 4-4"></path>
+                      <path d="m4 8 4 4-4 4"></path>
+                      <path d="m16 4-4 4-4-4"></path>
+                      <path d="m8 20 4-4 4 4"></path>
+                    </svg>
+                    
+                    <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
                     </svg>
                   </div>
                   
                   <div class="entry-quote-text">
-                    "{{ entry.quote }}"
+                    "{{ entry.notes_review }}"
                   </div>
                 </div>
 
@@ -178,94 +198,134 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import Topbar from '@/components/Topbar.vue'
 import Sidebar from '@/components/Sidebar.vue'
+import axios from 'axios'
 
-// Data Bohongan (Mock Data) untuk Daftar Riwayat Diary
-const diaryEntries = ref([
-  {
-    id: 1,
-    perfumeName: 'Baccarat',
-    place: 'RESTO',
-    time: 'MALAM',
-    date: '10/01/2025',
-    iconType: 'moon',
-    quote: 'Perpaduan mawar dan oud yang sangat megah. Memberikan rasa percaya diri ekstra saat berjalan di karpet merah malam ini.'
-  },
-  {
-    id: 2,
-    perfumeName: 'Lacoco',
-    place: 'PANTAI',
-    time: 'SIANG',
-    date: '08/11/2024',
-    iconType: 'cloud',
-    quote: 'Kesegaran sitrus yang sempurna untuk udara siang yang cerah. Sangat ringan dan tidak mengganggu saat menikmati kopi di teras.'
-  },
-  {
-    id: 3, // Data ke-3 agar tombol View More muncul
-    perfumeName: 'Ambre Nuit',
-    place: 'KANTOR',
-    time: 'PAGI',
-    date: '02/09/2024',
-    iconType: 'cloud',
-    quote: 'Aroma amber yang hangat namun bersih. Membantu memberikan ketenangan ekstra sebelum presentasi penting dengan klien.'
-  }
+const diaryEntries = ref([])
+const perfumes = ref([])
+const occasions = ref([
+  { id: 1, name: 'Santai / Kasual' },
+  { id: 2, name: 'Bekerja / Kantor' },
+  { id: 3, name: 'Kencan / Romantis' },
+  { id: 4, name: 'Pesta / Malam Hari' },
+  { id: 5, name: 'Olahraga / Outdoor' }
 ])
 
-// STATE UNTUK FORM CATATAN BARU
+const weathers = ['Cerah', 'Berawan', 'Mendung', 'Hujan', 'Sejuk', 'Dingin']
+
 const newEntry = ref({
-  perfumeName: 'Santal 33',
-  weather: 'Cerah',
-  place: '',
-  quote: ''
+  perfume_id: '',
+  weather: '',
+  occasion_id: '',
+  notes_review: ''
 })
 
-// FUNGSI UNTUK MENYIMPAN ENTRI BARU
-const submitEntry = () => {
-  // Mencegah simpan jika catatan kosong
-  if (!newEntry.value.quote.trim()) {
-    alert("Silakan isi catatan aroma Anda terlebih dahulu!");
-    return;
+const fetchScentLogs = async () => {
+  try {
+    const token = localStorage.getItem('token')
+    if (!token) return
+    const res = await axios.get('http://localhost:8000/api/scentLog', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    if (res.data?.success) {
+      diaryEntries.value = res.data.data
+    }
+  } catch (error) {
+    console.error('Gagal mengambil daftar buku harian:', error)
   }
-
-  // Menentukan ikon sederhana berdasarkan cuaca
-  const isCloudy = ['Berawan', 'Mendung', 'Hujan'].includes(newEntry.value.weather);
-  
-  // Mendapatkan tanggal hari ini
-  const today = new Date();
-  const formattedDate = today.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
-
-  // Membuat objek data baru
-  const entryToAdd = {
-    id: Date.now(), // ID unik dari waktu saat ini
-    perfumeName: newEntry.value.perfumeName,
-    place: newEntry.value.place.toUpperCase() || 'LOKASI BARU',
-    time: 'SAAT INI',
-    date: formattedDate,
-    iconType: isCloudy ? 'cloud' : 'moon',
-    quote: newEntry.value.quote
-  };
-
-  // Memasukkan data baru ke urutan PALING ATAS dari array
-  diaryEntries.value.unshift(entryToAdd);
-
-  // Mengosongkan form kembali setelah berhasil disimpan
-  newEntry.value.place = '';
-  newEntry.value.quote = '';
 }
 
-// STATE UNTUK VIEW MORE
+const fetchPerfumes = async () => {
+  try {
+    const token = localStorage.getItem('token')
+    if (!token) return
+    const res = await axios.get('http://localhost:8000/api/perfumes', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    if (res.data?.data) {
+      perfumes.value = res.data.data
+    }
+  } catch (error) {
+    console.error('Gagal mengambil daftar parfum:', error)
+  }
+}
+
+onMounted(() => {
+  fetchScentLogs()
+  fetchPerfumes()
+})
+
+const submitEntry = async () => {
+  if (!newEntry.value.notes_review.trim() || !newEntry.value.perfume_id || !newEntry.value.occasion_id) {
+    alert("Silakan isi semua pilihan!")
+    return
+  }
+
+  try {
+    const token = localStorage.getItem('token')
+    const payload = {
+      perfume_id: newEntry.value.perfume_id,
+      occasion_id: newEntry.value.occasion_id,
+      weather: newEntry.value.weather,
+      notes_review: newEntry.value.notes_review
+    }
+    
+    // Asumsi occasion_id belum ada seedernya, jika API error 422 'exists:occasions,id', backend perlu occassion logic.
+    // Tapi kita kirim sesuai request. 
+
+    const res = await axios.post('http://localhost:8000/api/scentLog', payload, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+
+    if (res.data?.success) {
+      diaryEntries.value.unshift(res.data.data)
+      newEntry.value.perfume_id = ''
+      newEntry.value.occasion_id = ''
+      newEntry.value.notes_review = ''
+      newEntry.value.weather = '' 
+    }
+  } catch (error) {
+    console.error('Gagal menyimpan entry:', error)
+    if(error.response?.data?.message) {
+      alert("Error: " + error.response.data.message)
+    }
+  }
+}
+
+const deleteEntry = async (id) => {
+  if (!confirm('Hapus catatan aroma ini?')) return
+  try {
+    const token = localStorage.getItem('token')
+    await axios.delete(`http://localhost:8000/api/scentLog/${id}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    diaryEntries.value = diaryEntries.value.filter(e => e.id !== id)
+  } catch (error) {
+    console.error('Gagal menghapus entry:', error)
+  }
+}
+
 const showAllEntries = ref(false)
 
-// COMPUTED: Memotong array menjadi 2 jika showAllEntries bernilai false
 const displayedEntries = computed(() => {
   return showAllEntries.value ? diaryEntries.value : diaryEntries.value.slice(0, 2)
 })
 
-// FUNGSI TOGGLE: Saat tombol di-klik
 const toggleEntries = () => {
   showAllEntries.value = !showAllEntries.value
+}
+
+const formatDate = (dateString) => {
+  if(!dateString) return ''
+  const d = new Date(dateString)
+  return d.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' })
+}
+
+const getIconType = (weather) => {
+  const isCloudy = ['Berawan', 'Mendung', 'Hujan'].includes(weather)
+  return isCloudy ? 'cloud' : 'moon'
 }
 </script>
 
@@ -330,6 +390,13 @@ const toggleEntries = () => {
 /* =========================================
    KOLOM KIRI: FORM CATATAN BARU
    ========================================= */
+
+.left-column {
+  position: sticky;
+  top: 10px; /* Jarak aman dari atap layar saat mulai menempel */
+  z-index: 10; /* Memastikan form selalu berada di atas jika ada elemen yang tumpang tindih */
+}
+
 .form-card {
   background-color: #ffffff;
   border-radius: 20px;
@@ -355,7 +422,7 @@ const toggleEntries = () => {
 
 .input-row {
   display: grid;
-  grid-template-columns: 0.8fr 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 10px;
   margin-bottom: 25px;
 }

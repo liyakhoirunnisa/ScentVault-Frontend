@@ -23,51 +23,61 @@ const router = createRouter({
       path: '/',
       name: 'login',
       component: LoginView,
+      meta: { guestOnly: true },
     },
     {
       path: '/register',
       name: 'register',
       component: RegisterView,
+      meta: { guestOnly: true },
     },
     {
       path: '/beranda',
       name: 'beranda',
       component: BerandaView,
+      meta: { requiresAuth: true },
     },
     {
-      path: '/detail',
+      path: '/detail/:id',
       name: 'detail',
       component: DetailParfumView,
+      meta: { requiresAuth: true },
     },
     {
       path: '/koleksi',
       name: 'koleksi',
       component: KoleksiView,
+      meta: { requiresAuth: true },
     },
     {
       path: '/tambah-parfum',
       name: 'tambah-parfum',
       component: TambahParfumView,
+      meta: { requiresAuth: true },
     },
     {
       path: '/buku',
       name: 'buku',
       component: BukuView,
+      meta: { requiresAuth: true },
     },
     {
-      path: '/edit-parfum',
+      path: '/edit-parfum/:id',
       name: 'edit-parfum',
       component: EditParfumView,
+      meta: { requiresAuth: true },
     },
     {
       path: '/kesesuaian',
       name: 'kesesuaian',
       component: KesesuianView,
+      meta: { requiresAuth: true },
     },
     {
       path: '/profil',
       name: 'profil',
       component: ProfilView,
+      meta: { requiresAuth: true },
     },
     {
       path: '/konfigurasi-aturan',
@@ -75,7 +85,7 @@ const router = createRouter({
       component: KonfigurasiAturan,
       meta: {
         layout: 'admin',
-        topbarPlaceholder: 'Cari konfigurasi aturan...'
+        topbarPlaceholder: 'Cari konfigurasi aturan...',
       },
     },
     {
@@ -84,7 +94,7 @@ const router = createRouter({
       component: ManajemenPengguna,
       meta: {
         layout: 'admin',
-        topbarPlaceholder: 'Cari pengguna...'
+        topbarPlaceholder: 'Cari pengguna...',
       },
     },
     {
@@ -93,7 +103,7 @@ const router = createRouter({
       component: TambahPengguna,
       meta: {
         layout: 'admin',
-        topbarPlaceholder: 'Cari pengguna...'
+        topbarPlaceholder: 'Cari pengguna...',
       },
     },
     {
@@ -102,7 +112,7 @@ const router = createRouter({
       component: IntegrasiData,
       meta: {
         layout: 'admin',
-        topbarPlaceholder: 'Cari integrasi...'
+        topbarPlaceholder: 'Cari integrasi...',
       },
     },
     {
@@ -111,7 +121,7 @@ const router = createRouter({
       component: UserDetail,
       meta: {
         layout: 'admin',
-        topbarPlaceholder: 'Cari pengguna...'
+        topbarPlaceholder: 'Cari pengguna...',
       },
     },
     {
@@ -120,7 +130,7 @@ const router = createRouter({
       component: UserDetail,
       meta: {
         layout: 'admin',
-        topbarPlaceholder: 'Cari pengguna...'
+        topbarPlaceholder: 'Cari pengguna...',
       },
     },
     {
@@ -129,10 +139,23 @@ const router = createRouter({
       component: ProfileAdminView,
       meta: {
         layout: 'admin',
-        topbarPlaceholder: 'Cari profil admin...'
+        topbarPlaceholder: 'Cari profil admin...',
       },
-    }
+    },
   ],
+})
+
+router.beforeEach((to) => {
+  const token = localStorage.getItem('token')
+  const isAuthenticated = !!token
+
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    return '/'
+  }
+
+  if (to.meta.guestOnly && isAuthenticated) {
+    return '/beranda'
+  }
 })
 
 export default router

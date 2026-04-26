@@ -62,7 +62,7 @@
       </RouterLink>
 
       <div class="sidebar-footer">
-        <button class="btn-logout">
+        <button class="btn-logout" @click="handleLogout" :disabled="isLoggingOut">
           <svg
             viewBox="0 0 24 24"
             fill="none"
@@ -75,7 +75,7 @@
             <polyline points="16 17 21 12 16 7"></polyline>
             <line x1="21" y1="12" x2="9" y2="12"></line>
           </svg>
-          Keluar
+          {{ isLoggingOut ? 'MEMPROSES...' : 'Keluar' }}
         </button>
       </div>
     </nav>
@@ -84,10 +84,13 @@
 
 <script setup>
 import { ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import api from '../services/api'
 
 const route = useRoute()
+const router = useRouter()
 const activeMainMenu = ref('')
+const isLoggingOut = ref(false)
 
 watch(
   () => route.path,
@@ -126,6 +129,33 @@ watch(
   },
   { immediate: true },
 )
+
+// Fungsi logout
+const handleLogout = async () => {
+  isLoggingOut.value = true
+
+  try {
+    // Call logout endpoint di backend
+    await api.post('/logout')
+
+    // Clear localStorage
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    localStorage.removeItem('lastActiveMenu')
+
+    // Redirect ke login
+    router.push('/')
+  } catch (error) {
+    console.error('Logout error:', error)
+    // Meskipun error, tetap clear dan redirect ke login
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    localStorage.removeItem('lastActiveMenu')
+    router.push('/login')
+  } finally {
+    isLoggingOut.value = false
+  }
+}
 </script>
 
 <style scoped>

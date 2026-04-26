@@ -129,7 +129,10 @@
 
 <script setup>
 import { reactive, ref } from 'vue'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
+import api from '../services/api'
+
+const router = useRouter()
 
 // State reaktif untuk menampung inputan pengguna
 const form = reactive({
@@ -139,6 +142,7 @@ const form = reactive({
 })
 
 const isLoading = ref(false)
+const errorMessage = ref('')
 
 // Ini untuk toggle visibilitas password
 const showPassword = ref(false)
@@ -146,23 +150,34 @@ const showPassword = ref(false)
 // Fungsi yang dieksekusi saat tombol MASUK ditekan
 const handleLogin = async () => {
   isLoading.value = true
+  errorMessage.value = ''
 
-  // LOGIKA API AXIOS NANTINYA AKAN DITULIS DI SINI
-  // Contoh:
-  // try {
-  //   const response = await axios.post('http://localhost:8000/api/login', form)
-  //   // Simpan token, arahkan ke dashboard...
-  // } catch (error) {
-  //   // Tampilkan pesan error...
-  // }
+  try {
+    const response = await api.post('/login', {
+      email: form.email,
+      password: form.password
+    })
 
-  console.log('Mencoba login dengan data:', form)
-
-  // Simulasi loading selama 1.5 detik agar terlihat profesional
-  setTimeout(() => {
+    if (response.data && response.data.token && response.data.user) {
+      // Simpan token dan user info ke localStorage
+      localStorage.setItem('token', response.data.token)
+      localStorage.setItem('user', JSON.stringify(response.data.user))
+      
+      // Reset form
+      form.email = ''
+      form.password = ''
+      form.rememberMe = false
+      
+      // Redirect ke beranda
+      router.push('/beranda')
+    }
+  } catch (error) {
+    console.error('Login error:', error)
+    errorMessage.value = error.response?.data?.message || 'Email atau password salah'
+    alert(errorMessage.value)
+  } finally {
     isLoading.value = false
-    alert('Logika Login Frontend Berhasil! Cek Console Browser.')
-  }, 1500)
+  }
 }
 </script>
 

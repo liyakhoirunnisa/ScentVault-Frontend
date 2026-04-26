@@ -11,35 +11,58 @@
           <span v-if="profileRole" class="profile-role">{{ profileRole }}</span>
         </div>
 
-        <img
-          :src="profileAvatar"
-          :alt="profileName"
-          class="profile-avatar"
-        />
+        <img :src="profileAvatar" :alt="profileName" class="profile-avatar" />
       </div>
     </div>
   </header>
 </template>
 
 <script setup>
+import { computed, ref, onMounted, onUnmounted } from 'vue'
+import defaultAvatar from '@/assets/profil.jpg' // Pastikan file ini ada di folder assets
+
 defineProps({
-  profileName: {
-    type: String,
-    default: 'ELENA VANCE',
-  },
-  profileRole: {
-    type: String,
-    default: '',
-  },
-  profileAvatar: {
-    type: String,
-    default:
-      'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=150&q=80',
-  },
-  profileRoute: {
-    type: String,
-    default: '/profil',
-  },
+  profileRole: { type: String, default: '' },
+  profileRoute: { type: String, default: '/profil' },
+})
+
+// Pemicu reaktivitas manual
+const userUpdateTrigger = ref(0)
+
+const getUserFromStorage = () => {
+  const userStr = localStorage.getItem('user')
+  return userStr ? JSON.parse(userStr) : null
+}
+
+const currentUser = computed(() => {
+  userUpdateTrigger.value // Membaca trigger agar computed ini terikat pada perubahan
+  return getUserFromStorage()
+})
+
+const profileName = computed(() => {
+  return currentUser.value?.name ? currentUser.value.name.toUpperCase() : 'PENGGUNA'
+})
+
+const profileAvatar = computed(() => {
+  const user = currentUser.value
+  // Gunakan field 'photo' sesuai database dan berikan timestamp untuk anti-cache
+  if (user && user.photo) {
+    return `http://localhost:8000/storage/${user.photo}?t=${new Date().getTime()}`
+  }
+  return defaultAvatar
+})
+
+// Logika sinkronisasi instan
+const refreshUserData = () => {
+  userUpdateTrigger.value++
+}
+
+onMounted(() => {
+  window.addEventListener('user-data-updated', refreshUserData)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('user-data-updated', refreshUserData)
 })
 </script>
 

@@ -12,17 +12,20 @@
 
         <div class="profile-hero-card">
           <div class="hero-avatar-wrapper">
-            <img
-              src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=300&q=80"
-              alt="Foto Profil Elena"
-              class="hero-avatar"
-            />
+            <img :src="userData.photoUrl" alt="Foto Profil" class="hero-avatar" />
           </div>
 
           <div class="hero-info">
-            <h1 class="hero-name">Elena Vance</h1>
+            <h1 class="hero-name">{{ userData.name || 'Pengguna' }}</h1>
             <div class="hero-actions">
-              <button class="btn-gradient">Edit Foto</button>
+              <input
+                type="file"
+                ref="fileInput"
+                @change="handleFileChange"
+                accept="image/*"
+                style="display: none"
+              />
+              <button class="btn-gradient" @click="triggerFileInput">Edit Foto</button>
             </div>
           </div>
         </div>
@@ -47,7 +50,7 @@
                 <path d="M12 14v-3h4v3"></path>
               </svg>
             </div>
-            <h2 class="stat-number">128</h2>
+            <h2 class="stat-number">{{ stats.total_koleksi }}</h2>
             <p class="stat-label">TOTAL KOLEKSI</p>
           </div>
 
@@ -68,10 +71,9 @@
                 <line x1="13" y1="15.5" x2="17" y2="15.5"></line>
               </svg>
             </div>
-            <h2 class="stat-number">42</h2>
+            <h2 class="stat-number">{{ stats.ulasan_terbit }}</h2>
             <p class="stat-label">ULASAN TERBIT</p>
           </div>
-
         </div>
 
         <div class="settings-card">
@@ -86,6 +88,30 @@
             <div class="input-group">
               <label>EMAIL</label>
               <input type="email" class="form-control" v-model="userData.email" />
+            </div>
+
+            <div class="input-group">
+              <label>KATA SANDI SAAT INI</label>
+              <div class="password-wrapper">
+                <svg
+                  class="icon-left"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                <input
+                  :type="showCurrentPassword ? 'text' : 'password'"
+                  class="form-control input-password"
+                  v-model="userData.current_password"
+                  placeholder="••••••••"
+                />
+              </div>
             </div>
 
             <div class="input-group">
@@ -196,11 +222,11 @@
             </div>
 
             <div class="input-group">
-              <label>PILIH PROVINSI</label>
+              <label>PROVINSI</label>
               <div class="select-wrapper">
-                <select class="form-control custom-select" v-model="userData.provinsi">
-                  <option value="" disabled selected>Pilih Provinsi</option>
-                  <option v-for="prov in provinsis" :key="prov" :value="prov">{{ prov }}</option>
+                <select class="custom-select" v-model="selectedProvinsi" @change="onProvinsiChange">
+                  <option value="" disabled>Pilih Provinsi</option>
+                  <option v-for="p in provinsis" :key="p.code" :value="p.code">{{ p.name }}</option>
                 </select>
                 <svg
                   class="select-arrow"
@@ -217,11 +243,18 @@
             </div>
 
             <div class="input-group">
-              <label>PILIH KABUPATEN/KOTA</label>
+              <label>KABUPATEN/KOTA</label>
               <div class="select-wrapper">
-                <select class="form-control custom-select" v-model="userData.kabupaten">
-                  <option value="" disabled selected>Pilih Kabupaten/Kota</option>
-                  <option v-for="kab in kabupatens" :key="kab" :value="kab">{{ kab }}</option>
+                <select
+                  class="custom-select"
+                  v-model="selectedKabupaten"
+                  @change="onKabupatenChange"
+                  :disabled="!selectedProvinsi"
+                >
+                  <option value="" disabled>Pilih Kabupaten/Kota</option>
+                  <option v-for="k in kabupatens" :key="k.code" :value="k.code">
+                    {{ k.name }}
+                  </option>
                 </select>
                 <svg
                   class="select-arrow"
@@ -238,11 +271,18 @@
             </div>
 
             <div class="input-group">
-              <label>PILIH KECAMATAN</label>
+              <label>KECAMATAN</label>
               <div class="select-wrapper">
-                <select class="form-control custom-select" v-model="userData.kecamatan">
-                  <option value="" disabled selected>Pilih Kecamatan</option>
-                  <option v-for="kec in kecamatans" :key="kec" :value="kec">{{ kec }}</option>
+                <select
+                  class="custom-select"
+                  v-model="selectedKecamatan"
+                  @change="onKecamatanChange"
+                  :disabled="!selectedKabupaten"
+                >
+                  <option value="" disabled>Pilih Kecamatan</option>
+                  <option v-for="c in kecamatans" :key="c.code" :value="c.code">
+                    {{ c.name }}
+                  </option>
                 </select>
                 <svg
                   class="select-arrow"
@@ -259,13 +299,27 @@
             </div>
 
             <div class="input-group">
-              <label>PILIH KELURAHAN/DESA</label>
+              <label>KELURAHAN/DESA</label>
               <div class="select-wrapper">
-                <select class="form-control custom-select" v-model="userData.kelurahan">
-                  <option value="" disabled selected>Pilih Kelurahan/Desa</option>
-                  <option v-for="kel in kelurahans" :key="kel" :value="kel">{{ kel }}</option>
+                <select
+                  class="custom-select"
+                  v-model="userData.kelurahan"
+                  :disabled="!selectedKecamatan"
+                >
+                  <option value="" disabled>Pilih Kelurahan/Desa</option>
+                  <option v-for="v in kelurahans" :key="v.code" :value="v.code">
+                    {{ v.name }}
+                  </option>
                 </select>
-                <svg class="select-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg
+                  class="select-arrow"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
                   <polyline points="6 9 12 15 18 9"></polyline>
                 </svg>
               </div>
@@ -308,33 +362,177 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import Topbar from '@/components/Topbar.vue'
 import Sidebar from '@/components/Sidebar.vue'
+import api from '../services/api'
 
 // Data User State
 const userData = ref({
-  name: 'Elena Vance',
-  email: 'Elenavance@gmail.com',
+  name: '',
+  email: '',
+  current_password: '',
   password: '',
   password_confirmation: '',
-  provinsi: 'DKI Jakarta',
-  kabupaten: 'Jakarta Selatan',
-  kecamatan: 'Tebet',
-  kelurahan: 'Tebet Timur',
+  provinsi: '',
+  kabupaten: '',
+  kecamatan: '',
+  kelurahan: '',
+  photoUrl:
+    'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=300&q=80',
 })
 
-// Data Dummy untuk Lokasi (Bisa diganti dengan API Area Indonesia nanti)
-const provinsis = ref(['DKI Jakarta', 'Jawa Barat', 'Jawa Tengah', 'Jawa Timur', 'Bali'])
-const kabupatens = ref(['Jakarta Selatan', 'Bandung', 'Semarang', 'Surabaya', 'Denpasar'])
-const kecamatans = ref(['Tebet', 'Coblong', 'Banyumanik', 'Gubeng', 'Kuta'])
-const kelurahans = ref(['Tebet Barat', 'Tebet Timur', 'Kebon Baru', 'Manggarai'])
+const stats = ref({
+  total_koleksi: 0,
+  ulasan_terbit: 0,
+})
 
+const regionDisplay = ref({
+  provinsi: '',
+  kabupaten: '',
+  kecamatan: '',
+  kelurahan: '',
+})
+
+const showCurrentPassword = ref(false)
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
 
-// STATE UNTUK MENGONTROL MODAL KONFIRMASI SIMPAN
 const showSaveModal = ref(false)
+
+// =========================================
+// STATE & LOGIKA DROPDOWN WILAYAH (BARU)
+// =========================================
+const provinsis = ref([])
+const kabupatens = ref([])
+const kecamatans = ref([])
+const kelurahans = ref([])
+
+const selectedProvinsi = ref('')
+const selectedKabupaten = ref('')
+const selectedKecamatan = ref('')
+
+// 1. Ambil Semua Provinsi
+const fetchProvinces = async () => {
+  try {
+    const res = await api.get('/region/provinces')
+    provinsis.value = res.data
+  } catch (e) {
+    console.error('Gagal memuat provinsi', e)
+  }
+}
+
+// 2. Saat Provinsi dipilih oleh User
+const onProvinsiChange = async () => {
+  selectedKabupaten.value = ''
+  selectedKecamatan.value = ''
+  userData.value.kelurahan = ''
+  kabupatens.value = []
+  kecamatans.value = []
+  kelurahans.value = []
+
+  if (!selectedProvinsi.value) return
+  try {
+    const res = await api.get('/region/regencies', {
+      params: { province_code: selectedProvinsi.value },
+    })
+    kabupatens.value = res.data
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+// 3. Saat Kabupaten dipilih oleh User
+const onKabupatenChange = async () => {
+  selectedKecamatan.value = ''
+  userData.value.kelurahan = ''
+  kecamatans.value = []
+  kelurahans.value = []
+
+  if (!selectedKabupaten.value) return
+  try {
+    const res = await api.get('/region/districts', {
+      params: { regency_code: selectedKabupaten.value },
+    })
+    kecamatans.value = res.data
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+// 4. Saat Kecamatan dipilih oleh User
+const onKecamatanChange = async () => {
+  userData.value.kelurahan = ''
+  kelurahans.value = []
+
+  if (!selectedKecamatan.value) return
+  try {
+    const res = await api.get('/region/villages', {
+      params: { district_code: selectedKecamatan.value },
+    })
+    kelurahans.value = res.data
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+// =========================================
+// MUAT PROFIL & AUTO-FILL WILAYAH (DIPERBARUI)
+// =========================================
+const loadUserProfile = async () => {
+  try {
+    const response = await api.get('/me')
+    const user = response.data.data
+
+    userData.value.name = user.name
+    userData.value.email = user.email
+    stats.value.total_koleksi = user.perfumes_count
+    stats.value.ulasan_terbit = user.scent_logs_count
+    if (user.photo) {
+      userData.value.photoUrl = `http://localhost:8000/storage/${user.photo}`
+    }
+
+    // ==========================================
+    // DUA BARIS KUNCI YANG SEBELUMNYA TERLEWAT:
+    // ==========================================
+    localStorage.setItem('user', JSON.stringify(user))
+    window.dispatchEvent(new Event('user-data-updated'))
+    // ==========================================
+
+    const village = user.region
+    const district = village?.parent || null
+    const regency = district?.parent || null
+    const province = regency?.parent || null
+
+    if (province) {
+      selectedProvinsi.value = province.code
+      const resKab = await api.get('/region/regencies', {
+        params: { province_code: province.code },
+      })
+      kabupatens.value = resKab.data
+    }
+    if (regency) {
+      selectedKabupaten.value = regency.code
+      const resKec = await api.get('/region/districts', { params: { regency_code: regency.code } })
+      kecamatans.value = resKec.data
+    }
+    if (district) {
+      selectedKecamatan.value = district.code
+      const resKel = await api.get('/region/villages', { params: { district_code: district.code } })
+      kelurahans.value = resKel.data
+    }
+    if (village) {
+      userData.value.kelurahan = village.code
+    }
+  } catch (e) {
+    console.error('Failed to load profile', e)
+  }
+}
+
+onMounted(() => {
+  fetchProvinces()
+  loadUserProfile()
+})
 
 // Memunculkan modal saat tombol diklik
 const promptSave = () => {
@@ -342,14 +540,79 @@ const promptSave = () => {
 }
 
 // Fungsi ketika pengguna klik "IYA, SIMPAN"
-const confirmSave = () => {
-  console.log('Perubahan profil berhasil disimpan!', userData.value)
-  showSaveModal.value = false // Tutup modal setelah menyimpan
-}
+// Fungsi ketika pengguna klik "IYA, SIMPAN"
+const confirmSave = async () => {
+  try {
+    // 1. Update basic info (name, email)
+    await api.patch('/me', {
+      name: userData.value.name,
+      email: userData.value.email,
+    })
 
+    // 2. Update password if filled
+    if (userData.value.password) {
+      if (userData.value.password !== userData.value.password_confirmation) {
+        alert('Kata sandi tidak cocok!')
+        return
+      }
+      await api.patch('/me/password', {
+        current_password: userData.value.current_password,
+        password: userData.value.password,
+        password_confirmation: userData.value.password_confirmation,
+      })
+    }
+
+    // 3. Update region if selected
+    if (userData.value.kelurahan) {
+      await api.patch('/me/region', {
+        region_code: userData.value.kelurahan,
+      })
+    }
+
+    // 4. PERBAIKAN: Upload foto ke backend JIKA pengguna memilih foto baru
+    if (selectedImageFile.value) {
+      const formData = new FormData()
+      formData.append('photo', selectedImageFile.value)
+      await api.post('/me/avatar', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      // Kosongkan kembali variabel sementara setelah sukses
+      selectedImageFile.value = null
+    }
+
+    // 5. Muat ulang seluruh profil dari database
+    // (Fungsi ini otomatis akan memperbarui localStorage dan mengubah Topbar!)
+    await loadUserProfile()
+
+    alert('Perubahan profil berhasil disimpan!')
+    showSaveModal.value = false
+  } catch (error) {
+    console.error(error)
+    alert(error.response?.data?.message || 'Gagal menyimpan perubahan')
+    showSaveModal.value = false
+  }
+}
 // Fungsi ketika pengguna klik "BATAL"
 const closeSaveModal = () => {
   showSaveModal.value = false
+}
+
+// File Avatar Upload
+// File Avatar Upload
+const fileInput = ref(null)
+// BARU: Penampung file foto yang belum disimpan
+const selectedImageFile = ref(null)
+const triggerFileInput = () => fileInput.value.click()
+
+const handleFileChange = (event) => {
+  const file = event.target.files[0]
+  if (!file) return
+
+  // 1. Simpan file ke variabel sementara
+  selectedImageFile.value = file
+
+  // 2. Buat URL lokal untuk preview instan HANYA di halaman profil
+  userData.value.photoUrl = URL.createObjectURL(file)
 }
 </script>
 

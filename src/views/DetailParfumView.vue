@@ -22,7 +22,7 @@
           </button>
 
           <div class="action-buttons">
-            <button class="btn-action btn-edit" @click="$router.push('/edit-parfum')">
+            <button class="btn-action btn-edit" @click="$router.push(`/edit-parfum/${perfumeId}`)">
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -60,14 +60,14 @@
           </div>
         </div>
 
-        <div class="product-layout">
+        <div class="product-layout" v-if="perfume">
           <div class="product-gallery-side">
             <div class="main-image">
-              <img src="@/assets/parfum-oud-immortel.jpeg" alt="Oud Immortel" />
+              <img :src="getImageUrl(perfume.image_url)" :alt="perfume.name" />
             </div>
 
             <div class="check-btn-wrapper">
-              <button class="btn-gradient" @click="$router.push('/kesesuaian')">
+              <button class="btn-gradient" @click="$router.push(`/kesesuaian?id=${perfumeId}`)">
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"
@@ -85,13 +85,13 @@
           </div>
 
           <div class="product-info-side">
-            <span class="brand-name">MAISON DE L'ARÔME</span>
-            <h2 class="product-title">Oud Immortel</h2>
+            <span class="brand-name">{{ perfume.brand?.name || perfume.brand }}</span>
+            <h2 class="product-title">{{ perfume.name }}</h2>
 
             <div class="rating-row">
               <div class="stars">
                 <svg
-                  v-for="i in 4"
+                  v-for="i in Math.floor(perfume.star_rating || 0)"
                   :key="i"
                   class="star-icon full"
                   viewBox="0 0 24 24"
@@ -101,19 +101,22 @@
                     d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
                   ></path>
                 </svg>
-                <svg class="star-icon half" viewBox="0 0 24 24" fill="currentColor">
+                <svg
+                  v-if="perfume.star_rating % 1 !== 0"
+                  class="star-icon half"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
                   <path
                     d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
                   ></path>
                 </svg>
               </div>
-              <span class="date-added">Ditambahkan pada 14 Oktober 2023</span>
+              <span class="date-added">Ditambahkan pada {{ formatDate(perfume?.created_at) }}</span>
             </div>
 
             <p class="description">
-              Wewangian kayu yang kompleks yang menangkap esensi kayu oud kuno yang seimbang dengan
-              kecerahan ceria dari kapulaga dan limoncello. Ia berkembang menjadi jejak asap yang
-              canggih yang bertahan selama berjam-jam, menggema kemewahan perpustakaan pribadi.
+              {{ perfume.description }}
             </p>
 
             <h3 class="section-heading">Piramida Olfaktori</h3>
@@ -121,25 +124,34 @@
               <div class="olfactory-col">
                 <h4>AROMA PUNCAK</h4>
                 <div class="notes-stack">
-                  <span class="note-pill">Kapulaga</span>
-                  <span class="note-pill">Limoncello</span>
-                  <span class="note-pill">Kemenyan</span>
+                  <span
+                    class="note-pill"
+                    v-for="note in perfume.notes?.filter((n) => n.type === 'top') || []"
+                    :key="`top-${note.id || note.name}`"
+                    >{{ note.name }}</span
+                  >
                 </div>
               </div>
               <div class="olfactory-col">
                 <h4>AROMA INTI</h4>
                 <div class="notes-stack">
-                  <span class="note-pill">Papirus</span>
-                  <span class="note-pill">Patchouli</span>
-                  <span class="note-pill">Rosewood</span>
+                  <span
+                    class="note-pill"
+                    v-for="note in perfume.notes?.filter((n) => n.type === 'middle') || []"
+                    :key="`mid-${note.id || note.name}`"
+                    >{{ note.name }}</span
+                  >
                 </div>
               </div>
               <div class="olfactory-col">
                 <h4>AROMA DASAR</h4>
                 <div class="notes-stack">
-                  <span class="note-pill">Oud</span>
-                  <span class="note-pill">Oakmoss</span>
-                  <span class="note-pill">Tembakau</span>
+                  <span
+                    class="note-pill"
+                    v-for="note in perfume.notes?.filter((n) => n.type === 'base') || []"
+                    :key="`base-${note.id || note.name}`"
+                    >{{ note.name }}</span
+                  >
                 </div>
               </div>
             </div>
@@ -183,33 +195,86 @@
     </main>
   </div>
 </template>
-
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import Topbar from '@/components/Topbar.vue'
 import Sidebar from '@/components/Sidebar.vue'
-import { RouterLink } from 'vue-router'
-import imgRec1 from '@/assets/rekomendasi-1.jpeg'
-import imgRec2 from '@/assets/rekomendasi-2.jpeg'
-import imgRec3 from '@/assets/rekomendasi-3.jpeg'
-import imgRec4 from '@/assets/rekomendasi-4.png'
+import { useRouter, useRoute } from 'vue-router'
+import api from '@/services/api'
 
+import defaultImg from '@/assets/upload-parfum.JPEG'
+
+const router = useRouter()
+const route = useRoute()
+
+const perfumeId = route.params.id
+
+const perfume = ref(null)
+const loading = ref(true)
+
+const fetchPerfume = async () => {
+  try {
+    const res = await api.get(`/perfumes/${perfumeId}`)
+    perfume.value = res.data.data
+  } catch (err) {
+    console.error('Failed fetching perfume detail', err)
+    alert('Data parfum tidak ditemukan.')
+    router.push('/koleksi')
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  if (perfumeId) fetchPerfume()
+})
+
+// ==========================================
+// FUNGSI LOGIKA GAMBAR DINAMIS (ANTI-CACHE)
+// ==========================================
+const getImageUrl = (path) => {
+  // Jika tidak ada data gambar dari backend
+  if (!path) return defaultImg
+
+  // Membuat cap waktu acak agar browser tidak menggunakan gambar lama dari memori (Cache-Busting)
+  const timestamp = new Date().getTime();
+
+  // Jika URL sudah berupa link utuh (eksternal)
+  if (path.startsWith('http')) {
+    // Cek apakah URL sudah memiliki parameter tanda tanya (?)
+    return path.includes('?') ? `${path}&t=${timestamp}` : `${path}?t=${timestamp}`
+  }
+
+  // Jika URL berasal dari storage lokal Laravel
+  return `http://localhost:8000/storage/${path}?t=${timestamp}`
+}
+const formatDate = (dateString) => {
+  if (!dateString) return ''
+  const d = new Date(dateString)
+  return d.toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })
+}
+
+// =========================================
 // STATE UNTUK MENGONTROL MODAL HAPUS
+// =========================================
 const showDeleteModal = ref(false)
 
-// Fungsi untuk menutup modal
 const closeDeleteModal = () => {
   showDeleteModal.value = false
 }
 
-// Fungsi ketika tombol Hapus di dalam modal ditekan
-const confirmDelete = () => {
-  console.log('Parfum berhasil dihapus!')
-  showDeleteModal.value = false
-  // (Opsional) router.push('/beranda') jika ingin langsung kembali ke beranda
+const confirmDelete = async () => {
+  try {
+    await api.delete(`/perfumes/${perfumeId}`)
+    showDeleteModal.value = false
+    router.push('/koleksi')
+  } catch (err) {
+    console.error('Failed to delete perfume', err)
+    alert('Gagal menghapus parfum.')
+    showDeleteModal.value = false
+  }
 }
 </script>
-
 <style scoped>
 /* =========================================
    Layout Utama
@@ -465,7 +530,7 @@ Product Layout (Kiri: Gambar, Kanan: Info)
 ========================================= */
 .product-layout {
   display: grid;
-  grid-template-columns: 1fr 1.3fr; /* Proporsi Kiri & Kanan */
+  grid-template-columns: 0.7fr 1.3fr; /* Proporsi Kiri & Kanan */
   gap: 50px;
   margin-bottom: 60px;
 }

@@ -252,12 +252,12 @@
             </div>
           </div>
 
-          <div class="recommendation-col">
+          <div class="recommendation-col" v-if="perfume">
             <div class="hero-card">
               <div class="hero-image-side">
                 <img
-                  src="@/assets/parfum-oud-immortel.jpeg"
-                  alt="The Ethereal Chypre"
+                  :src="getImageUrl(perfume.image_url)"
+                  :alt="perfume.name"
                   class="hero-bottle"
                 />
               </div>
@@ -268,17 +268,14 @@
                   <span class="badge-atelier">ATELIER PICK</span>
                 </div>
 
-                <h2 class="hero-title">The<br />Ethereal<br />Chypre</h2>
+                <h2 class="hero-title" v-html="perfume.name.split(' ').join('<br />')"></h2>
 
                 <p class="hero-desc">
-                  "Sebuah perpaduan puitis antara kesegaran embun pagi dan kehangatan lumut hutan
-                  yang tenang. Sempurna untuk memulai hari dengan penuh percaya diri."
+                  {{ perfume.description }}
                 </p>
 
                 <div class="hero-tags">
-                  <span class="tag-pill">KAYU</span>
-                  <span class="tag-pill">AROMATIK</span>
-                  <span class="tag-pill">SEGAR</span>
+                  <span class="tag-pill" v-for="n in (perfume.notes || []).slice(0, 3)" :key="n.id">{{ n.name.toUpperCase() }}</span>
                 </div>
               </div>
             </div>
@@ -291,16 +288,107 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import Topbar from '@/components/Topbar.vue'
 import Sidebar from '@/components/Sidebar.vue'
+import axios from 'axios'
+import defaultImg from '@/assets/upload-parfum.JPEG'
 
-// Data interaktif untuk filter
+const route = useRoute()
+const perfumeId = route.query.id
+
 const filters = ref({
   temperature: 'Dingin',
   time: 'Pagi',
   environment: 'All Around',
 })
+
+const perfume = ref(null)
+
+const fetchSuitability = async () => {
+  if (!perfumeId) return
+  try {
+    const token = localStorage.getItem('token')
+    const res = await axios.get(`http://localhost:8000/api/perfumes/${perfumeId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    if (res.data?.data) {
+      perfume.value = res.data.data
+      
+      try {
+        const suitRes = await axios.get(`http://localhost:8000/api/perfumes/${perfumeId}/suitability`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        
+        if (suitRes.data?.data) {
+          const s = suitRes.data.data
+          filters.value.temperature = s.ideal_temperature ? capitalize(s.ideal_temperature) : 'Normal'
+          filters.value.time = s.ideal_time ? capitalize(s.ideal_time) : 'Pagi'
+          
+          if (s.ideal_environment === 'indoor') filters.value.environment = 'Indoor'
+          else if (s.ideal_environment === 'outdoor') filters.value.environment = 'Outdoor'
+          else filters.value.environment = 'All Around'
+        }
+      } catch (suitErr) {
+        console.error('Suitability belum ada, akan membuat saat klik', suitErr)
+      }
+    }
+  } catch (error) {
+    console.error('Gagal mengambil data perfume:', error)
+  }
+}
+
+const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
+
+const updateSuitability = async () => {
+  if (!perfumeId) return
+  try {
+    const token = localStorage.getItem('token')
+    const payload = {
+      ideal_temperature: filters.value.temperature.toLowerCase(),
+      ideal_time: filters.value.time.toLowerCase(),
+      ideal_environment: filters.value.environment.toLowerCase()
+    }
+    await axios.put(`http://localhost:8000/api/perfumes/${perfumeId}/suitability`, payload, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    // alert('Kesesuaian diupdate')
+  } catch (error) {
+    console.error('Update suitability error:', error)
+  }
+}
+
+let isInitialLoad = true
+
+watch(() => filters.value, () => {
+  if (isInitialLoad) {
+    isInitialLoad = false
+    return
+  }
+  updateSuitability()
+}, { deep: true })
+
+onMounted(() => {
+  fetchSuitability()
+})
+
+const getImageUrl = (path) => {
+  // Jika tidak ada data gambar dari backend, gunakan gambar default
+  if (!path) return defaultImg
+
+  // Trik Anti-Cache agar gambar baru langsung termuat
+  const timestamp = new Date().getTime();
+
+  // Jika URL sudah berupa link utuh (eksternal)
+  if (path.startsWith('http')) {
+    return path.includes('?') ? `${path}&t=${timestamp}` : `${path}?t=${timestamp}`
+  }
+
+  // Jika URL berasal dari storage lokal Laravel
+  return `http://localhost:8000/storage/${path}?t=${timestamp}`
+}
+
 </script>
 
 <style scoped>
@@ -522,7 +610,7 @@ const filters = ref({
   padding: 20px 30px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
 }
 .hero-header-meta {
   display: flex;

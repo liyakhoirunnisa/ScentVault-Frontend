@@ -26,36 +26,39 @@
 
         <div class="form-grid">
           <div class="left-column">
-            <div class="upload-placeholder">
-              <svg
-                class="upload-icon"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path
-                  d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
-                ></path>
-                <circle cx="12" cy="13" r="4"></circle>
-              </svg>
-              <span class="upload-title">Unggah Foto Botol</span>
-              <span class="upload-desc">Format: JPG, PNG (Maks 5MB)</span>
+            <div class="upload-placeholder" @click="triggerUpload" :style="photoPreview ? { backgroundImage: `url(${photoPreview})`, backgroundSize: 'cover', backgroundPosition: 'center', border: 'none' } : {}">
+              <input type="file" ref="fileInput" @change="handleImageUpload" accept="image/*" style="display: none;" />
+              <div v-if="!photoPreview" style="display: flex; flex-direction: column; align-items: center;">
+                <svg
+                  class="upload-icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
+                  ></path>
+                  <circle cx="12" cy="13" r="4"></circle>
+                </svg>
+                <span class="upload-title">Unggah Foto Botol</span>
+                <span class="upload-desc">Format: JPG, PNG (Maks 5MB)</span>
+              </div>
             </div>
 
             <div class="concentration-section">
               <label>KONSENTRASI</label>
               <div class="pill-group">
                 <button
-                  v-for="tipe in ['EDP', 'EDT', 'Extrait', 'Cologne']"
-                  :key="tipe"
+                  v-for="(val, label) in { 'EDP': 'eau de parfum', 'EDT': 'eau de toilette', 'Extrait': 'extrait de parfum', 'Cologne': 'eau de cologne' }"
+                  :key="label"
                   class="pill-btn"
-                  :class="{ active: formData.concentration === tipe }"
-                  @click="formData.concentration = tipe"
+                  :class="{ active: formData.concentration === val }"
+                  @click="formData.concentration = val"
                 >
-                  {{ tipe }}
+                  {{ label }}
                 </button>
               </div>
             </div>
@@ -106,13 +109,9 @@
             <div class="input-group">
               <label>KATEGORI AROMA</label>
               <div class="select-wrapper">
-                <select class="form-control select-custom" v-model="formData.category">
+                <select class="form-control select-custom" v-model="formData.category_id">
                   <option value="" disabled selected>Pilih kategori</option>
-                  <option>Floral</option>
-                  <option>Fruity</option>
-                  <option>Woody</option>
-                  <option>Oriental/Spicy</option>
-                  <option>Fresh</option>
+                  <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
                 </select>
                 <svg
                   class="chevron"
@@ -164,12 +163,12 @@
                   <div class="tag-container">
                     <span class="note-pill" v-for="(note, index) in formData.topNotes" :key="index">
                       {{ note }}
-                      <button class="btn-remove-tag">×</button>
+                      <button type="button" class="btn-remove-tag" @click="removeNote('top', index)">×</button>
                     </span>
                   </div>
                   <div class="input-with-add">
-                    <input type="text" class="input-add-note" placeholder="Tambah bahan..." />
-                    <button class="btn-add-small">+ TAMBAH</button>
+                    <input type="text" class="input-add-note" v-model="newTop" placeholder="Tambah bahan..." @keyup.enter="addNote('top')" />
+                    <button type="button" class="btn-add-small" @click="addNote('top')">+ TAMBAH</button>
                   </div>
                 </div>
               </div>
@@ -187,12 +186,12 @@
                       :key="index"
                     >
                       {{ note }}
-                      <button class="btn-remove-tag">×</button>
+                      <button type="button" class="btn-remove-tag" @click="removeNote('heart', index)">×</button>
                     </span>
                   </div>
                   <div class="input-with-add">
-                    <input type="text" class="input-add-note" placeholder="Tambah bahan..." />
-                    <button class="btn-add-small">+ TAMBAH</button>
+                    <input type="text" class="input-add-note" v-model="newHeart" placeholder="Tambah bahan..." @keyup.enter="addNote('heart')" />
+                    <button type="button" class="btn-add-small" @click="addNote('heart')">+ TAMBAH</button>
                   </div>
                 </div>
               </div>
@@ -210,12 +209,12 @@
                       :key="index"
                     >
                       {{ note }}
-                      <button class="btn-remove-tag">×</button>
+                      <button type="button" class="btn-remove-tag" @click="removeNote('base', index)">×</button>
                     </span>
                   </div>
                   <div class="input-with-add">
-                    <input type="text" class="input-add-note" placeholder="Tambah bahan..." />
-                    <button class="btn-add-small">+ TAMBAH</button>
+                    <input type="text" class="input-add-note" v-model="newBase" placeholder="Tambah bahan..." @keyup.enter="addNote('base')" />
+                    <button type="button" class="btn-add-small" @click="addNote('base')">+ TAMBAH</button>
                   </div>
                 </div>
               </div>
@@ -264,35 +263,132 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import Topbar from '@/components/Topbar.vue'
 import Sidebar from '@/components/Sidebar.vue'
+import api from '../services/api'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const formData = ref({
   name: '',
   brand: '',
-  category: '',
-  concentration: 'EDP',
+  category_id: '',
+  concentration: 'eau de parfum',
   rating: 0,
   description: '',
-  topNotes: ['Bergamot', 'Lemon'],
-  heartNotes: ['Lavender'],
-  baseNotes: ['Sandalwood', 'Oakmoss'],
+  topNotes: [],
+  heartNotes: [],
+  baseNotes: [],
+  image: null
 })
+
+const categories = ref([])
+const photoPreview = ref(null)
+const fileInput = ref(null)
+
+const newTop = ref('')
+const newHeart = ref('')
+const newBase = ref('')
+
+const fetchCategories = async () => {
+  try {
+    const res = await api.get('/pages/perfume-collection')
+    categories.value = res.data.data.categories
+  } catch (e) {
+    console.error('Failed fetching categories', e)
+  }
+}
+
+onMounted(() => fetchCategories())
+
+const triggerUpload = () => fileInput.value.click()
+
+const handleImageUpload = (e) => {
+  const file = e.target.files[0]
+  if(file){
+    formData.value.image = file
+    photoPreview.value = URL.createObjectURL(file)
+  }
+}
+
+const addNote = (type) => {
+  if (type === 'top' && newTop.value.trim()) {
+    formData.value.topNotes.push(newTop.value.trim())
+    newTop.value = ''
+  } else if (type === 'heart' && newHeart.value.trim()) {
+    formData.value.heartNotes.push(newHeart.value.trim())
+    newHeart.value = ''
+  } else if (type === 'base' && newBase.value.trim()) {
+    formData.value.baseNotes.push(newBase.value.trim())
+    newBase.value = ''
+  }
+}
+
+const removeNote = (type, index) => {
+  if (type === 'top') formData.value.topNotes.splice(index, 1)
+  if (type === 'heart') formData.value.heartNotes.splice(index, 1)
+  if (type === 'base') formData.value.baseNotes.splice(index, 1)
+}
 
 const showSuccessModal = ref(false)
 
-const submitForm = () => {
-  showSuccessModal.value = true
+const submitForm = async () => {
+  if(!formData.value.name || !formData.value.brand || !formData.value.category_id) {
+    alert('Harap lengkapi nama, brand, dan kategori terlebih dahulu.')
+    return
+  }
+
+  const fd = new FormData()
+  fd.append('name', formData.value.name)
+  fd.append('brand', formData.value.brand)
+  fd.append('category_id', formData.value.category_id)
+  fd.append('concentration', formData.value.concentration)
+  fd.append('description', formData.value.description)
+  fd.append('star_rating', formData.value.rating)
+  
+  if(formData.value.image) {
+    fd.append('image', formData.value.image)
+  }
+
+  let noteIndex = 0;
+  formData.value.topNotes.forEach(n => {
+    fd.append(`notes[${noteIndex}][name]`, n)
+    fd.append(`notes[${noteIndex}][type]`, 'top')
+    noteIndex++;
+  })
+  formData.value.heartNotes.forEach(n => {
+    fd.append(`notes[${noteIndex}][name]`, n)
+    fd.append(`notes[${noteIndex}][type]`, 'middle')
+    noteIndex++;
+  })
+  formData.value.baseNotes.forEach(n => {
+    fd.append(`notes[${noteIndex}][name]`, n)
+    fd.append(`notes[${noteIndex}][type]`, 'base')
+    noteIndex++;
+  })
+
+  try {
+    await api.post('/perfumes', fd, { headers: { 'Content-Type': 'multipart/form-data' }})
+    showSuccessModal.value = true
+  } catch (e) {
+    alert('Gagal menyimpan parfum. Silakan periksa kembali data Anda.')
+    console.error(e)
+  }
 }
 
 const resetForm = () => {
   showSuccessModal.value = false
-  // Reset fields opsional
   formData.value.name = ''
   formData.value.brand = ''
   formData.value.description = ''
-  formData.value.category = ''
+  formData.value.category_id = ''
+  formData.value.topNotes = []
+  formData.value.heartNotes = []
+  formData.value.baseNotes = []
+  formData.value.image = null
+  photoPreview.value = null
 }
 </script>
 

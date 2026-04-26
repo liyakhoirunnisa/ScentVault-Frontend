@@ -26,8 +26,19 @@
 
         <div class="edit-grid">
           <div class="left-column">
-            <div class="image-edit-wrapper">
-              <img src="@/assets/parfum-oud-immortel.jpeg" alt="Oud Immortel" class="perfume-img" />
+            <div class="image-edit-wrapper" @click="triggerUpload">
+              <input
+                type="file"
+                ref="fileInput"
+                @change="handleImageUpload"
+                accept="image/*"
+                style="display: none"
+              />
+              <img
+                :src="photoPreview || '/src/assets/parfum-oud-immortel.jpeg'"
+                alt="Cover"
+                class="perfume-img"
+              />
 
               <div class="badge-edit-active">
                 <svg
@@ -99,10 +110,11 @@
               <div class="form-card half-card">
                 <label class="card-label">KATEGORI AROMA</label>
                 <div class="select-wrapper">
-                  <select class="form-control select-custom" v-model="formData.category">
-                    <option>Oriental Woody</option>
-                    <option>Floral</option>
-                    <option>Fresh</option>
+                  <select class="form-control select-custom" v-model="formData.category_id">
+                    <option value="" disabled>Pilih kategori</option>
+                    <option v-for="cat in categories" :key="cat.id" :value="cat.id">
+                      {{ cat.name }}
+                    </option>
                   </select>
                   <svg
                     class="chevron"
@@ -122,9 +134,10 @@
                 <label class="card-label">KONSENTRASI</label>
                 <div class="select-wrapper">
                   <select class="form-control select-custom" v-model="formData.concentration">
-                    <option>Eau de Parfum</option>
-                    <option>Extrait De Parfum</option>
-                    <option>Eau de Toilette</option>
+                    <option value="extrait de parfum">Extrait de Parfum</option>
+                    <option value="eau de parfum">Eau de Parfum</option>
+                    <option value="eau de toilette">Eau de Toilette</option>
+                    <option value="eau de cologne">Eau de Cologne</option>
                   </select>
                   <svg
                     class="chevron"
@@ -176,12 +189,26 @@
                   <div class="tag-container">
                     <span class="note-pill" v-for="(note, index) in formData.topNotes" :key="index">
                       {{ note }}
-                      <button class="btn-remove-tag">×</button>
+                      <button
+                        type="button"
+                        class="btn-remove-tag"
+                        @click="removeNote('top', index)"
+                      >
+                        ×
+                      </button>
                     </span>
                   </div>
                   <div class="input-with-add">
-                    <input type="text" class="input-add-note" placeholder="Tambah bahan..." />
-                    <button class="btn-add-small">+ TAMBAH</button>
+                    <input
+                      type="text"
+                      class="input-add-note"
+                      v-model="newTop"
+                      placeholder="Tambah bahan..."
+                      @keyup.enter="addNote('top')"
+                    />
+                    <button type="button" class="btn-add-small" @click="addNote('top')">
+                      + TAMBAH
+                    </button>
                   </div>
                 </div>
               </div>
@@ -199,12 +226,26 @@
                       :key="index"
                     >
                       {{ note }}
-                      <button class="btn-remove-tag">×</button>
+                      <button
+                        type="button"
+                        class="btn-remove-tag"
+                        @click="removeNote('heart', index)"
+                      >
+                        ×
+                      </button>
                     </span>
                   </div>
                   <div class="input-with-add">
-                    <input type="text" class="input-add-note" placeholder="Tambah bahan..." />
-                    <button class="btn-add-small">+ TAMBAH</button>
+                    <input
+                      type="text"
+                      class="input-add-note"
+                      v-model="newHeart"
+                      placeholder="Tambah bahan..."
+                      @keyup.enter="addNote('heart')"
+                    />
+                    <button type="button" class="btn-add-small" @click="addNote('heart')">
+                      + TAMBAH
+                    </button>
                   </div>
                 </div>
               </div>
@@ -222,20 +263,42 @@
                       :key="index"
                     >
                       {{ note }}
-                      <button class="btn-remove-tag">×</button>
+                      <button
+                        type="button"
+                        class="btn-remove-tag"
+                        @click="removeNote('base', index)"
+                      >
+                        ×
+                      </button>
                     </span>
                   </div>
                   <div class="input-with-add">
-                    <input type="text" class="input-add-note" placeholder="Tambah bahan..." />
-                    <button class="btn-add-small">+ TAMBAH</button>
+                    <input
+                      type="text"
+                      class="input-add-note"
+                      v-model="newBase"
+                      placeholder="Tambah bahan..."
+                      @keyup.enter="addNote('base')"
+                    />
+                    <button type="button" class="btn-add-small" @click="addNote('base')">
+                      + TAMBAH
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
 
             <div class="form-actions">
-              <button class="btn-outline-cancel" @click="$router.push('/detail')">Batal</button>
-              <button class="btn-gradient" @click="promptSave">Simpan Perubahan</button>
+              <button
+                type="button"
+                class="btn-outline-cancel"
+                @click="$router.push('/detail/' + perfumeId)"
+              >
+                Batal
+              </button>
+              <button type="button" class="btn-gradient" @click="promptSave">
+                Simpan Perubahan
+              </button>
             </div>
           </div>
         </div>
@@ -274,55 +337,197 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import Topbar from '@/components/Topbar.vue'
 import Sidebar from '@/components/Sidebar.vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
+import api from '../services/api'
+
+// 1. IMPORT GAMBAR DEFAULT
+import defaultImg from '@/assets/upload-parfum.JPEG'
 
 const router = useRouter()
+const route = useRoute()
 
-// Data pre-filled untuk simulasi Edit sesuai gambar desain Anda
+const perfumeId = route.params.id
+
 const formData = ref({
-  name: 'Oud Immortel',
-  brand: 'Byredo',
-  category: 'Oriental Woody',
-  concentration: 'Eau de Parfum',
+  name: '',
+  brand: '',
+  category_id: '',
+  concentration: 'eau de parfum',
   rating: 0,
-  description:
-    'Oud Immortel adalah penghormatan kepada oud, kayu tradisional yang sangat penting secara budaya. Aroma ini menggabungkan oud dengan patchouli dan papirus untuk memberikan karakter kayu yang smoky, sementara limoncello dan cardamom memberikan pembukaan yang segar dan tajam.',
-  topNotes: ['Limoncello', 'Incense', 'Cardamom'],
-  heartNotes: ['Oud', 'Patchouli', 'Papyrus'],
-  baseNotes: ['Oakmoss', 'Tobacco Leaves'],
+  description: '',
+  topNotes: [],
+  heartNotes: [],
+  baseNotes: [],
+  image: null,
 })
 
-const saveChanges = () => {
-  // Simulasi simpan data
-  console.log('Data berhasil diubah!', formData.value)
-  // Kembali ke halaman detail setelah menyimpan
-  router.push('/detail')
+const categories = ref([])
+const photoPreview = ref(defaultImg)
+const fileInput = ref(null)
+
+const newTop = ref('')
+const newHeart = ref('')
+const newBase = ref('')
+
+const fetchCategories = async () => {
+  try {
+    // DIHAPUS AWALAN /api (Axios sudah mengaturnya)
+    const res = await api.get('/pages/perfume-collection')
+    categories.value = res.data.data.categories
+  } catch (e) {
+    console.error('Failed fetching categories', e)
+  }
 }
 
-// STATE UNTUK MENGONTROL MODAL KONFIRMASI SIMPAN
+const fetchPerfume = async () => {
+  if (!perfumeId) return
+  try {
+    // DIHAPUS AWALAN /api
+    const res = await api.get(`/perfumes/${perfumeId}`)
+    const p = res.data.data
+
+    formData.value.name = p.name || ''
+    formData.value.brand = p.brand_name || ''
+    formData.value.category_id = p.category_id || ''
+    formData.value.concentration = p.concentration ? p.concentration.toLowerCase() : 'eau de parfum'
+    formData.value.rating = parseInt(p.star_rating || 0)
+    formData.value.description = p.description || ''
+
+    formData.value.topNotes = p.notes?.filter((n) => n.type === 'top').map((n) => n.name) || []
+    formData.value.heartNotes = p.notes?.filter((n) => n.type === 'middle').map((n) => n.name) || []
+    formData.value.baseNotes = p.notes?.filter((n) => n.type === 'base').map((n) => n.name) || []
+
+    if (p.image_url) {
+      photoPreview.value = p.image_url.startsWith('http')
+        ? p.image_url
+        : `http://localhost:8000/storage/${p.image_url}`
+    } else {
+      photoPreview.value = defaultImg
+    }
+  } catch (e) {
+    console.error('Failed fetching perfume details', e)
+    alert('Gagal mengambil data parfum.')
+    router.push('/koleksi')
+  }
+}
+
+onMounted(() => {
+  fetchCategories()
+  fetchPerfume()
+})
+
+const triggerUpload = () => {
+  if (fileInput.value) {
+    fileInput.value.click()
+  }
+}
+
+const handleImageUpload = (e) => {
+  const file = e.target.files[0]
+  if (file) {
+    formData.value.image = file
+    photoPreview.value = URL.createObjectURL(file)
+  }
+}
+
+const addNote = (type) => {
+  if (type === 'top' && newTop.value.trim()) {
+    formData.value.topNotes.push(newTop.value.trim())
+    newTop.value = ''
+  } else if (type === 'heart' && newHeart.value.trim()) {
+    formData.value.heartNotes.push(newHeart.value.trim())
+    newHeart.value = ''
+  } else if (type === 'base' && newBase.value.trim()) {
+    formData.value.baseNotes.push(newBase.value.trim())
+    newBase.value = ''
+  }
+}
+
+const removeNote = (type, index) => {
+  if (type === 'top') formData.value.topNotes.splice(index, 1)
+  if (type === 'heart') formData.value.heartNotes.splice(index, 1)
+  if (type === 'base') formData.value.baseNotes.splice(index, 1)
+}
+
 const showEditModal = ref(false)
 
-// Fungsi ketika tombol "Simpan Perubahan" diklik (memunculkan modal)
 const promptSave = () => {
   showEditModal.value = true
 }
 
-// Fungsi ketika pengguna klik "IYA" di dalam modal
-const confirmSave = () => {
-  console.log('Data berhasil diubah!', formData.value)
-  showEditModal.value = false
-  router.push('/detail') // Navigasi kembali ke detail
+const confirmSave = async () => {
+  if (!formData.value.name || !formData.value.brand || !formData.value.category_id) {
+    alert('Mohon lengkapi Nama Parfum, Brand, dan Kategori sebelum menyimpan.')
+    showEditModal.value = false
+    return
+  }
+
+  const fd = new FormData()
+  fd.append('_method', 'PUT')
+
+  fd.append('name', formData.value.name)
+  fd.append('brand', formData.value.brand)
+  fd.append('category_id', formData.value.category_id)
+  fd.append('concentration', formData.value.concentration)
+  fd.append('description', formData.value.description || '')
+  fd.append('star_rating', formData.value.rating || 0)
+
+  // PERBAIKAN 1: Pengecekan ketat, pastikan ini benar-benar objek File
+  if (formData.value.image && formData.value.image instanceof File) {
+    fd.append('image', formData.value.image)
+  }
+
+  let noteIndex = 0
+  formData.value.topNotes.forEach((n) => {
+    fd.append(`notes[${noteIndex}][name]`, n)
+    fd.append(`notes[${noteIndex}][type]`, 'top')
+    noteIndex++
+  })
+  formData.value.heartNotes.forEach((n) => {
+    fd.append(`notes[${noteIndex}][name]`, n)
+    fd.append(`notes[${noteIndex}][type]`, 'middle')
+    noteIndex++
+  })
+  formData.value.baseNotes.forEach((n) => {
+    fd.append(`notes[${noteIndex}][name]`, n)
+    fd.append(`notes[${noteIndex}][type]`, 'base')
+    noteIndex++
+  })
+
+  try {
+    // PERBAIKAN 2: Kembalikan header multipart/form-data agar file dikirim sebagai fisik
+    await api.post(`/perfumes/${perfumeId}`, fd, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+
+    showEditModal.value = false
+    alert('Perubahan berhasil disimpan!')
+    router.push(`/detail/${perfumeId}`)
+  } catch (e) {
+    showEditModal.value = false
+
+    if (e.response && e.response.status === 422) {
+      const errors = e.response.data.errors
+      let errorMessage = 'Laravel menolak penyimpanan karena:\n\n'
+      for (let field in errors) {
+        errorMessage += `• ${errors[field][0]}\n`
+      }
+      alert(errorMessage)
+    } else {
+      alert('Terjadi kesalahan pada server.')
+    }
+  }
 }
 
-// Fungsi ketika pengguna klik "TIDAK" atau di luar modal
 const closeEditModal = () => {
   showEditModal.value = false
 }
 </script>
-
 <style scoped>
 /* =========================================
    Layout Dasar & Header (Konsisten)

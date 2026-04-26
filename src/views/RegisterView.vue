@@ -178,7 +178,9 @@
                 <div class="select-wrapper">
                   <select id="provinsi" v-model="form.provinsi" class="custom-select" required>
                     <option value="" disabled selected>Pilih Provinsi</option>
-                    <option v-for="prov in provinsis" :key="prov" :value="prov">{{ prov }}</option>
+                    <option v-for="prov in provinsis" :key="prov.code" :value="prov.code">
+                      {{ prov.name }}
+                    </option>
                   </select>
                   <svg
                     class="select-arrow"
@@ -197,9 +199,17 @@
               <div class="form-group">
                 <label for="kabupaten">KABUPATEN/KOTA</label>
                 <div class="select-wrapper">
-                  <select id="kabupaten" v-model="form.kabupaten" class="custom-select" required>
+                  <select
+                    id="kabupaten"
+                    v-model="form.kabupaten"
+                    class="custom-select"
+                    required
+                    :disabled="!form.provinsi"
+                  >
                     <option value="" disabled selected>Pilih Kabupaten/Kota</option>
-                    <option v-for="kab in kabupatens" :key="kab" :value="kab">{{ kab }}</option>
+                    <option v-for="kab in kabupatens" :key="kab.code" :value="kab.code">
+                      {{ kab.name }}
+                    </option>
                   </select>
                   <svg
                     class="select-arrow"
@@ -218,9 +228,17 @@
               <div class="form-group">
                 <label for="kecamatan">KECAMATAN</label>
                 <div class="select-wrapper">
-                  <select id="kecamatan" v-model="form.kecamatan" class="custom-select" required>
+                  <select
+                    id="kecamatan"
+                    v-model="form.kecamatan"
+                    class="custom-select"
+                    required
+                    :disabled="!form.kabupaten"
+                  >
                     <option value="" disabled selected>Pilih Kecamatan</option>
-                    <option v-for="kec in kecamatans" :key="kec" :value="kec">{{ kec }}</option>
+                    <option v-for="kec in kecamatans" :key="kec.code" :value="kec.code">
+                      {{ kec.name }}
+                    </option>
                   </select>
                   <svg
                     class="select-arrow"
@@ -239,9 +257,17 @@
               <div class="form-group">
                 <label for="Kelurahan">KELURAHAN/DESA</label>
                 <div class="select-wrapper">
-                  <select id="kelurahan" v-model="form.kelurahan" class="custom-select" required>
+                  <select
+                    id="kelurahan"
+                    v-model="form.kelurahan"
+                    class="custom-select"
+                    required
+                    :disabled="!form.kecamatan"
+                  >
                     <option value="" disabled selected>Pilih Kelurahan/Desa</option>
-                    <option v-for="kel in kelurahans" :key="kel" :value="kel">{{ kel }}</option>
+                    <option v-for="kel in kelurahans" :key="kel.code" :value="kel.code">
+                      {{ kel.name }}
+                    </option>
                   </select>
                   <svg
                     class="select-arrow"
@@ -289,8 +315,9 @@
 </template>
 
 <script setup>
-import { reactive, ref, computed } from 'vue'
+import { reactive, ref, computed, onMounted, watch } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
+import api from '../services/api'
 
 const router = useRouter()
 
@@ -307,15 +334,17 @@ const form = reactive({
 })
 
 const isLoading = ref(false)
+const errorMessage = ref('')
 
 // UNTUK FITUR MATA (EYE ICON)
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
 
-// Data Dummy untuk Lokasi (Bisa diganti dengan API Area Indonesia nanti)
-const provinsis = ref(['DKI Jakarta', 'Jawa Barat', 'Jawa Tengah', 'Jawa Timur', 'Bali'])
-const kabupatens = ref(['Jakarta Selatan', 'Bandung', 'Semarang', 'Surabaya', 'Denpasar'])
-const kecamatans = ref(['Tebet', 'Coblong', 'Banyumanik', 'Gubeng', 'Kuta'])
+// Data Asli untuk Lokasi
+const provinsis = ref([])
+const kabupatens = ref([])
+const kecamatans = ref([])
+const kelurahans = ref([])
 
 // Logika reaktif untuk mengecek kecocokan kata sandi
 const passwordError = computed(() => {
@@ -325,19 +354,113 @@ const passwordError = computed(() => {
   return false
 })
 
+const fetchProvinces = async () => {
+  try {
+    const res = await api.get('/region/provinces')
+    provinsis.value = res.data
+  } catch (error) {
+    console.error('Failed to fetch provinces', error)
+  }
+}
+
+const fetchRegencies = async (provinceCode) => {
+  try {
+    const res = await api.get(`/region/regencies?province_code=${provinceCode}`)
+    kabupatens.value = res.data
+  } catch (error) {
+    console.error('Failed to fetch regencies', error)
+  }
+}
+
+const fetchDistricts = async (regencyCode) => {
+  try {
+    const res = await api.get(`/region/districts?regency_code=${regencyCode}`)
+    kecamatans.value = res.data
+  } catch (error) {
+    console.error('Failed to fetch districts', error)
+  }
+}
+
+const fetchVillages = async (districtCode) => {
+  try {
+    const res = await api.get(`/region/villages?district_code=${districtCode}`)
+    kelurahans.value = res.data
+  } catch (error) {
+    console.error('Failed to fetch villages', error)
+  }
+}
+
+watch(
+  () => form.provinsi,
+  (newCode) => {
+    form.kabupaten = ''
+    kabupatens.value = []
+    if (newCode) fetchRegencies(newCode)
+  },
+)
+
+watch(
+  () => form.kabupaten,
+  (newCode) => {
+    form.kecamatan = ''
+    kecamatans.value = []
+    if (newCode) fetchDistricts(newCode)
+  },
+)
+
+watch(
+  () => form.kecamatan,
+  (newCode) => {
+    form.kelurahan = ''
+    kelurahans.value = []
+    if (newCode) fetchVillages(newCode)
+  },
+)
+
+onMounted(() => {
+  fetchProvinces()
+})
+
 const handleRegister = async () => {
   if (passwordError.value) {
     alert('Mohon pastikan konfirmasi kata sandi Anda sama.')
     return
   }
-  isLoading.value = true
-  console.log('Mengirim data registrasi:', form)
 
-  setTimeout(() => {
+  if (!form.kelurahan) {
+    alert('Harap pilih Kelurahan/Desa.')
+    return
+  }
+
+  isLoading.value = true
+  errorMessage.value = ''
+
+  try {
+    const payload = {
+      name: form.name,
+      email: form.email,
+      password: form.password,
+      password_confirmation: form.password_confirmation,
+      region_code: form.kelurahan,
+    }
+
+    const response = await api.post('/register', payload)
+
+    if (response.data) {
+      alert('Registrasi Berhasil! Silakan login dengan akun Anda.')
+      router.push('/')
+    }
+  } catch (error) {
+    if (error.response && error.response.data && error.response.data.message) {
+      errorMessage.value = error.response.data.message
+      alert(errorMessage.value)
+    } else {
+      alert('Gagal melakukan pendaftaran. Periksa koneksi Anda.')
+    }
+    console.error('Register error:', error)
+  } finally {
     isLoading.value = false
-    alert('Registrasi Berhasil!')
-    router.push('/')
-  }, 1500)
+  }
 }
 </script>
 

@@ -3,16 +3,11 @@
     <Sidebar />
 
     <main class="main-content">
-      <Topbar>
-        <div class="search-bar">
-          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-          <input type="text" placeholder="Cari Koleksi Anda..." />
-        </div>
-      </Topbar>
+     <Topbar />
 
       <div class="content-body">
         <section class="welcome-section">
-          <h2>Selamat datang kembali, Kurator</h2>
+          <h2>Selamat datang kembali, {{ user.name || 'Kurator' }}</h2>
           <p>Atelier digital Anda telah dikurasi dan siap untuk pilihan hari ini.</p>
         </section>
 
@@ -34,7 +29,7 @@
               </svg>
               <span class="stat-badge">INVENTARIS</span>
             </div>
-            <h3 class="stat-number">128</h3>
+            <h3 class="stat-number">{{ summary.total_perfumes }}</h3>
             <p class="stat-label">Total Parfum</p>
           </div>
 
@@ -54,7 +49,7 @@
               </svg>
               <span class="stat-badge">ARSIP</span>
             </div>
-            <h3 class="stat-number">156</h3>
+            <h3 class="stat-number">{{ summary.total_scent_logs }}</h3>
             <p class="stat-label">Catatan Harian</p>
           </div>
         </section>
@@ -62,24 +57,23 @@
         <div class="split-section">
           <section class="recommendation-area">
             <h3 class="section-title">Rekomendasi Hari Ini</h3>
-            <div class="recom-card">
+            <div class="recom-card" v-if="recommendation">
               <div class="recom-image">
-                <img src="@/assets/baccarat-rouge.png" alt="Baccarat Rouge" />
-              </div>
+              <img :src="getImageUrl(recommendation.image_url || recommendation.image)" :alt="recommendation.name" />
+            </div>
               <div class="recom-content">
-                <span class="brand-name">MAISON FRANCIS KURKDJIAN</span>
-                <h4 class="perfume-name">Baccarat<br />Rouge 540</h4>
+                <h4 class="perfume-name">{{ recommendation.name }}</h4>
                 <div class="tags">
-                  <span class="tag">SAFFRON</span>
-                  <span class="tag">JASMINE</span>
-                  <span class="tag">AMBERWOOD</span>
+                  <span class="tag" v-for="(note, idx) in recommendation.notes" :key="idx">{{ note.name || note }}</span>
                 </div>
                 <p class="perfume-desc">
-                  Alkimia puitis di mana aroma melati yang ringan dan kemilau saffron membawa faset
-                  ambergris dan aroma kayu.
+                  {{ recommendation.description || 'Pilihan sempurna untuk hari ini.' }}
                 </p>
-                <button class="btn-detail" @click="$router.push('/detail')">LIHAT DETAIL</button>
+                <button class="btn-detail" @click="goDetail(recommendation.perfume_id || recommendation.id)">LIHAT DETAIL</button>
               </div>
+            </div>
+            <div v-else class="empty-state">
+              Belum ada rekomendasi parfum untuk Anda saat ini.
             </div>
           </section>
 
@@ -91,17 +85,17 @@
                 
                 <div class="entry-card-top">
                   <div class="entry-title-group">
-                    <h4 class="entry-perfume-name">{{ entry.perfumeName }}</h4>
-                    <span class="entry-subtitle">{{ entry.subtitle }}</span>
+                    <h4 class="entry-perfume-name">{{ entry.title || 'Parfum' }}</h4>
+                    <span class="entry-subtitle">{{ entry.occasion?.name || 'OCCASION' }} • {{ (entry.weather || 'CERAH').toUpperCase() }}</span>
                   </div>
                   <div class="entry-date-group">
-                    <span class="entry-date-text">{{ entry.date }}</span>
+                    <span class="entry-date-text">{{ new Date(entry.input_date).toLocaleDateString() }}</span>
                   </div>
                 </div>
 
                 <div class="entry-card-content">
                   <div class="entry-icon-box">
-                    <svg v-if="entry.iconType === 'sun'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <svg v-if="entry.weather?.toLowerCase() === 'cerah'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                       <circle cx="12" cy="12" r="5"></circle>
                       <line x1="12" y1="1" x2="12" y2="3"></line>
                       <line x1="12" y1="21" x2="12" y2="23"></line>
@@ -112,18 +106,22 @@
                       <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
                       <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                     </svg>
-                    <svg v-else-if="entry.iconType === 'moon'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <svg v-else-if="entry.weather?.toLowerCase() === 'malam' || entry.weather?.toLowerCase() === 'sejuk'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                       <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                     </svg>
-                    <svg v-else-if="entry.iconType === 'cloud'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                       <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path>
                     </svg>
                   </div>
                   <div class="entry-quote-text">
-                    "{{ entry.quote }}"
+                    "{{ entry.notes_review }}"
                   </div>
                 </div>
 
+              </div>
+              
+              <div v-if="recentJournals.length === 0" class="empty-state">
+                Belum ada catatan buku harian.
               </div>
             </div>
 
@@ -144,54 +142,58 @@
 <script setup>
 import Sidebar from '@/components/Sidebar.vue'
 import Topbar from '@/components/Topbar.vue'
-import { h } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import api from '../services/api'
+import defaultImg from '@/assets/upload-parfum.JPEG'
 
-const svgProps = { viewBox: '0 0 24 24', xmlns: 'http://www.w3.org/2000/svg' }
+const router = useRouter()
+const user = ref(JSON.parse(localStorage.getItem('user') || '{}'))
 
-const IconCloud = () =>
-  h('svg', svgProps, [h('path', { d: 'M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z' })])
-const IconMoon = () =>
-  h('svg', svgProps, [h('path', { d: 'M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z' })])
-const IconSun = () =>
-  h('svg', svgProps, [
-    h('circle', { cx: '12', cy: '12', r: '5' }),
-    h('line', { x1: '12', y1: '1', x2: '12', y2: '3' }),
-    h('line', { x1: '12', y1: '21', x2: '12', y2: '23' }),
-    h('line', { x1: '4.22', y1: '4.22', x2: '5.64', y2: '5.64' }),
-    h('line', { x1: '18.36', y1: '18.36', x2: '19.78', y2: '19.78' }),
-    h('line', { x1: '1', y1: '12', x2: '3', y2: '12' }),
-    h('line', { x1: '21', y1: '12', x2: '23', y2: '12' }),
-    h('line', { x1: '4.22', y1: '19.78', x2: '5.64', y2: '18.36' }),
-    h('line', { x1: '18.36', y1: '5.64', x2: '19.78', y2: '4.22' }),
-  ])
+const summary = ref({
+  total_perfumes: 0,
+  total_scent_logs: 0
+})
 
-// Data riwayat disesuaikan dengan gambar desain
-const recentJournals = [
-  {
-    id: 1,
-    perfumeName: 'Santal 33',
-    subtitle: 'KANTOR • CERAH',
-    date: '12/10/2025',
-    iconType: 'sun',
-    quote: 'Aroma kayu cendana yang ikonik memberikan kesan profesional namun tetap ramah. Sangat cocok untuk rapat pembukaan galeri hari ini.'
-  },
-  {
-    id: 2,
-    perfumeName: 'Baccarat',
-    subtitle: 'RESTO • SEJUK',
-    date: '10/01/2025',
-    iconType: 'moon',
-    quote: 'Perpaduan mawar dan oud yang sangat megah. Memberikan rasa percaya diri ekstra saat berjalan di karpet merah malam ini.'
-  },
-  {
-    id: 3,
-    perfumeName: 'Lacoco',
-    subtitle: 'PANTAI • BERAWAN',
-    date: '08/11/2024',
-    iconType: 'cloud',
-    quote: 'Kesegaran sitrus yang sempurna untuk udara siang yang cerah. Sangat ringan dan tidak mengganggu saat menikmati kopi di teras.'
+const recommendation = ref(null)
+const recentJournals = ref([])
+const isLoading = ref(true)
+
+const getImageUrl = (path) => {
+  if (!path) return defaultImg
+
+  const timestamp = new Date().getTime();
+
+  if (path.startsWith('http')) {
+    return path.includes('?') ? `${path}&t=${timestamp}` : `${path}?t=${timestamp}`
   }
-]
+
+  return `http://localhost:8000/storage/${path}?t=${timestamp}`
+}
+
+const fetchHomeData = async () => {
+  try {
+    const response = await api.get('/pages/home')
+    const resData = response.data.data
+    summary.value = resData.summary
+    recommendation.value = resData.today_recommendation?.perfume || null
+    
+    recentJournals.value = (resData.scent_logs || []).slice(0, 3)
+    
+  } catch (error) {
+    console.error('Gagal mengambil data beranda:', error)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+onMounted(() => {
+  fetchHomeData()
+})
+
+const goDetail = (id) => {
+  router.push(`/detail/${id}`)
+}
 </script>
 
 <style scoped>
@@ -207,29 +209,6 @@ const recentJournals = [
   display: flex;
   flex-direction: column;
   overflow: hidden;
-}
-
-.search-bar {
-  display: flex;
-  align-items: center;
-  background-color: #f0f0f0;
-  padding: 10px 15px;
-  border-radius: 20px;
-  width: 448px;
-}
-.search-icon {
-  width: 16px;
-  height: 16px;
-  color: #888;
-  margin-right: 10px;
-}
-.search-bar input {
-  border: none;
-  background: transparent;
-  outline: none;
-  font-size: 0.85rem;
-  width: 100%;
-  color: #333;
 }
 
 /* --- Area Scrollable & Konten Bawah Tetap Sama --- */
@@ -333,10 +312,10 @@ const recentJournals = [
 }
 .recom-content {
   flex: 1.2;
-  padding: 30px;
+  padding: 35px 40px;;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
 }
 .brand-name {
   font-size: 0.65rem;
@@ -346,7 +325,7 @@ const recentJournals = [
   margin-bottom: 8px;
 }
 .perfume-name {
-  font-size: 1.6rem;
+  font-size: 2rem;
   font-weight: 800;
   color: #1a1a1a;
   line-height: 1.1;
@@ -359,7 +338,7 @@ const recentJournals = [
   margin-bottom: 15px;
 }
 .tag {
-  font-size: 0.6rem;
+  font-size: 0.7rem;
   font-weight: 400;
   color: #634d43;
   background-color: #fcdccf;
@@ -374,6 +353,7 @@ const recentJournals = [
 }
 .btn-detail {
   align-self: flex-start;
+  margin-top: auto; 
   padding: 10px 20px;
   background: linear-gradient(135deg, #7d5731 0%, #fac898 100%);
   border: none;
