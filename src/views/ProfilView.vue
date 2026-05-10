@@ -366,6 +366,7 @@ import { ref, onMounted, computed, watch } from 'vue'
 import Topbar from '@/components/Topbar.vue'
 import Sidebar from '@/components/Sidebar.vue'
 import api from '../services/api'
+import defaultAvatar from '@/assets/profil.jpg'
 
 // Data User State
 const userData = ref({
@@ -378,8 +379,7 @@ const userData = ref({
   kabupaten: '',
   kecamatan: '',
   kelurahan: '',
-  photoUrl:
-    'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=300&q=80',
+  photoUrl: defaultAvatar,
 })
 
 const stats = ref({
@@ -489,7 +489,9 @@ const loadUserProfile = async () => {
     stats.value.total_koleksi = user.perfumes_count
     stats.value.ulasan_terbit = user.scent_logs_count
     if (user.photo) {
-      userData.value.photoUrl = `http://localhost:8000/storage/${user.photo}`
+      userData.value.photoUrl = `http://localhost:8000/storage/${user.photo}?t=${new Date().getTime()}`
+    } else {
+      userData.value.photoUrl = defaultAvatar
     }
 
     // ==========================================

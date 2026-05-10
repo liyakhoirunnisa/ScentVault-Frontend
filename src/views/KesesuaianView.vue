@@ -374,19 +374,21 @@ onMounted(() => {
 })
 
 const getImageUrl = (path) => {
-  // Jika tidak ada data gambar dari backend, gunakan gambar default
   if (!path) return defaultImg
 
-  // Trik Anti-Cache agar gambar baru langsung termuat
-  const timestamp = new Date().getTime();
-
-  // Jika URL sudah berupa link utuh (eksternal)
-  if (path.startsWith('http')) {
-    return path.includes('?') ? `${path}&t=${timestamp}` : `${path}?t=${timestamp}`
+  const timestamp = new Date().getTime()
+  
+  let relativePath = path
+  if (path.includes('/storage/')) {
+    relativePath = path.split('/storage/')[1]
   }
 
-  // Jika URL berasal dari storage lokal Laravel
-  return `http://localhost:8000/storage/${path}?t=${timestamp}`
+  if (relativePath.startsWith('http')) {
+    return relativePath.includes('?') ? `${relativePath}&t=${timestamp}` : `${relativePath}?t=${timestamp}`
+  }
+
+  const cleanPath = relativePath.startsWith('/') ? relativePath : `/${relativePath}`
+  return `http://127.0.0.1:8000/storage${cleanPath}?t=${timestamp}`
 }
 
 </script>

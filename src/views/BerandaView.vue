@@ -162,13 +162,22 @@ const isLoading = ref(true)
 const getImageUrl = (path) => {
   if (!path) return defaultImg
 
-  const timestamp = new Date().getTime();
-
-  if (path.startsWith('http')) {
-    return path.includes('?') ? `${path}&t=${timestamp}` : `${path}?t=${timestamp}`
+  const timestamp = new Date().getTime()
+  
+  // Ambil hanya nama direktori setelah "storage/"
+  let relativePath = path
+  if (path.includes('/storage/')) {
+    relativePath = path.split('/storage/')[1]
   }
 
-  return `http://localhost:8000/storage/${path}?t=${timestamp}`
+  // Jika ini adalah link internet eksternal murni
+  if (relativePath.startsWith('http')) {
+    return relativePath.includes('?') ? `${relativePath}&t=${timestamp}` : `${relativePath}?t=${timestamp}`
+  }
+
+  // Gunakan baseUrl yang fix dan ditambahkan cap waktu
+  const cleanPath = relativePath.startsWith('/') ? relativePath : `/${relativePath}`
+  return `http://127.0.0.1:8000/storage${cleanPath}?t=${timestamp}`
 }
 
 const fetchHomeData = async () => {
@@ -178,6 +187,24 @@ const fetchHomeData = async () => {
     summary.value = resData.summary
     recommendation.value = resData.today_recommendation?.perfume || null
     
+    // Fetch semua parfum untuk mengambil image_url tanpa mengubah backend
+    if (recommendation.value) {
+      try {
+        const resPerfumes = await api.get('/perfumes')
+        const perfumeList = resPerfumes.data.data || resPerfumes.data
+        const recomId = recommendation.value.perfume_id || recommendation.value.id
+        
+        const matchedPerfume = perfumeList.find(p => p.id === recomId)
+        
+        if (matchedPerfume && (matchedPerfume.image_url || matchedPerfume.image)) {
+          // Inject properti image_url sehingga UI bisa membacanya
+          recommendation.value.image_url = matchedPerfume.image_url || matchedPerfume.image
+        }
+      } catch (imgError) {
+        console.error('Gagal mengambil gambar rekomendasi:', imgError)
+      }
+    }
+
     recentJournals.value = (resData.scent_logs || []).slice(0, 3)
     
   } catch (error) {

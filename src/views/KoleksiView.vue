@@ -278,6 +278,18 @@ const pagination = ref({
 
 const isLoading = ref(true)
 
+// Helper format URL gambar
+const formatImageUrl = (path) => {
+  if (!path) return defaultParfumImg;
+  let relativePath = path;
+  if (path.includes('/storage/')) {
+    relativePath = path.split('/storage/')[1];
+  }
+  if (relativePath.startsWith('http')) return relativePath; // url web
+  const cleanPath = relativePath.startsWith('/') ? relativePath : `/${relativePath}`;
+  return `http://127.0.0.1:8000/storage${cleanPath}`;
+};
+
 // Fungsi Utama Penarik Data
 const fetchCollection = async (page = 1) => {
   isLoading.value = true
@@ -314,11 +326,7 @@ const fetchCollection = async (page = 1) => {
       rating: p.star_rating || 0,
       notes: p.notes ? p.notes.map((n) => n.name) : [], // Mengambil array nama bahan (notes)
       // Penanganan gambar yang lebih aman
-      image: p.image_url
-        ? p.image_url.startsWith('http')
-          ? p.image_url
-          : `http://localhost:8000/storage/${p.image_url}`
-        : defaultParfumImg,
+      image: formatImageUrl(p.image_url),
     }))
 
     // 3. Update Status Paginasi

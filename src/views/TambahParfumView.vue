@@ -245,7 +245,7 @@
             </div>
           </div>
 
-          <h3 class="modal-title">Mahakarya Olfaktori<br />Berhasil Ditambahkan!</h3>
+          <h3 class="modal-title">Berhasil Ditambahkan!</h3>
           <p class="modal-desc">
             Parfum baru Anda kini telah tersimpan dengan<br />aman di brankas digital.
           </p>
@@ -254,7 +254,7 @@
             <button class="btn-gradient w-100" @click="$router.push('/koleksi')">
               Lihat di Koleksi
             </button>
-            <button class="btn-outline-brown w-100" @click="resetForm">TAMBAH AROMA LAIN</button>
+            <button class="btn-outline-brown w-100" @click="resetForm">Tambah Aroma Lain</button>
           </div>
         </div>
       </div>

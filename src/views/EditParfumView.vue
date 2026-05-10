@@ -391,7 +391,16 @@ const fetchPerfume = async () => {
 
     formData.value.name = p.name || ''
     formData.value.brand = p.brand_name || ''
-    formData.value.category_id = p.category_id || ''
+
+    let foundCategoryId = ''
+    if (p.category_name) {
+      const matchedCategory = categories.value.find(c => c.name === p.category_name)
+      if (matchedCategory) {
+        foundCategoryId = matchedCategory.id
+      }
+    }
+    formData.value.category_id = p.category_id || foundCategoryId
+
     formData.value.concentration = p.concentration ? p.concentration.toLowerCase() : 'eau de parfum'
     formData.value.rating = parseInt(p.star_rating || 0)
     formData.value.description = p.description || ''
@@ -401,9 +410,16 @@ const fetchPerfume = async () => {
     formData.value.baseNotes = p.notes?.filter((n) => n.type === 'base').map((n) => n.name) || []
 
     if (p.image_url) {
-      photoPreview.value = p.image_url.startsWith('http')
-        ? p.image_url
-        : `http://localhost:8000/storage/${p.image_url}`
+      let relativePath = p.image_url
+      if (p.image_url.includes('/storage/')) {
+        relativePath = p.image_url.split('/storage/')[1]
+      }
+      if (relativePath.startsWith('http')) {
+        photoPreview.value = relativePath
+      } else {
+        const cleanPath = relativePath.startsWith('/') ? relativePath : `/${relativePath}`
+        photoPreview.value = `http://127.0.0.1:8000/storage${cleanPath}`
+      }
     } else {
       photoPreview.value = defaultImg
     }
@@ -414,9 +430,9 @@ const fetchPerfume = async () => {
   }
 }
 
-onMounted(() => {
-  fetchCategories()
-  fetchPerfume()
+onMounted(async () => {
+  await fetchCategories()
+  await fetchPerfume()
 })
 
 const triggerUpload = () => {

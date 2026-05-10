@@ -233,20 +233,24 @@ onMounted(() => {
 // FUNGSI LOGIKA GAMBAR DINAMIS (ANTI-CACHE)
 // ==========================================
 const getImageUrl = (path) => {
-  // Jika tidak ada data gambar dari backend
   if (!path) return defaultImg
 
-  // Membuat cap waktu acak agar browser tidak menggunakan gambar lama dari memori (Cache-Busting)
-  const timestamp = new Date().getTime();
-
-  // Jika URL sudah berupa link utuh (eksternal)
-  if (path.startsWith('http')) {
-    // Cek apakah URL sudah memiliki parameter tanda tanya (?)
-    return path.includes('?') ? `${path}&t=${timestamp}` : `${path}?t=${timestamp}`
+  const timestamp = new Date().getTime()
+  
+  // Ambil hanya nama direktori setelah "storage/" untuk mengabaikan localhost tanpa port dari backend
+  let relativePath = path
+  if (path.includes('/storage/')) {
+    relativePath = path.split('/storage/')[1]
   }
 
-  // Jika URL berasal dari storage lokal Laravel
-  return `http://localhost:8000/storage/${path}?t=${timestamp}`
+  // Jika ini adalah link internet eksternal murni
+  if (relativePath.startsWith('http')) {
+    return relativePath.includes('?') ? `${relativePath}&t=${timestamp}` : `${relativePath}?t=${timestamp}`
+  }
+
+  // Gunakan baseUrl yang fix dan ditambahkan cap waktu
+  const cleanPath = relativePath.startsWith('/') ? relativePath : `/${relativePath}`
+  return `http://127.0.0.1:8000/storage${cleanPath}?t=${timestamp}`
 }
 const formatDate = (dateString) => {
   if (!dateString) return ''

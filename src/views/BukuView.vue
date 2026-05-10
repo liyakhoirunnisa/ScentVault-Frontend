@@ -111,7 +111,7 @@
                 <div class="entry-card-top">
                   <div class="entry-title-group">
                     <h4 class="entry-perfume-name">{{ entry.perfume?.name }}</h4>
-                    <span class="entry-subtitle">{{ entry.occasion?.name }} � {{ entry.weather }}</span>
+                    <span class="entry-subtitle">{{ entry.occasion?.name }} • {{ entry.weather }}</span>
                   </div>
                   <div class="entry-date-group">
                     <span class="entry-date-text">{{ formatDate(entry.created_at) }}</span>
