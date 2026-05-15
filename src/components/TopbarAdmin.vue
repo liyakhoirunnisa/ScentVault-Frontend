@@ -1,242 +1,134 @@
 <template>
-  <header class="admin-topbar">
-    <div class="topbar-left">
-      <div v-if="showSearch" class="search-wrap">
-        <span class="search-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none">
-            <circle
-              cx="11"
-              cy="11"
-              r="6"
-              stroke="currentColor"
-              stroke-width="1.8"
-            />
-            <path
-              d="M20 20l-4.2-4.2"
-              stroke="currentColor"
-              stroke-width="1.8"
-              stroke-linecap="round"
-            />
-          </svg>
-        </span>
-
-        <input
-          v-model="keyword"
-          type="text"
-          class="search-input"
-          :placeholder="placeholder"
-        />
-      </div>
+  <header class="top-header">
+    <div class="header-left">
+      <slot></slot>
     </div>
 
-    <div class="topbar-right">
-      <button
-        type="button"
-        class="profile-section"
-        @click="goToProfile"
-      >
+    <div class="header-actions">
+      <div class="profile-section" @click="$router.push(profileRoute)">
         <div class="profile-text">
-          <span class="profile-name">{{ profileName }}</span>
-          <span v-if="profileRole" class="profile-role">{{ profileRole }}</span>
+          <span class="profile-name">{{ resolvedProfileName }}</span>
+          <span v-if="resolvedProfileRole" class="profile-role">{{ resolvedProfileRole }}</span>
         </div>
 
         <img
-          v-if="profileAvatar"
-          :src="profileAvatar"
-          :alt="profileName"
+          :src="resolvedProfileAvatar"
+          :alt="resolvedProfileName"
           class="profile-avatar"
         />
-
-        <div v-else class="profile-fallback">
-          {{ initials }}
-        </div>
-      </button>
+      </div>
     </div>
   </header>
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
-
-const emit = defineEmits(['update:search'])
+import { computed, onMounted, onUnmounted, ref } from 'vue'
+import defaultAvatar from '@/assets/profil.jpg'
 
 const props = defineProps({
-  placeholder: {
-    type: String,
-    default: 'Cari integrasi...'
-  },
   profileName: {
     type: String,
-    default: 'Profil Admin'
+    default: 'ELENA VANCE',
   },
   profileRole: {
     type: String,
-    default: 'Kurator Utama'
+    default: '',
   },
   profileAvatar: {
     type: String,
-    default: 'https://i.pravatar.cc/120?img=12'
+    default:
+      'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=150&q=80',
   },
   profileRoute: {
     type: String,
-    default: '/profil-admin'
+    default: '/profil',
   },
-  hasNotificationDot: {
-    type: Boolean,
-    default: true
-  },
-  showSearch: {
-    type: Boolean,
-    default: true
-  }
 })
 
-const router = useRouter()
-const keyword = ref('')
+const userUpdateTrigger = ref(0)
 
-watch(keyword, (val) => {
-  emit('update:search', val)
-})
-
-const initials = computed(() => {
-  return (props.profileName || 'A')
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((item) => item[0]?.toUpperCase() || '')
-    .join('')
-})
-
-function goToProfile() {
-  router.push(props.profileRoute)
+const getUserFromStorage = () => {
+  const userStr = localStorage.getItem('user')
+  return userStr ? JSON.parse(userStr) : null
 }
+
+const currentUser = computed(() => {
+  userUpdateTrigger.value
+  return getUserFromStorage()
+})
+
+const formatRole = (role) => {
+  const roleMap = {
+    admin: 'Admin',
+    user: 'Pengguna',
+    system_admin: 'Admin'
+  }
+
+  return roleMap[role] || role || ''
+}
+
+const resolvedProfileName = computed(() => {
+  const storedName = currentUser.value?.name
+  return storedName ? storedName.toUpperCase() : props.profileName
+})
+
+const resolvedProfileRole = computed(() => {
+  const storedRole = formatRole(currentUser.value?.role)
+  return storedRole || props.profileRole
+})
+
+const resolvedProfileAvatar = computed(() => {
+  const photo = currentUser.value?.photo
+  if (photo) {
+    return `http://localhost:8000/storage/${photo}?t=${Date.now()}`
+  }
+
+  return props.profileAvatar || defaultAvatar
+})
+
+const refreshUserData = () => {
+  userUpdateTrigger.value += 1
+}
+
+onMounted(() => {
+  window.addEventListener('user-data-updated', refreshUserData)
+  window.addEventListener('storage', refreshUserData)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('user-data-updated', refreshUserData)
+  window.removeEventListener('storage', refreshUserData)
+})
 </script>
 
 <style scoped>
-.admin-topbar {
-  --bg: #f7f5f1;
-  --card: #fbfaf8;
-  --title: #8a6035;
-  --text: #736b65;
-  --primary: #8b6138;
-  --primary-soft: #e9bf84;
-  --line: rgba(125, 87, 49, 0.1);
-
-  min-height: 84px;
+.top-header {
+  height: 80px;
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 20px;
-  padding: 16px 32px;
-  background: transparent;
+  align-items: center;
+  padding: 0 50px;
+  background-color: transparent;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
-.topbar-left {
-  flex: 1;
-  min-width: 0;
-}
-
-.search-wrap {
-  position: relative;
-  max-width: 420px;
-}
-
-.search-icon {
-  position: absolute;
-  top: 50%;
-  left: 14px;
-  width: 18px;
-  height: 18px;
-  color: #93897f;
-  transform: translateY(-50%);
-  pointer-events: none;
-}
-
-.search-icon svg {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-.search-input {
-  width: 100%;
-  height: 44px;
-  padding: 0 16px 0 42px;
-  border: 1px solid transparent;
-  border-radius: 999px;
-  background: #efede8;
-  color: #3a332f;
-  font: inherit;
-  outline: none;
-  transition: 0.2s ease;
-}
-
-.search-input::placeholder {
-  color: #9a9188;
-}
-
-.search-input:focus {
-  background: #ffffff;
-  border-color: rgba(139, 97, 56, 0.18);
-  box-shadow: 0 0 0 4px rgba(139, 97, 56, 0.06);
-}
-
-.topbar-right {
+.header-left {
   display: flex;
   align-items: center;
-  gap: 14px;
-  flex-shrink: 0;
+  flex: 1;
 }
 
-.icon-btn {
-  position: relative;
-  width: 38px;
-  height: 38px;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
-  color: var(--primary);
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-  transition: 0.2s ease;
-}
-
-.icon-btn:hover {
-  background: rgba(139, 97, 56, 0.08);
-  transform: translateY(-1px);
-}
-
-.icon-btn svg {
-  width: 18px;
-  height: 18px;
-}
-
-.notif-dot {
-  position: absolute;
-  top: 7px;
-  right: 8px;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #b57a43;
-}
-
-.divider {
-  width: 1px;
-  height: 28px;
-  background: var(--line);
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
 }
 
 .profile-section {
   display: flex;
   align-items: center;
   gap: 12px;
-  border: 0;
-  background: transparent;
   cursor: pointer;
-  padding: 0;
 }
 
 .profile-text {
@@ -247,55 +139,26 @@ function goToProfile() {
 }
 
 .profile-name {
-  font-size: 0.84rem;
+  font-size: 0.7rem;
   font-weight: 800;
-  color: #2f2925;
-}
-
-.profile-role {
-  margin-top: 4px;
-  font-size: 0.62rem;
-  font-weight: 700;
-  color: var(--text);
-  letter-spacing: 0.08em;
+  color: #000000;
+  letter-spacing: 0.5px;
   text-transform: uppercase;
 }
 
-.profile-avatar,
-.profile-fallback {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  flex-shrink: 0;
+.profile-role {
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: #7b7b7b;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-top: 3px;
 }
 
 .profile-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
   object-fit: cover;
-  display: block;
-}
-
-.profile-fallback {
-  display: grid;
-  place-items: center;
-  background: linear-gradient(135deg, var(--primary-soft), var(--primary));
-  color: #fff;
-  font-size: 0.82rem;
-  font-weight: 800;
-}
-
-@media (max-width: 768px) {
-  .admin-topbar {
-    flex-direction: column;
-    align-items: stretch;
-    padding: 16px 20px;
-  }
-
-  .topbar-right {
-    justify-content: space-between;
-  }
-
-  .search-wrap {
-    max-width: none;
-  }
 }
 </style>

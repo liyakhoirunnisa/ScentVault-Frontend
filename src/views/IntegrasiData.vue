@@ -1,26 +1,26 @@
 <template>
-  <main class="integration-page">
-    <section class="page-head">
-      <div class="page-copy">
-        <h1>Integrasi Data</h1>
-        <p>
-          Kelola koneksi eksternal yang menyusun narasi sensorik ScentVault.
-          Sinkronisasi otomatis untuk data lingkungan dan spasial.
-        </p>
-      </div>
+  <main class="content-body">
+    <div class="page-shell">
+      <section class="welcome-section">
+        <div class="page-copy">
+          <h1>Integrasi Data</h1>
+          <p>
+            Kelola koneksi eksternal yang menyusun narasi sensorik ScentVault.
+            Sinkronisasi otomatis untuk data lingkungan dan spasial.
+          </p>
+        </div>
+      </section>
 
-    </section>
-
-    <section class="integration-grid">
+      <section class="stats-grid">
       <article
         v-for="item in integrations"
         :key="item.id"
-        class="integration-card"
+        class="stat-card integration-card"
       >
-        <div class="card-top">
-          <div class="icon-badge" v-html="item.icon" />
+        <div class="stat-header">
+          <div class="stat-icon" v-html="item.icon" />
           <span
-            class="status-chip"
+            class="stat-badge status-chip"
             :class="item.connected ? 'connected' : 'inactive'"
           >
             <span class="status-dot"></span>
@@ -33,8 +33,8 @@
           <p>{{ item.description }}</p>
         </div>
       </article>
-
-    </section>
+      </section>
+    </div>
   </main>
 </template>
 
@@ -113,7 +113,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.integration-page {
+.content-body {
   --bg: #f7f5f1;
   --card: #fbfaf8;
   --title: #8a6035;
@@ -132,7 +132,12 @@ onMounted(() => {
   background: transparent;
 }
 
-.page-head {
+.page-shell {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.welcome-section {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -144,7 +149,7 @@ onMounted(() => {
   max-width: 520px;
 }
 
-.page-copy h1 {
+.welcome-section h1 {
   margin: 0 0 10px;
   color: #7d5731;
   font-family: 'Manrope', sans-serif;
@@ -154,7 +159,7 @@ onMounted(() => {
   letter-spacing: -0.03em;
 }
 
-.page-copy p {
+.welcome-section p {
   margin: 0;
   color: var(--text);
   font-size: 1rem;
@@ -194,14 +199,14 @@ onMounted(() => {
   font-weight: 800;
 }
 
-.integration-grid {
+.stats-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 24px;
   align-items: stretch;
 }
 
-.integration-card,
+.stat-card,
 .integration-add-card {
   min-height: 320px;
   border-radius: 24px;
@@ -216,7 +221,7 @@ onMounted(() => {
   flex-direction: column;
 }
 
-.card-top {
+.stat-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -224,7 +229,7 @@ onMounted(() => {
   margin-bottom: 22px;
 }
 
-.icon-badge {
+.stat-icon {
   width: 42px;
   height: 42px;
   border-radius: 16px;
@@ -235,12 +240,12 @@ onMounted(() => {
   flex-shrink: 0;
 }
 
-.icon-badge :deep(svg) {
+.stat-icon :deep(svg) {
   width: 22px;
   height: 22px;
 }
 
-.status-chip {
+.stat-badge {
   padding: 5px 12px;
   border-radius: 999px;
   font-size: 0.68rem;
@@ -250,6 +255,10 @@ onMounted(() => {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+}
+
+.status-chip {
+  text-transform: uppercase;
 }
 
 .status-dot {
@@ -385,11 +394,11 @@ onMounted(() => {
 }
 
 @media (max-width: 1100px) {
-  .integration-grid {
+  .stats-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .page-head {
+  .welcome-section {
     flex-direction: column;
     align-items: stretch;
   }
@@ -401,15 +410,15 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
-  .integration-page {
+  .content-body {
     /* Padding handled by global layout */
   }
 
-  .integration-grid {
+  .stats-grid {
     grid-template-columns: 1fr;
   }
 
-  .page-copy h1 {
+  .welcome-section h1 {
     font-size: 2rem;
   }
 

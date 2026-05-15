@@ -408,7 +408,7 @@ const confirmDelete = async () => {
 }
 .content-body {
   flex: 1;
-  padding: 10px 50px 50px 50px;
+  padding: 20px 50px 50px 50px;
   overflow-y: auto;
 }
 .content-body::-webkit-scrollbar {

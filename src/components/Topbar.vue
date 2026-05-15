@@ -74,6 +74,7 @@ onUnmounted(() => {
   align-items: center;
   padding: 0 50px;
   background-color: transparent;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .header-left {
@@ -120,8 +121,8 @@ onUnmounted(() => {
 }
 
 .profile-avatar {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   object-fit: cover;
 }

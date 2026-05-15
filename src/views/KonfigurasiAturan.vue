@@ -1,7 +1,7 @@
 <template>
-  <section class="rules-view">
-    <div class="rules-shell">
-      <header class="page-header">
+  <section class="content-body">
+    <div class="page-shell">
+      <header class="welcome-section">
         <h1>Konfigurasi Aturan</h1>
         <p>
           Modulasi parameter lingkungan untuk menjaga integritas koleksi wewangian di
@@ -10,10 +10,10 @@
         </p>
       </header>
 
-      <div class="rules-grid">
-        <form class="config-card" @submit.prevent="saveTemperatureSettings">
-          <div class="card-head">
-            <div class="card-icon temperature-icon">
+      <div class="stats-grid">
+        <form class="stat-card" @submit.prevent="saveTemperatureSettings">
+          <div class="stat-header">
+            <div class="stat-icon config-icon temperature-icon">
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -26,9 +26,9 @@
               </svg>
             </div>
 
-            <div class="card-title">
+            <div class="config-card-title">
               <h2>Konfigurasi Suhu</h2>
-              <p>TEMPERATURE CONTROL</p>
+              <p class="stat-badge">TEMPERATURE CONTROL</p>
             </div>
           </div>
 
@@ -66,9 +66,9 @@
           <button class="btn btn-solid" type="submit">Simpan Perubahan</button>
         </form>
 
-        <form class="config-card" @submit.prevent="saveTimeSettings">
-          <div class="card-head">
-            <div class="card-icon time-icon">
+        <form class="stat-card" @submit.prevent="saveTimeSettings">
+          <div class="stat-header">
+            <div class="stat-icon config-icon time-icon">
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -82,9 +82,9 @@
               </svg>
             </div>
 
-            <div class="card-title">
+            <div class="config-card-title">
               <h2>Interval Waktu</h2>
-              <p>TIME CYCLES</p>
+              <p class="stat-badge">TIME CYCLES</p>
             </div>
           </div>
 
@@ -174,7 +174,7 @@
         </form>
       </div>
 
-      <section class="info-banner">
+      <section class="split-section info-banner">
         <div class="banner-copy">
           <h2>Preservasi Wewangian Adalah Seni yang Terukur</h2>
           <p>
@@ -321,22 +321,24 @@ const saveTimeSettings = async () => {
 </script>
 
 <style scoped>
-.rules-view {
+.content-body {
   width: 100%;
+  flex: 1;
+  padding: 10px 50px 50px 50px;
   box-sizing: border-box;
   background: transparent;
 }
 
-.rules-shell {
+.page-shell {
   max-width: 1180px;
   margin: 0 auto;
 }
 
-.page-header {
+.welcome-section {
   margin-bottom: 30px;
 }
 
-.page-header h1 {
+.welcome-section h1 {
   margin: 0 0 10px;
   font-size: 35.2px;
   line-height: 1.1;
@@ -345,7 +347,7 @@ const saveTimeSettings = async () => {
   font-weight: 800;
 }
 
-.page-header p {
+.welcome-section p {
   margin: 0;
   max-width: 760px;
   font-size: 0.98rem;
@@ -353,14 +355,14 @@ const saveTimeSettings = async () => {
   color: #736b65;
 }
 
-.rules-grid {
+.stats-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(320px, 1fr));
   gap: 24px;
   margin-bottom: 28px;
 }
 
-.config-card {
+.stat-card {
   margin: 0;
   background: #fbfaf8;
   border: 1px solid rgba(125, 87, 49, 0.08);
@@ -369,14 +371,14 @@ const saveTimeSettings = async () => {
   box-shadow: 0 12px 35px rgba(59, 42, 31, 0.07);
 }
 
-.card-head {
+.stat-header {
   display: flex;
   align-items: center;
   gap: 14px;
   margin-bottom: 24px;
 }
 
-.card-icon {
+.stat-icon {
   width: 52px;
   height: 52px;
   border-radius: 16px;
@@ -384,6 +386,11 @@ const saveTimeSettings = async () => {
   place-items: center;
   color: #7d5731;
   flex-shrink: 0;
+}
+
+.config-icon {
+  display: grid;
+  place-items: center;
 }
 
 .temperature-icon {
@@ -394,25 +401,30 @@ const saveTimeSettings = async () => {
   background: #ece2b8;
 }
 
-.card-icon svg,
+.stat-icon svg,
 .cycle-icon svg {
   width: 22px;
   height: 22px;
 }
 
-.card-title h2 {
+.config-card-title h2 {
   margin: 0;
   font-size: 1.18rem;
   color: #30241f;
   font-weight: 800;
 }
 
-.card-title p {
+.config-card-title .stat-badge {
   margin: 4px 0 0;
   color: #a29b94;
   font-size: 0.72rem;
   letter-spacing: 1.5px;
   font-weight: 700;
+}
+
+.stat-badge {
+  display: inline-flex;
+  align-items: center;
 }
 
 .field-group + .field-group {
@@ -574,10 +586,13 @@ const saveTimeSettings = async () => {
   font-weight: 600;
 }
 
-.info-banner {
+.split-section {
   display: grid;
   grid-template-columns: minmax(0, 1.45fr) minmax(240px, 0.85fr);
   gap: 24px;
+}
+
+.info-banner {
   align-items: center;
   background: #f0eeea;
   border: 1px solid rgba(125, 87, 49, 0.08);
@@ -647,8 +662,8 @@ const saveTimeSettings = async () => {
 }
 
 @media (max-width: 1100px) {
-  .rules-grid,
-  .info-banner {
+  .stats-grid,
+  .split-section {
     grid-template-columns: 1fr;
   }
 
@@ -658,7 +673,7 @@ const saveTimeSettings = async () => {
 }
 
 @media (max-width: 640px) {
-  .rules-view {
+  .content-body {
     /* Padding handled globally */
   }
 

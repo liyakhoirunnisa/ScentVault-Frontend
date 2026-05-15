@@ -1,165 +1,167 @@
 <template>
-  <main class="users-page">
-    <section class="page-head">
-      <div>
-        <h1>Manajemen Pengguna</h1>
-        <p>
-          Kelola hak akses dan profil kurator dalam ekosistem Digital Atelier
-          ScentVault.
-        </p>
-      </div>
-      <div class="head-actions">
-        <router-link to="/tambah-pengguna" class="btn btn-primary">
+  <main class="content-body">
+    <div class="page-shell">
+      <section class="welcome-section">
+        <div>
+          <h1>Manajemen Pengguna</h1>
+          <p>
+            Kelola hak akses dan profil kurator dalam ekosistem Digital Atelier
+            ScentVault.
+          </p>
+        </div>
+        <div class="head-actions">
+          <router-link to="/tambah-pengguna" class="btn btn-solid">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M12 5v14M5 12h14"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+            </svg>
+            <span>Tambah Pengguna</span>
+          </router-link>
+        </div>
+      </section>
+
+      <section class="stats-grid">
+        <article
+          v-for="user in users"
+          :key="user.id"
+          class="stat-card"
+        >
+          <div class="stat-header">
+            <div class="avatar-wrap">
+              <div class="avatar">
+                <img
+                  v-if="user.image && !imageErrors[user.id]"
+                  :src="user.image"
+                  :alt="user.name"
+                  @error="markImageError(user.id)"
+                />
+                <span v-else>{{ getInitials(user.name) }}</span>
+              </div>
+            </div>
+
+            <div class="user-meta">
+              <span class="stat-badge">{{ formatRole(user.role) }}</span>
+              <h3>{{ user.name }}</h3>
+              <p>{{ user.email }}</p>
+            </div>
+          </div>
+
+          <div class="card-divider" />
+
+          <div class="card-actions">
+            <button
+              class="icon-btn"
+              type="button"
+              aria-label="Lihat pengguna"
+              @click="viewUser(user)"
+            >
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                />
+                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8" />
+              </svg>
+            </button>
+
+            <button
+              class="icon-btn"
+              type="button"
+              aria-label="Edit pengguna"
+              @click="editUser(user)"
+            >
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  d="M4 20h4l10.5-10.5a2.12 2.12 0 0 0-3-3L5 17v3Z"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+
+            <button
+              class="icon-btn"
+              type="button"
+              aria-label="Hapus pengguna"
+              @click="deleteUser(user)"
+            >
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  d="M5 7h14M9 7V5h6v2m-7 3v7m4-7v7m4-7v7M7 7l1 12h8l1-12"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
+        </article>
+      </section>
+
+      <p v-if="!isLoading && users.length === 0" class="empty-state">
+        Tidak ada pengguna yang cocok dengan pencarian saat ini.
+      </p>
+
+      <nav class="pagination" aria-label="Pagination pengguna" v-if="pagination.lastPage > 1">
+        <button
+          class="page-arrow"
+          type="button"
+          :disabled="pagination.currentPage === 1 || isLoading"
+          @click="prevPage"
+        >
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path
-              d="M12 5v14M5 12h14"
+              d="M14 6l-6 6 6 6"
               stroke="currentColor"
               stroke-width="2"
               stroke-linecap="round"
+              stroke-linejoin="round"
             />
           </svg>
-          <span>Tambah Pengguna</span>
-        </router-link>
-      </div>
-    </section>
+        </button>
 
-    <section class="users-grid">
-      <article
-        v-for="user in paginatedUsers"
-        :key="user.id"
-        class="user-card"
-      >
+        <button
+          v-for="page in pagination.lastPage"
+          :key="page"
+          type="button"
+          class="page-number"
+          :class="{ active: page === pagination.currentPage }"
+          :disabled="isLoading"
+          @click="goToPage(page)"
+        >
+          {{ page }}
+        </button>
 
-        <div class="user-top">
-          <div class="avatar-wrap">
-            <div class="avatar">
-              <img
-                v-if="user.image && !imageErrors[user.id]"
-                :src="user.image"
-                :alt="user.name"
-                @error="markImageError(user.id)"
-              />
-              <span v-else>{{ getInitials(user.name) }}</span>
-            </div>
-
-
-          </div>
-
-          <div class="user-meta">
-            <span class="role-badge">{{ formatRole(user.role) }}</span>
-            <h3>{{ user.name }}</h3>
-            <p>{{ user.email }}</p>
-          </div>
-        </div>
-
-
-
-        <div class="card-divider" />
-
-        <div class="card-actions">
-          <button
-            class="icon-btn"
-            type="button"
-            aria-label="Lihat pengguna"
-            @click="viewUser(user)"
-          >
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path
-                d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"
-                stroke="currentColor"
-                stroke-width="1.8"
-              />
-              <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8" />
-            </svg>
-          </button>
-
-          <button
-            class="icon-btn"
-            type="button"
-            aria-label="Edit pengguna"
-            @click="editUser(user)"
-          >
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path
-                d="M4 20h4l10.5-10.5a2.12 2.12 0 0 0-3-3L5 17v3Z"
-                stroke="currentColor"
-                stroke-width="1.8"
-                stroke-linejoin="round"
-              />
-            </svg>
-          </button>
-
-          <button
-            class="icon-btn"
-            type="button"
-            aria-label="Hapus pengguna"
-            @click="deleteUser(user)"
-          >
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path
-                d="M5 7h14M9 7V5h6v2m-7 3v7m4-7v7m4-7v7M7 7l1 12h8l1-12"
-                stroke="currentColor"
-                stroke-width="1.8"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
-          </button>
-        </div>
-      </article>
-    </section>
-
-    <nav class="pagination" aria-label="Pagination pengguna" v-if="totalPages > 1">
-      <button
-        class="page-arrow"
-        type="button"
-        :disabled="currentPage === 1"
-        @click="prevPage"
-      >
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path
-            d="M14 6l-6 6 6 6"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-      </button>
-
-      <button
-        v-for="page in totalPages"
-        :key="page"
-        type="button"
-        class="page-number"
-        :class="{ active: page === currentPage }"
-        @click="currentPage = page"
-      >
-        {{ page }}
-      </button>
-
-      <button
-        class="page-arrow"
-        type="button"
-        :disabled="currentPage === totalPages"
-        @click="nextPage"
-      >
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path
-            d="M10 6l6 6-6 6"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-      </button>
-    </nav>
+        <button
+          class="page-arrow"
+          type="button"
+          :disabled="pagination.currentPage === pagination.lastPage || isLoading"
+          @click="nextPage"
+        >
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+              d="M10 6l6 6-6 6"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
+      </nav>
+    </div>
   </main>
 </template>
 
 <script setup>
-import { computed, onMounted, ref, inject } from 'vue'
+import { onMounted, ref, inject, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/services/api'
 
@@ -167,21 +169,64 @@ const router = useRouter()
 
 const searchQuery = inject('globalSearch', ref(''))
 
-const currentPage = ref(1)
 const perPage = 5
 const imageErrors = ref({})
-
 const users = ref([])
+const isLoading = ref(false)
+const pagination = ref({
+  currentPage: 1,
+  lastPage: 1,
+  perPage,
+  total: 0
+})
 
-const loadUsers = async () => {
+const getImageUrl = (path) => {
+  if (!path) return ''
+  if (path.startsWith('http://') || path.startsWith('https://')) return path
+
+  const normalizedPath = path.startsWith('/') ? path.slice(1) : path
+  return `http://localhost:8000/storage/${normalizedPath}?t=${Date.now()}`
+}
+
+const mapUser = (user) => ({
+  ...user,
+  role: user.role || 'Kurator',
+  image: getImageUrl(user.photo || user.image || '')
+})
+
+const loadUsers = async (page = pagination.value.currentPage) => {
+  isLoading.value = true
   try {
-    const res = await api.get('/admin/users')
-    users.value = res.data.data.map(u => ({
-      ...u,
-      role: u.role || 'Kurator'
-    }))
+    const res = await api.get('/admin/users', {
+      params: {
+        page,
+        per_page: perPage,
+        search: searchQuery.value || undefined
+      }
+    })
+
+    const payload = res.data?.data || {}
+    const fetchedUsers = payload.users || []
+    const fetchedPagination = payload.pagination || {}
+
+    users.value = fetchedUsers.map(mapUser)
+    pagination.value = {
+      currentPage: fetchedPagination.current_page || page,
+      lastPage: fetchedPagination.last_page || 1,
+      perPage: fetchedPagination.per_page || perPage,
+      total: fetchedPagination.total || fetchedUsers.length
+    }
   } catch (err) {
     console.error(err)
+    users.value = []
+    pagination.value = {
+      currentPage: 1,
+      lastPage: 1,
+      perPage,
+      total: 0
+    }
+  } finally {
+    isLoading.value = false
   }
 }
 
@@ -189,25 +234,26 @@ onMounted(() => {
   loadUsers()
 })
 
-const filteredUsers = computed(() => {
-  if (!searchQuery.value) return users.value
-  return users.value.filter(u => u.name.toLowerCase().includes(searchQuery.value.toLowerCase()))
-})
-
-const totalPages = computed(() => Math.ceil(filteredUsers.value.length / perPage))
-
-const paginatedUsers = computed(() => {
-  const start = (currentPage.value - 1) * perPage
-  const end = start + perPage
-  return filteredUsers.value.slice(start, end)
+watch(searchQuery, () => {
+  loadUsers(1)
 })
 
 const prevPage = () => {
-  if (currentPage.value > 1) currentPage.value--
+  if (pagination.value.currentPage > 1) {
+    loadUsers(pagination.value.currentPage - 1)
+  }
 }
 
 const nextPage = () => {
-  if (currentPage.value < totalPages.value) currentPage.value++
+  if (pagination.value.currentPage < pagination.value.lastPage) {
+    loadUsers(pagination.value.currentPage + 1)
+  }
+}
+
+const goToPage = (page) => {
+  if (page !== pagination.value.currentPage) {
+    loadUsers(page)
+  }
 }
 
 const getInitials = (name) => {
@@ -255,10 +301,10 @@ const deleteUser = async (user) => {
   if (!confirm(`Hapus pengguna ${user.name}?`)) return
   try {
     await api.delete(`/admin/users/${user.id}`)
-    await loadUsers()
-    if (currentPage.value > totalPages.value && totalPages.value > 0) {
-      currentPage.value = totalPages.value
-    }
+    const targetPage = users.value.length === 1 && pagination.value.currentPage > 1
+      ? pagination.value.currentPage - 1
+      : pagination.value.currentPage
+    await loadUsers(targetPage)
   } catch(err) {
     console.error(err)
   }
@@ -270,7 +316,7 @@ const deleteUser = async (user) => {
   box-sizing: border-box;
 }
 
-.users-page {
+.content-body {
   --bg: #f7f5f1;
   --card: #fbfaf8;
   --card-line: rgba(125, 87, 49, 0.08);
@@ -291,7 +337,12 @@ const deleteUser = async (user) => {
   background: transparent;
 }
 
-.page-head {
+.page-shell {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.welcome-section {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -299,7 +350,7 @@ const deleteUser = async (user) => {
   margin-bottom: 36px;
 }
 
-.page-head h1 {
+.welcome-section h1 {
   margin: 0 0 10px;
   color: #7d5731;
   font-family: 'Manrope', sans-serif;
@@ -309,7 +360,7 @@ const deleteUser = async (user) => {
   letter-spacing: -0.03em;
 }
 
-.page-head p {
+.welcome-section p {
   max-width: 540px;
   margin: 0;
   color: var(--text);
@@ -348,19 +399,19 @@ const deleteUser = async (user) => {
   height: 18px;
 }
 
-.btn-primary {
+.btn-solid {
   color: #fff;
   background: linear-gradient(90deg, #8b6138 0%, #e9bf84 100%);
   box-shadow: 0 16px 30px rgba(139, 97, 56, 0.18);
 }
 
-.users-grid {
+.stats-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 24px;
 }
 
-.user-card {
+.stat-card {
   position: relative;
   min-height: 244px;
   padding: 26px;
@@ -390,7 +441,7 @@ const deleteUser = async (user) => {
   height: 18px;
 }
 
-.user-top {
+.stat-header {
   display: flex;
   align-items: center;
   gap: 16px;
@@ -446,7 +497,7 @@ const deleteUser = async (user) => {
   min-width: 0;
 }
 
-.role-badge {
+.stat-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -545,6 +596,17 @@ const deleteUser = async (user) => {
   height: 18px;
 }
 
+.empty-state {
+  margin: 28px 0 0;
+  padding: 24px;
+  border-radius: 20px;
+  background: rgba(251, 250, 248, 0.9);
+  border: 1px solid rgba(125, 87, 49, 0.08);
+  color: var(--text);
+  text-align: center;
+  font-weight: 600;
+}
+
 .pagination {
   display: flex;
   justify-content: center;
@@ -585,23 +647,27 @@ const deleteUser = async (user) => {
   cursor: not-allowed;
 }
 
+.page-number:disabled {
+  cursor: wait;
+}
+
 @media (max-width: 1200px) {
-  .users-grid {
+  .stats-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .page-head {
+  .welcome-section {
     flex-direction: column;
     align-items: stretch;
   }
 }
 
 @media (max-width: 768px) {
-  .users-page {
+  .content-body {
     /* Padding handled globally */
   }
 
-  .users-grid {
+  .stats-grid {
     grid-template-columns: 1fr;
   }
 
