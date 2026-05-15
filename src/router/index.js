@@ -16,6 +16,27 @@ import TambahPengguna from '../views/TambahPengguna.vue'
 import UserDetail from '../views/UserDetail.vue'
 import IntegrasiData from '../views/IntegrasiData.vue'
 
+const clearAuthState = () => {
+  localStorage.removeItem('token')
+  localStorage.removeItem('user')
+  localStorage.removeItem('lastActiveMenu')
+}
+
+const getStoredUser = () => {
+  const userStr = localStorage.getItem('user')
+
+  if (!userStr || userStr === 'undefined' || userStr === 'null') {
+    return null
+  }
+
+  try {
+    return JSON.parse(userStr)
+  } catch {
+    clearAuthState()
+    return null
+  }
+}
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -35,49 +56,49 @@ const router = createRouter({
       path: '/beranda',
       name: 'beranda',
       component: BerandaView,
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, requiresUser: true },
     },
     {
       path: '/detail/:id',
       name: 'detail',
       component: DetailParfumView,
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, requiresUser: true },
     },
     {
       path: '/koleksi',
       name: 'koleksi',
       component: KoleksiView,
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, requiresUser: true },
     },
     {
       path: '/tambah-parfum',
       name: 'tambah-parfum',
       component: TambahParfumView,
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, requiresUser: true },
     },
     {
       path: '/buku',
       name: 'buku',
       component: BukuView,
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, requiresUser: true },
     },
     {
       path: '/edit-parfum/:id',
       name: 'edit-parfum',
       component: EditParfumView,
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, requiresUser: true },
     },
     {
       path: '/kesesuaian',
       name: 'kesesuaian',
       component: KesesuianView,
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, requiresUser: true },
     },
     {
       path: '/profil',
       name: 'profil',
       component: ProfilView,
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, requiresUser: true },
     },
     {
       path: '/konfigurasi-aturan',
@@ -160,7 +181,14 @@ const router = createRouter({
     {
       path: '/:pathMatch(.*)*',
       redirect: () => {
-        return localStorage.getItem('token') ? '/beranda' : '/'
+        const token = localStorage.getItem('token')
+        const user = getStoredUser()
+
+        if (!token || token === 'null' || token === 'undefined') {
+          return '/'
+        }
+
+        return user?.role === 'admin' ? '/integrasi-data' : '/beranda'
       }
     }
   ],
@@ -168,12 +196,16 @@ const router = createRouter({
 
 router.beforeEach((to) => {
   const token = localStorage.getItem('token')
-  const userStr = localStorage.getItem('user')
-  const user = userStr && userStr !== 'undefined' ? JSON.parse(userStr) : {}
+  const user = getStoredUser()
   // Check if token exists and is not null/undefined string
   const isAuthenticated = token && token !== 'null' && token !== 'undefined'
 
   if (to.meta.requiresAuth && !isAuthenticated) {
+    return { name: 'login' }
+  }
+
+  if (to.meta.requiresAuth && isAuthenticated && !user) {
+    clearAuthState()
     return { name: 'login' }
   }
 
@@ -184,9 +216,13 @@ router.beforeEach((to) => {
     return { path: '/beranda' }
   }
 
+  if (to.meta.requiresUser && user.role !== 'user') {
+    clearAuthState()
+    return { name: 'login' }
+  }
+
   if (to.meta.requiresAdmin && user.role !== 'admin') {
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
+    clearAuthState()
     return { name: 'login' }
   }
 })

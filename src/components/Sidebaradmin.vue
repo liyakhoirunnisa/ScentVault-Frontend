@@ -80,7 +80,7 @@
       </RouterLink>
 
       <div class="sidebar-footer">
-        <button class="btn-logout" type="button">
+        <button class="btn-logout" type="button" @click="handleLogout" :disabled="isLoggingOut">
           <svg
             viewBox="0 0 24 24"
             fill="none"
@@ -93,7 +93,7 @@
             <polyline points="16 17 21 12 16 7"></polyline>
             <line x1="21" y1="12" x2="9" y2="12"></line>
           </svg>
-          Keluar
+          {{ isLoggingOut ? 'MEMPROSES...' : 'Keluar' }}
         </button>
       </div>
     </nav>
@@ -102,10 +102,13 @@
 
 <script setup>
 import { ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import api from '../services/api'
 
 const route = useRoute()
+const router = useRouter()
 const activeMainMenu = ref('')
+const isLoggingOut = ref(false)
 
 watch(
   () => route.path,
@@ -144,6 +147,28 @@ watch(
   },
   { immediate: true },
 )
+
+const clearAuthState = () => {
+  localStorage.removeItem('token')
+  localStorage.removeItem('user')
+  localStorage.removeItem('lastActiveMenu')
+}
+
+const handleLogout = async () => {
+  isLoggingOut.value = true
+
+  try {
+    await api.post('/logout')
+    clearAuthState()
+    router.push('/')
+  } catch (error) {
+    console.error('Logout admin error:', error)
+    clearAuthState()
+    router.push('/')
+  } finally {
+    isLoggingOut.value = false
+  }
+}
 </script>
 
 <style scoped>
@@ -151,7 +176,7 @@ watch(
    Sidebar Kiri (CSS Ekstrak dari Beranda)
    ========================================= */
 .sidebar {
-  width: 255px;
+  width: 260px;
   background-color: #eeeeea;
   border-right: 1px solid #e5e5e5;
   display: flex;
