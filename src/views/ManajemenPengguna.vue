@@ -334,6 +334,10 @@ const deleteUser = async (user) => {
   --gray: #9d9a96;
   --gray-soft: #ece9e5;
 
+  width: 100%;
+  flex: 1;
+  padding: 20px 50px 50px 50px;
+  box-sizing: border-box;
   background: transparent;
 }
 

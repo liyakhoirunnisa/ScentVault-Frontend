@@ -324,7 +324,7 @@ const saveTimeSettings = async () => {
 .content-body {
   width: 100%;
   flex: 1;
-  padding: 10px 50px 50px 50px;
+  padding: 20px 50px 50px 50px;
   box-sizing: border-box;
   background: transparent;
 }

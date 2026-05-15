@@ -129,6 +129,10 @@ onMounted(() => {
   --gray-soft: #f1eee9;
   --chip-bg: #f4f0ea;
 
+  width: 100%;
+  flex: 1;
+  padding: 20px 50px 50px 50px;
+  box-sizing: border-box;
   background: transparent;
 }
 
