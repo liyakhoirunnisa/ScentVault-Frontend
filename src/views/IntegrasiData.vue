@@ -39,17 +39,18 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import api from '@/services/api'
 
 const integrations = ref([
   {
-    id: 1,
+    key: 'weather',
     title: 'API Cuaca',
     description:
       'Menyinkronkan kelembapan dan suhu untuk kalibrasi difusi aroma ruangan secara real-time.',
-    connected: true,
+    connected: false,
     enabled: true,
-    statusText: 'TERHUBUNG',
+    statusText: 'MEMUAT',
     icon: `
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <path
@@ -69,13 +70,13 @@ const integrations = ref([
     `
   },
   {
-    id: 2,
+    key: 'location',
     title: 'API Lokasi',
     description:
       'Data pemetaan spasial untuk menentukan titik distribusi wewangian di seluruh galeri pameran.',
     connected: false,
     enabled: false,
-    statusText: 'TIDAK TERHUBUNG',
+    statusText: 'MEMUAT',
     icon: `
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <path
@@ -89,6 +90,26 @@ const integrations = ref([
     `
   }
 ])
+
+const fetchIntegrations = async () => {
+  try {
+    const res = await api.get('/admin/integration-status');
+    const data = res.data.data;
+    data.forEach(item => {
+      const idx = integrations.value.findIndex(i => i.key === item.key);
+      if (idx !== -1) {
+        integrations.value[idx].connected = item.connected;
+        integrations.value[idx].statusText = item.status;
+      }
+    });
+  } catch (error) {
+    console.error('Failed to fetch integrations', error);
+  }
+};
+
+onMounted(() => {
+  fetchIntegrations();
+});
 </script>
 
 <style scoped>
@@ -108,9 +129,7 @@ const integrations = ref([
   --gray-soft: #f1eee9;
   --chip-bg: #f4f0ea;
 
-  min-height: 100%;
-  padding: 44px 32px 60px;
-  background: var(--bg);
+  background: transparent;
 }
 
 .page-head {
@@ -127,8 +146,9 @@ const integrations = ref([
 
 .page-copy h1 {
   margin: 0 0 10px;
-  color: var(--title);
-  font-size: clamp(2rem, 2.5vw, 2.9rem);
+  color: #7d5731;
+  font-family: 'Manrope', sans-serif;
+  font-size: 35.2px;
   line-height: 1.05;
   font-weight: 800;
   letter-spacing: -0.03em;
@@ -382,7 +402,7 @@ const integrations = ref([
 
 @media (max-width: 768px) {
   .integration-page {
-    padding: 32px 20px 48px;
+    /* Padding handled by global layout */
   }
 
   .integration-grid {

@@ -473,18 +473,31 @@ function mapUserToForm(user) {
   Object.assign(form, {
     id: user.id ?? '',
     name: normalizeString(user.name),
-    joinedAt: toISODate(user.joinedAt || '2023-01-12'),
+    joinedAt: toISODate(user.createdAt || user.joinedAt || '2023-01-12'),
     email: normalizeString(user.email),
     userId: normalizeString(user.userId || `UID-${String(user.id).padStart(5, '0')}-ATELIER`),
-    role: normalizeString(user.role),
+    role: normalizeString(user.role || 'Kurator'),
     philosophy: normalizeString(user.philosophy),
     status: normalizeString(user.status || 'aktif'),
     avatar: normalizeString(user.image || user.avatar)
   })
 }
 
+async function loadData() {
+  const routeId = Number(route.params.id)
+  if (!routeId) return
+  
+  try {
+    const api = (await import('@/services/api')).default;
+    const res = await api.get(`/admin/users/${routeId}`);
+    users.value = [res.data.data];
+  } catch (e) {
+    console.error(e)
+  }
+}
+
 onMounted(() => {
-  loadUsers()
+  loadData()
 })
 
 watch(
@@ -533,15 +546,25 @@ function toggleEdit(forceValue) {
   emit('edit-mode-change', nextValue)
 }
 
-function handleSave() {
+async function handleSave() {
   const payload = {
     ...form,
     joinedAt: toISODate(form.joinedAt)
   }
 
-  emit('save', payload)
-  isEditing.value = false
-  emit('edit-mode-change', false)
+  try {
+    const api = (await import('@/services/api')).default;
+    await api.patch(`/admin/users/${form.id}`, {
+      name: payload.name,
+      email: payload.email,
+      role: payload.role
+    });
+    isEditing.value = false
+    emit('edit-mode-change', false)
+    loadData()
+  } catch(error) {
+    console.error(error)
+  }
 }
 
 function handleCancel() {
@@ -554,8 +577,16 @@ function handleCancel() {
   emit('cancel')
 }
 
-function handleDelete() {
-  emit('delete', { ...form })
+async function handleDelete() {
+  if(confirm('Hapus pengguna ini?')) {
+    try {
+      const api = (await import('@/services/api')).default;
+      await api.delete(`/admin/users/${form.id}`);
+      emit('delete', { ...form })
+    } catch(err) {
+      console.error(err);
+    }
+  }
 }
 
 let copyTimeout = null
@@ -598,9 +629,8 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .user-detail-page {
-  min-height: 100%;
-  padding: 32px;
-  background: var(--bg, #f7f5f1);
+  box-sizing: border-box;
+  background: transparent;
 }
 
 .user-card {
@@ -671,11 +701,12 @@ onBeforeUnmount(() => {
 }
 
 .user-name {
-  margin: 0;
-  font-size: 2rem;
+  margin: 0 0 10px;
+  font-size: 35.2px;
   line-height: 1.1;
   font-weight: 700;
-  color: #2f2925;
+  color: #7d5731;
+  font-family: 'Manrope', sans-serif;
 }
 
 .status-badge {
@@ -982,7 +1013,7 @@ onBeforeUnmount(() => {
 
 @media (max-width: 520px) {
   .user-detail-page {
-    padding: 14px;
+    /* Padding handled globally */
   }
 
   .user-card {

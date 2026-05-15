@@ -84,8 +84,10 @@ const router = createRouter({
       name: 'KonfigurasiAturan',
       component: KonfigurasiAturan,
       meta: {
+        requiresAuth: true,
+        requiresAdmin: true,
         layout: 'admin',
-        topbarPlaceholder: 'Cari konfigurasi aturan...',
+        topbarPlaceholder: 'Cari konfigurasi aturan...'
       },
     },
     {
@@ -93,8 +95,10 @@ const router = createRouter({
       name: 'ManajemenPengguna',
       component: ManajemenPengguna,
       meta: {
+        requiresAuth: true,
+        requiresAdmin: true,
         layout: 'admin',
-        topbarPlaceholder: 'Cari pengguna...',
+        topbarPlaceholder: 'Cari pengguna...'
       },
     },
     {
@@ -102,8 +106,10 @@ const router = createRouter({
       name: 'TambahPengguna',
       component: TambahPengguna,
       meta: {
+        requiresAuth: true,
+        requiresAdmin: true,
         layout: 'admin',
-        topbarPlaceholder: 'Cari pengguna...',
+        topbarPlaceholder: 'Cari pengguna...'
       },
     },
     {
@@ -111,8 +117,10 @@ const router = createRouter({
       name: 'IntegrasiData',
       component: IntegrasiData,
       meta: {
+        requiresAuth: true,
+        requiresAdmin: true,
         layout: 'admin',
-        topbarPlaceholder: 'Cari integrasi...',
+        topbarPlaceholder: 'Cari integrasi...'
       },
     },
     {
@@ -120,8 +128,10 @@ const router = createRouter({
       name: 'UserDetail',
       component: UserDetail,
       meta: {
+        requiresAuth: true,
+        requiresAdmin: true,
         layout: 'admin',
-        topbarPlaceholder: 'Cari pengguna...',
+        topbarPlaceholder: 'Cari pengguna...'
       },
     },
     {
@@ -129,8 +139,10 @@ const router = createRouter({
       name: 'UserEdit',
       component: UserDetail,
       meta: {
+        requiresAuth: true,
+        requiresAdmin: true,
         layout: 'admin',
-        topbarPlaceholder: 'Cari pengguna...',
+        topbarPlaceholder: 'Cari pengguna...'
       },
     },
     {
@@ -138,23 +150,44 @@ const router = createRouter({
       name: 'ProfileAdminView',
       component: ProfileAdminView,
       meta: {
+        requiresAuth: true,
+        requiresAdmin: true,
         layout: 'admin',
-        topbarPlaceholder: 'Cari profil admin...',
+        topbarPlaceholder: 'Cari profil admin...'
       },
     },
+    // Catch-all route for undefined paths
+    {
+      path: '/:pathMatch(.*)*',
+      redirect: () => {
+        return localStorage.getItem('token') ? '/beranda' : '/'
+      }
+    }
   ],
 })
 
 router.beforeEach((to) => {
   const token = localStorage.getItem('token')
-  const isAuthenticated = !!token
+  const userStr = localStorage.getItem('user')
+  const user = userStr && userStr !== 'undefined' ? JSON.parse(userStr) : {}
+  // Check if token exists and is not null/undefined string
+  const isAuthenticated = token && token !== 'null' && token !== 'undefined'
 
   if (to.meta.requiresAuth && !isAuthenticated) {
-    return '/'
+    return { name: 'login' }
   }
 
   if (to.meta.guestOnly && isAuthenticated) {
-    return '/beranda'
+    if (user.role === 'admin') {
+      return { path: '/integrasi-data' }
+    }
+    return { path: '/beranda' }
+  }
+
+  if (to.meta.requiresAdmin && user.role !== 'admin') {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    return { name: 'login' }
   }
 })
 

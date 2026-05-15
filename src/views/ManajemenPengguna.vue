@@ -161,6 +161,7 @@
 <script setup>
 import { computed, onMounted, ref, inject } from 'vue'
 import { useRouter } from 'vue-router'
+import api from '@/services/api'
 
 const router = useRouter()
 
@@ -170,118 +171,18 @@ const currentPage = ref(1)
 const perPage = 5
 const imageErrors = ref({})
 
-const defaultUsers = [
-  {
-    id: 1,
-    name: 'Clara Amandine',
-    email: 'clara.a@scentvault.com',
-    role: 'Kurator',
-    status: 'active',
-    image: 'https://i.pravatar.cc/120?img=32',
-  },
-  {
-    id: 2,
-    name: 'Julian Sterling',
-    email: 'sterling.j@scentvault.com',
-    role: 'Admin',
-    status: 'active',
-    image: 'https://i.pravatar.cc/120?img=12',
-  },
-  {
-    id: 3,
-    name: 'Elara Vance',
-    email: 'evance@scentvault.com',
-    role: 'Kurator',
-    status: 'inactive',
-    image: 'https://i.pravatar.cc/120?img=47',
-  },
-  {
-    id: 4,
-    name: 'Marcus Thorne',
-    email: 'm.thorne@scentvault.com',
-    role: 'Kurator',
-    status: 'active',
-    image: 'https://i.pravatar.cc/120?img=14',
-  },
-  {
-    id: 5,
-    name: 'Sophia Lazar',
-    email: 's.lazar@scentvault.com',
-    role: 'Kurator',
-    status: 'active',
-    image: 'https://i.pravatar.cc/120?img=48',
-  },
-  {
-    id: 6,
-    name: 'Noah Bellamy',
-    email: 'n.bellamy@scentvault.com',
-    role: 'Admin',
-    status: 'active',
-    image: 'https://i.pravatar.cc/120?img=19',
-  },
-  {
-    id: 7,
-    name: 'Isla Moreau',
-    email: 'imoreau@scentvault.com',
-    role: 'Kurator',
-    status: 'inactive',
-    image: 'https://i.pravatar.cc/120?img=25',
-  },
-  {
-    id: 8,
-    name: 'Theo Arden',
-    email: 'theo.arden@scentvault.com',
-    role: 'Kurator',
-    status: 'active',
-    image: 'https://i.pravatar.cc/120?img=67',
-  },
-  {
-    id: 9,
-    name: 'Aurora Flint',
-    email: 'aurora.f@scentvault.com',
-    role: 'Kurator',
-    status: 'active',
-    image: 'https://i.pravatar.cc/120?img=44',
-  },
-  {
-    id: 10,
-    name: 'Elias Hart',
-    email: 'elias.h@scentvault.com',
-    role: 'Admin',
-    status: 'inactive',
-    image: 'https://i.pravatar.cc/120?img=60',
-  },
-  {
-    id: 11,
-    name: 'Luna Cervantes',
-    email: 'l.cervantes@scentvault.com',
-    role: 'Kurator',
-    status: 'active',
-    image: 'https://i.pravatar.cc/120?img=39',
-  },
-  {
-    id: 12,
-    name: 'Milo Vesper',
-    email: 'mvesper@scentvault.com',
-    role: 'Kurator',
-    status: 'active',
-    image: 'https://i.pravatar.cc/120?img=15',
-  },
-  {
-    id: 13,
-    name: 'Freya Solene',
-    email: 'freya.s@scentvault.com',
-    role: 'Kurator',
-    status: 'inactive',
-    image: 'https://i.pravatar.cc/120?img=50',
-  },
-]
-
 const users = ref([])
 
-const loadUsers = () => {
-  const savedUsers = JSON.parse(localStorage.getItem('scentvault_users') || '[]')
-  users.value = [...savedUsers, ...defaultUsers]
+const loadUsers = async () => {
+  try {
+    const res = await api.get('/admin/users')
+    users.value = res.data.data.map(u => ({
+      ...u,
+      role: u.role || 'Kurator'
+    }))
+  } catch (err) {
+    console.error(err)
+  }
 }
 
 onMounted(() => {
@@ -310,6 +211,7 @@ const nextPage = () => {
 }
 
 const getInitials = (name) => {
+  if (!name) return 'U'
   return name
     .split(' ')
     .slice(0, 2)
@@ -319,6 +221,7 @@ const getInitials = (name) => {
 }
 
 const formatRole = (role) => {
+  if (!role) return 'User'
   const map = {
     kurator: 'Kurator',
     admin: 'Admin',
@@ -326,6 +229,8 @@ const formatRole = (role) => {
     Kurator: 'Kurator',
     Admin: 'Admin',
     Operator: 'Operator',
+    system_admin: 'Admin',
+    curator: 'Kurator'
   }
   return map[role] || role
 }
@@ -335,33 +240,28 @@ const markImageError = (userId) => {
 }
 
 const viewUser = (user) => {
-  console.log('Membuka profil: ' + user.name)
-
   router.push({
     path: `/manajemen-pengguna/detail/${user.id}`,
   })
 }
 
 const editUser = (user) => {
-  console.log('Membuka profil: ' + user.name)
-
   router.push({
     path: `/manajemen-pengguna/edit/${user.id}`,
   })
 }
 
-const deleteUser = (user) => {
-  const savedUsers = JSON.parse(localStorage.getItem('scentvault_users') || '[]')
-  const updatedSavedUsers = savedUsers.filter((item) => item.id !== user.id)
-
-  localStorage.setItem('scentvault_users', JSON.stringify(updatedSavedUsers))
-  users.value = users.value.filter((item) => item.id !== user.id)
-
-  if (currentPage.value > totalPages.value) {
-    currentPage.value = Math.max(1, totalPages.value)
+const deleteUser = async (user) => {
+  if (!confirm(`Hapus pengguna ${user.name}?`)) return
+  try {
+    await api.delete(`/admin/users/${user.id}`)
+    await loadUsers()
+    if (currentPage.value > totalPages.value && totalPages.value > 0) {
+      currentPage.value = totalPages.value
+    }
+  } catch(err) {
+    console.error(err)
   }
-
-  console.log('Delete user:', user)
 }
 </script>
 
@@ -388,9 +288,7 @@ const deleteUser = (user) => {
   --gray: #9d9a96;
   --gray-soft: #ece9e5;
 
-  min-height: 100%;
-  padding: 48px 56px;
-  background: var(--bg);
+  background: transparent;
 }
 
 .page-head {
@@ -403,8 +301,9 @@ const deleteUser = (user) => {
 
 .page-head h1 {
   margin: 0 0 10px;
-  color: var(--title);
-  font-size: clamp(2rem, 2.4vw, 2.8rem);
+  color: #7d5731;
+  font-family: 'Manrope', sans-serif;
+  font-size: 35.2px;
   line-height: 1.05;
   font-weight: 800;
   letter-spacing: -0.03em;
@@ -699,7 +598,7 @@ const deleteUser = (user) => {
 
 @media (max-width: 768px) {
   .users-page {
-    padding: 32px 20px;
+    /* Padding handled globally */
   }
 
   .users-grid {

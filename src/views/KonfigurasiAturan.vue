@@ -192,99 +192,7 @@
 
         <div class="banner-visual" aria-hidden="true">
           <div class="perfume-placeholder">
-            <svg
-              viewBox="0 0 200 220"
-              class="perfume-illustration"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <defs>
-                <linearGradient
-                  id="bottleFill"
-                  x1="100"
-                  y1="68"
-                  x2="100"
-                  y2="196"
-                  gradientUnits="userSpaceOnUse"
-                >
-                  <stop stop-color="#e5b169" />
-                  <stop offset="1" stop-color="#8d5625" />
-                </linearGradient>
-
-                <radialGradient
-                  id="glow"
-                  cx="0"
-                  cy="0"
-                  r="1"
-                  gradientUnits="userSpaceOnUse"
-                  gradientTransform="translate(100 150) rotate(90) scale(90 80)"
-                >
-                  <stop stop-color="#ffcf86" stop-opacity="0.65" />
-                  <stop offset="1" stop-color="#ffcf86" stop-opacity="0" />
-                </radialGradient>
-              </defs>
-
-              <ellipse cx="100" cy="190" rx="70" ry="18" fill="url(#glow)" />
-              <rect x="76" y="16" width="48" height="24" rx="4" fill="#171311" />
-              <rect
-                x="58"
-                y="44"
-                width="84"
-                height="22"
-                rx="6"
-                fill="#2a211d"
-                stroke="#f7d8a3"
-                stroke-width="3"
-              />
-              <rect
-                x="36"
-                y="68"
-                width="128"
-                height="126"
-                rx="18"
-                fill="url(#bottleFill)"
-                stroke="#f9dfb6"
-                stroke-width="4"
-              />
-              <rect
-                x="58"
-                y="104"
-                width="84"
-                height="48"
-                rx="8"
-                fill="#231c19"
-                stroke="#f9dfb6"
-                stroke-width="2.5"
-              />
-              <text
-                x="100"
-                y="123"
-                text-anchor="middle"
-                fill="#f9dfb6"
-                font-size="13"
-                font-weight="700"
-                font-family="Arial, sans-serif"
-              >
-                SCENTVAULT
-              </text>
-              <text
-                x="100"
-                y="141"
-                text-anchor="middle"
-                fill="#d9b887"
-                font-size="10"
-                font-weight="600"
-                font-family="Arial, sans-serif"
-              >
-                ATELIER
-              </text>
-              <path
-                d="M52 92C72 86 128 86 148 92"
-                stroke="#ffffff"
-                stroke-opacity="0.45"
-                stroke-width="4"
-                stroke-linecap="round"
-              />
-            </svg>
+            <img :src="imgKonfigurasi" alt="Ilustrasi Konfigurasi" class="perfume-image-asset" />
           </div>
         </div>
       </section>
@@ -327,7 +235,9 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import api from '@/services/api'
+import imgKonfigurasi from '@/assets/parfum-konfigurasi.png'
 
 const showModal = ref(false)
 const modalContent = ref({
@@ -339,44 +249,82 @@ const closeModal = () => {
   showModal.value = false
 }
 
-const temperatureRanges = ref([
-  { key: 'dingin', label: 'Rentang Dingin (°C)', min: 24, max: 28 },
-  { key: 'normal', label: 'Rentang Normal (°C)', min: 29, max: 30 },
-  { key: 'panas', label: 'Rentang Panas (°C)', min: 30, max: 35 },
-])
+const temperatureRanges = ref([])
+const timeCycles = ref([])
 
-const timeCycles = ref([
-  { key: 'pagi', label: 'Pagi', start: '06:00', end: '10:00' },
-  { key: 'siang', label: 'Siang', start: '10:01', end: '15:00' },
-  { key: 'malam', label: 'Malam', start: '18:00', end: '05:59' },
-])
-
-const saveTemperatureSettings = () => {
-  console.log('Temperature settings saved:', temperatureRanges.value)
-  modalContent.value = {
-    title: 'Perubahan Suhu Berhasil Disimpan',
-    message: 'Parameter sensor suhu telah diperbarui secara global di seluruh sistem Digital Atelier.'
+const fetchConfigs = async () => {
+  try {
+    const res = await api.get('/admin/rule-configs')
+    const configs = res.data.data
+    temperatureRanges.value = configs
+      .filter(c => c.type === 'temperature')
+      .map(c => ({ id: c.id, key: c.label, label: `Rentang ${c.label} (°C)`, min: c.min_value, max: c.max_value }))
+    timeCycles.value = configs
+      .filter(c => c.type === 'time')
+      .map(c => ({
+        id: c.id,
+        key: c.label,
+        label: c.label.charAt(0).toUpperCase() + c.label.slice(1),
+        start: String(c.min_value).padStart(2, '0') + ':00',
+        end: String(c.max_value).padStart(2, '0') + ':00'
+      }))
+  } catch (err) {
+    console.error(err)
   }
-  showModal.value = true
 }
 
-const saveTimeSettings = () => {
-  console.log('Time cycle settings saved:', timeCycles.value)
-  modalContent.value = {
-    title: 'Konfigurasi Waktu Berhasil Diperbarui',
-    message: 'Interval waktu operasional untuk kurasi aroma telah berhasil disinkronkan.'
+onMounted(() => {
+  fetchConfigs()
+})
+
+const saveTemperatureSettings = async () => {
+  try {
+    for (const range of temperatureRanges.value) {
+      await api.put(`/admin/rule-configs/${range.id}`, {
+        type: 'temperature',
+        label: range.key,
+        min_value: range.min,
+        max_value: range.max
+      })
+    }
+    modalContent.value = {
+      title: 'Perubahan Suhu Berhasil Disimpan',
+      message: 'Parameter sensor suhu telah diperbarui secara global di seluruh sistem Digital Atelier.'
+    }
+    showModal.value = true
+  } catch(err) {
+    console.error(err)
   }
-  showModal.value = true
+}
+
+const saveTimeSettings = async () => {
+  try {
+    for (const cycle of timeCycles.value) {
+      const minVal = parseInt(cycle.start.split(':')[0])
+      const maxVal = parseInt(cycle.end.split(':')[0])
+      await api.put(`/admin/rule-configs/${cycle.id}`, {
+        type: 'time',
+        label: cycle.key,
+        min_value: minVal,
+        max_value: maxVal
+      })
+    }
+    modalContent.value = {
+      title: 'Konfigurasi Waktu Berhasil Diperbarui',
+      message: 'Interval waktu operasional untuk kurasi aroma telah berhasil disinkronkan.'
+    }
+    showModal.value = true
+  } catch(err) {
+    console.error(err)
+  }
 }
 </script>
 
 <style scoped>
 .rules-view {
   width: 100%;
-  min-height: 100vh;
-  padding: 48px 56px 40px;
   box-sizing: border-box;
-  background: #f7f5f1;
+  background: transparent;
 }
 
 .rules-shell {
@@ -389,10 +337,11 @@ const saveTimeSettings = () => {
 }
 
 .page-header h1 {
-  margin: 0 0 12px;
-  font-size: clamp(2rem, 2.8vw, 2.6rem);
+  margin: 0 0 10px;
+  font-size: 35.2px;
   line-height: 1.1;
-  color: #8a6035;
+  color: #7d5731;
+  font-family: 'Manrope', sans-serif;
   font-weight: 800;
 }
 
@@ -683,22 +632,18 @@ const saveTimeSettings = () => {
   max-width: 300px;
   aspect-ratio: 1.1 / 1;
   border-radius: 24px;
-  background:
-    radial-gradient(circle at 50% 36%, rgba(255, 193, 107, 0.18), transparent 36%),
-    linear-gradient(180deg, #0f1622 0%, #23160f 100%);
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
-    0 18px 36px rgba(17, 19, 34, 0.28);
-  display: grid;
-  place-items: center;
+  background-color: #111; 
+  box-shadow: 0 18px 36px rgba(17, 19, 34, 0.28);
+  display: flex;
+  justify-content: center;
+  align-items: center;
   overflow: hidden;
-  padding: 18px;
 }
 
-.perfume-illustration {
-  width: 78%;
-  height: auto;
-  filter: drop-shadow(0 18px 22px rgba(255, 171, 79, 0.22));
+.perfume-image-asset {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 @media (max-width: 1100px) {
@@ -714,7 +659,7 @@ const saveTimeSettings = () => {
 
 @media (max-width: 640px) {
   .rules-view {
-    padding: 32px 20px;
+    /* Padding handled globally */
   }
 
   .range-inputs {

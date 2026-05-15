@@ -168,8 +168,12 @@ const handleLogin = async () => {
       form.password = ''
       form.rememberMe = false
       
-      // Redirect ke beranda
-      router.push('/beranda')
+      // Redirect berdasarkan role
+      if (response.data.user.role === 'admin') {
+        router.push('/integrasi-data')
+      } else {
+        router.push('/beranda')
+      }
     }
   } catch (error) {
     console.error('Login error:', error)
