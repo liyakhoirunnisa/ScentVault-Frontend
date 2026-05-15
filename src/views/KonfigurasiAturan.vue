@@ -511,7 +511,9 @@ const saveTimeSettings = async () => {
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease,
-    background-color 0.2s ease;
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .btn:hover {
@@ -519,10 +521,10 @@ const saveTimeSettings = async () => {
 }
 
 .btn-solid {
-  border: none;
-  color: #ffffff;
-  background: linear-gradient(90deg, #8b6138 0%, #e9bf84 100%);
-  box-shadow: 0 10px 24px rgba(125, 87, 49, 0.24);
+  background: transparent;
+  border: 1.5px solid rgba(125, 87, 49, 0.6);
+  color: #7d5731;
+  box-shadow: none;
 }
 
 .btn-outline {
@@ -531,8 +533,12 @@ const saveTimeSettings = async () => {
   color: #7d5731;
 }
 
+.btn-solid:hover,
 .btn-outline:hover {
-  background: rgba(125, 87, 49, 0.04);
+  border-color: transparent;
+  color: #ffffff;
+  background: linear-gradient(90deg, #8b6138 0%, #e9bf84 100%);
+  box-shadow: 0 10px 24px rgba(125, 87, 49, 0.24);
 }
 
 .schedule-list {
