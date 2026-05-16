@@ -1,5 +1,21 @@
 <template>
   <main class="add-user-page">
+    <div class="action-bar">
+      <button class="btn-back" type="button" @click="$router.back()">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+      </button>
+    </div>
+
     <section class="page-header">
       <div>
         <h1>Tambah Pengguna</h1>
@@ -133,8 +149,9 @@
           <div class="field-group">
             <label for="provinsi">Provinsi</label>
             <div class="select-wrap">
-              <select id="provinsi" v-model="form.provinsi">
-                <option value="" disabled></option>
+              <select id="provinsi" v-model="form.provinsi" @change="onProvinsiChange">
+                <option value="" disabled>Pilih Provinsi</option>
+                <option v-for="p in provinsis" :key="p.code" :value="p.code">{{ p.name }}</option>
               </select>
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M7 10l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
@@ -145,8 +162,14 @@
           <div class="field-group">
             <label for="kabupaten">Kabupaten/Kota</label>
             <div class="select-wrap">
-              <select id="kabupaten" v-model="form.kabupaten">
-                <option value="" disabled></option>
+              <select
+                id="kabupaten"
+                v-model="form.kabupaten"
+                :disabled="!form.provinsi"
+                @change="onKabupatenChange"
+              >
+                <option value="" disabled>Pilih Kabupaten/Kota</option>
+                <option v-for="k in kabupatens" :key="k.code" :value="k.code">{{ k.name }}</option>
               </select>
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M7 10l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
@@ -157,8 +180,14 @@
           <div class="field-group">
             <label for="kecamatan">Kecamatan</label>
             <div class="select-wrap">
-              <select id="kecamatan" v-model="form.kecamatan">
-                <option value="" disabled></option>
+              <select
+                id="kecamatan"
+                v-model="form.kecamatan"
+                :disabled="!form.kabupaten"
+                @change="onKecamatanChange"
+              >
+                <option value="" disabled>Pilih Kecamatan</option>
+                <option v-for="c in kecamatans" :key="c.code" :value="c.code">{{ c.name }}</option>
               </select>
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M7 10l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
@@ -169,8 +198,9 @@
           <div class="field-group">
             <label for="kelurahan">Kelurahan/Desa</label>
             <div class="select-wrap">
-              <select id="kelurahan" v-model="form.kelurahan">
-                <option value="" disabled></option>
+              <select id="kelurahan" v-model="form.kelurahan" :disabled="!form.kecamatan">
+                <option value="" disabled>Pilih Kelurahan/Desa</option>
+                <option v-for="v in kelurahans" :key="v.code" :value="v.code">{{ v.name }}</option>
               </select>
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M7 10l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
@@ -185,18 +215,20 @@
           <button class="btn btn-primary" type="submit">
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path
-                d="M12 5v14M5 12h14"
+                d="M18 8v8M14 12h8"
                 stroke="currentColor"
                 stroke-width="2"
                 stroke-linecap="round"
+                stroke-linejoin="round"
               />
               <path
-                d="M16 19a4 4 0 0 0-8 0"
+                d="M3.5 19.5a5.5 5.5 0 0 1 11 0"
                 stroke="currentColor"
                 stroke-width="2"
                 stroke-linecap="round"
+                stroke-linejoin="round"
               />
-              <circle cx="12" cy="9" r="3" stroke="currentColor" stroke-width="2" />
+              <circle cx="9" cy="8" r="3.25" stroke="currentColor" stroke-width="2" />
             </svg>
             <span>Buat Pengguna</span>
           </button>
@@ -251,20 +283,22 @@
 
             <button class="btn btn-ghost modal-btn" type="button" @click="handleAddAnother">
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path
-                  d="M12 5v14M5 12h14"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                />
-                <path
-                  d="M16 19a4 4 0 0 0-8 0"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                />
-                <circle cx="12" cy="9" r="3" stroke="currentColor" stroke-width="2" />
-              </svg>
+              <path
+                d="M18 8v8M14 12h8"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M3.5 19.5a5.5 5.5 0 0 1 11 0"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <circle cx="9" cy="8" r="3.25" stroke="currentColor" stroke-width="2" />
+            </svg>
               <span>Tambah Lagi</span>
             </button>
           </div>
@@ -275,16 +309,21 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import api from '@/services/api'
 
 const router = useRouter()
 const showPassword = ref(false)
 const showPasswordConfirm = ref(false)
 const showSuccessModal = ref(false)
+const provinsis = ref([])
+const kabupatens = ref([])
+const kecamatans = ref([])
+const kelurahans = ref([])
 
 const roleOptions = [
-  { value: 'kurator', label: 'Kurator' },
+  { value: 'user', label: 'User' },
   { value: 'admin', label: 'Admin' },
 ]
 
@@ -304,8 +343,74 @@ const form = ref(defaultForm())
 
 const resetForm = () => {
   form.value = defaultForm()
+  kabupatens.value = []
+  kecamatans.value = []
+  kelurahans.value = []
   showPassword.value = false
   showPasswordConfirm.value = false
+}
+
+const fetchProvinces = async () => {
+  try {
+    const res = await api.get('/region/provinces')
+    provinsis.value = res.data
+  } catch (error) {
+    console.error('Gagal memuat provinsi.', error)
+  }
+}
+
+const onProvinsiChange = async () => {
+  form.value.kabupaten = ''
+  form.value.kecamatan = ''
+  form.value.kelurahan = ''
+  kabupatens.value = []
+  kecamatans.value = []
+  kelurahans.value = []
+
+  if (!form.value.provinsi) return
+
+  try {
+    const res = await api.get('/region/regencies', {
+      params: { province_code: form.value.provinsi },
+    })
+    kabupatens.value = res.data
+  } catch (error) {
+    console.error('Gagal memuat kabupaten/kota.', error)
+  }
+}
+
+const onKabupatenChange = async () => {
+  form.value.kecamatan = ''
+  form.value.kelurahan = ''
+  kecamatans.value = []
+  kelurahans.value = []
+
+  if (!form.value.kabupaten) return
+
+  try {
+    const res = await api.get('/region/districts', {
+      params: { regency_code: form.value.kabupaten },
+    })
+    kecamatans.value = res.data
+  } catch (error) {
+    console.error('Gagal memuat kecamatan.', error)
+  }
+}
+
+const onKecamatanChange = async () => {
+  form.value.kelurahan = ''
+  kelurahans.value = []
+
+  if (!form.value.kecamatan) return
+
+  try {
+    const res = await api.get('/region/villages', {
+      params: { district_code: form.value.kecamatan },
+    })
+    kelurahans.value = res.data
+  } catch (error) {
+    console.error('Gagal memuat kelurahan/desa.', error)
+  }
 }
 
 const saveUserToLocalStorage = () => {
@@ -345,20 +450,20 @@ const handleSubmit = async () => {
   }
 
   try {
-    const api = (await import('@/services/api')).default;
     await api.post('/admin/users', {
       name: form.value.name.trim(),
       email: form.value.email.trim(),
       password: form.value.password.trim(),
       password_confirmation: form.value.passwordConfirm.trim(),
-      role: form.value.role
-    });
-    showSuccessModal.value = true;
+      role: form.value.role,
+      region_code: form.value.kelurahan || null,
+    })
+    showSuccessModal.value = true
   } catch (error) {
     if(error.response && error.response.data && error.response.data.message) {
-      alert(error.response.data.message);
+      alert(error.response.data.message)
     } else {
-      alert('Gagal menambahkan pengguna.');
+      alert('Gagal menambahkan pengguna.')
     }
   }
 }
@@ -380,6 +485,10 @@ const goToList = () => {
   closeModal()
   router.push('/manajemen-pengguna')
 }
+
+onMounted(() => {
+  fetchProvinces()
+})
 </script>
 
 <style scoped>
@@ -404,7 +513,40 @@ const goToList = () => {
   --success: #4caf62;
   --success-soft: #e7f7eb;
 
+  width: 100%;
+  padding: 20px 50px 50px;
+  box-sizing: border-box;
   background: transparent;
+}
+
+.action-bar {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.btn-back {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #7d5731;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.btn-back:hover {
+  transform: scale(1.05);
+}
+
+.btn-back svg {
+  width: 18px;
+  height: 18px;
 }
 
 .page-header {
@@ -469,6 +611,7 @@ const goToList = () => {
   font-size: 1rem;
   padding: 0 20px;
   transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  -webkit-text-fill-color: var(--field-text);
 }
 
 .field-group input::placeholder {
@@ -480,6 +623,17 @@ const goToList = () => {
   border-color: rgba(139, 97, 56, 0.22);
   box-shadow: 0 0 0 4px rgba(139, 97, 56, 0.08);
   background: #f2f1ed;
+  color: var(--field-text);
+  -webkit-text-fill-color: var(--field-text);
+}
+
+.field-group input:-webkit-autofill,
+.field-group input:-webkit-autofill:hover,
+.field-group input:-webkit-autofill:focus,
+.field-group input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--field-text);
+  -webkit-box-shadow: 0 0 0 1000px var(--field-bg) inset;
+  transition: background-color 9999s ease-in-out 0s;
 }
 
 .select-wrap,
@@ -491,6 +645,11 @@ const goToList = () => {
   appearance: none;
   padding-right: 54px;
   cursor: pointer;
+}
+
+.field-group select option {
+  background: #ffffff;
+  color: var(--field-text);
 }
 
 .select-wrap svg,
@@ -602,13 +761,14 @@ const goToList = () => {
 
 .form-actions {
   display: flex;
+  justify-content: flex-end;
   align-items: center;
   gap: 18px;
   margin-top: 40px;
 }
 
 .btn {
-  height: 52px;
+  height: 45px;
   padding: 0 28px;
   border-radius: 999px;
   border: 1px solid transparent;
@@ -617,7 +777,7 @@ const goToList = () => {
   justify-content: center;
   gap: 10px;
   font-size: 1rem;
-  font-weight: 800;
+  font-weight: 500;
   cursor: pointer;
   text-decoration: none;
   transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
@@ -752,7 +912,7 @@ const goToList = () => {
 
 @media (max-width: 768px) {
   .add-user-page {
-    /* Padding handled globally */
+    padding: 20px;
   }
 
   .user-form {

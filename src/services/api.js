@@ -1,5 +1,11 @@
 import axios from 'axios';
 
+const clearAuthState = () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  localStorage.removeItem('lastActiveMenu');
+};
+
 const api = axios.create({
   baseURL: 'http://localhost:8000/api',
   headers: {
@@ -15,5 +21,21 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error.response?.status;
+
+    if (status === 401 || status === 403) {
+      clearAuthState();
+      if (window.location.pathname !== '/') {
+        window.location.href = '/';
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
 
 export default api;

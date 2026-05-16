@@ -99,7 +99,7 @@ const currentUser = computed(() => {
 const formatRole = (role) => {
   const roleMap = {
     admin: 'Admin',
-    user: 'Pengguna',
+    user: 'User',
     system_admin: 'Admin'
   }
 

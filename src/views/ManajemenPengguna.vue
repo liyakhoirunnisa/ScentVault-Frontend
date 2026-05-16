@@ -194,7 +194,7 @@ const getImageUrl = (path) => {
 
 const mapUser = (user) => ({
   ...user,
-  role: user.role || 'Kurator',
+  role: user.role || 'User',
   image: getImageUrl(user.photo || user.image || '')
 })
 
@@ -273,14 +273,16 @@ const getInitials = (name) => {
 const formatRole = (role) => {
   if (!role) return 'User'
   const map = {
-    kurator: 'Kurator',
+    user: 'User',
+    kurator: 'User',
     admin: 'Admin',
     operator: 'Operator',
-    Kurator: 'Kurator',
+    User: 'User',
+    Kurator: 'User',
     Admin: 'Admin',
     Operator: 'Operator',
     system_admin: 'Admin',
-    curator: 'Kurator'
+    curator: 'User'
   }
   return map[role] || role
 }
@@ -289,13 +291,28 @@ const markImageError = (userId) => {
   imageErrors.value[userId] = true
 }
 
+const cacheSelectedUser = (user) => {
+  sessionStorage.setItem(
+    `selected-user-${user.id}`,
+    JSON.stringify({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      image: user.image
+    })
+  )
+}
+
 const viewUser = (user) => {
+  cacheSelectedUser(user)
   router.push({
     path: `/manajemen-pengguna/detail/${user.id}`,
   })
 }
 
 const editUser = (user) => {
+  cacheSelectedUser(user)
   router.push({
     path: `/manajemen-pengguna/edit/${user.id}`,
   })

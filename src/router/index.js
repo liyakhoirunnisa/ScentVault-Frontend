@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import api from '@/services/api'
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import BerandaView from '../views/BerandaView.vue'
@@ -35,6 +36,44 @@ const getStoredUser = () => {
     clearAuthState()
     return null
   }
+}
+
+let authCheckPromise = null
+let lastVerifiedUserId = null
+let lastVerifiedRole = null
+let lastVerifiedAt = 0
+
+const verifyStoredSession = async (user) => {
+  const now = Date.now()
+  const cacheWindowMs = 10 * 1000
+
+  if (
+    user?.id &&
+    user.id === lastVerifiedUserId &&
+    user.role === lastVerifiedRole &&
+    now - lastVerifiedAt < cacheWindowMs
+  ) {
+    return true
+  }
+
+  if (!authCheckPromise) {
+    authCheckPromise = (async () => {
+      if (user?.role === 'admin') {
+        await api.get(`/admin/users/${user.id}`)
+      } else {
+        await api.get('/me')
+      }
+
+      lastVerifiedUserId = user?.id ?? null
+      lastVerifiedRole = user?.role ?? null
+      lastVerifiedAt = Date.now()
+      return true
+    })().finally(() => {
+      authCheckPromise = null
+    })
+  }
+
+  return authCheckPromise
 }
 
 const router = createRouter({
@@ -194,7 +233,7 @@ const router = createRouter({
   ],
 })
 
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   const token = localStorage.getItem('token')
   const user = getStoredUser()
   // Check if token exists and is not null/undefined string
@@ -207,6 +246,15 @@ router.beforeEach((to) => {
   if (to.meta.requiresAuth && isAuthenticated && !user) {
     clearAuthState()
     return { name: 'login' }
+  }
+
+  if (to.meta.requiresAuth && isAuthenticated && user) {
+    try {
+      await verifyStoredSession(user)
+    } catch {
+      clearAuthState()
+      return { name: 'login' }
+    }
   }
 
   if (to.meta.guestOnly && isAuthenticated) {

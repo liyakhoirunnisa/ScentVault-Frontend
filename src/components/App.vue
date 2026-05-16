@@ -5,7 +5,7 @@
     <div class="main-shell">
   <TopbarAdmin
     profile-name="Profil Admin"
-    profile-role="Kurator Utama"
+    profile-role="Admin Utama"
     profile-avatar="https://i.pravatar.cc/120?img=12"
     profile-route="/profil-admin"
     :placeholder="topbarPlaceholder"
