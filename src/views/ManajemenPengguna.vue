@@ -10,14 +10,18 @@
           </p>
         </div>
         <div class="head-actions">
-          <router-link to="/tambah-pengguna" class="btn btn-solid">
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path
-                d="M12 5v14M5 12h14"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-              />
+          <router-link to="/tambah-pengguna" class="btn-gradient">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
             <span>Tambah Pengguna</span>
           </router-link>
@@ -379,34 +383,32 @@ const deleteUser = async (user) => {
   flex-wrap: wrap;
 }
 
-.btn {
-  height: 52px;
-  padding: 0 24px;
-  border-radius: 999px;
-  font-size: 0.98rem;
-  font-weight: 700;
-  border: 1px solid transparent;
-  display: inline-flex;
+.btn-gradient {
+  display: flex;
   align-items: center;
-  gap: 10px;
-  cursor: pointer;
+  gap: 8px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #7d5731 0%, #fac898 100%);
+  border: none;
+  border-radius: 30px;
+  color: #ffffff;
   text-decoration: none;
-  transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(125, 87, 49, 0.25);
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.btn:hover {
-  transform: translateY(-1px);
+.btn-gradient:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(125, 87, 49, 0.35);
 }
 
-.btn svg {
+.btn-gradient svg {
   width: 18px;
   height: 18px;
-}
-
-.btn-solid {
-  color: #fff;
-  background: linear-gradient(90deg, #8b6138 0%, #e9bf84 100%);
-  box-shadow: 0 16px 30px rgba(139, 97, 56, 0.18);
 }
 
 .stats-grid {
@@ -679,7 +681,7 @@ const deleteUser = async (user) => {
     width: 100%;
   }
 
-  .btn {
+  .btn-gradient {
     width: 100%;
     justify-content: center;
   }

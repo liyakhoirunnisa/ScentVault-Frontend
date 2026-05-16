@@ -1,6 +1,27 @@
 <template>
   <header class="top-header">
     <div class="header-left">
+      <div v-if="showSearch" class="search-bar">
+        <svg
+          class="search-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+        <input
+          :value="search"
+          type="text"
+          :placeholder="placeholder"
+          @input="handleSearchInput"
+        />
+      </div>
       <slot></slot>
     </div>
 
@@ -43,9 +64,27 @@ const props = defineProps({
     type: String,
     default: '/profil',
   },
+  placeholder: {
+    type: String,
+    default: 'Cari data...'
+  },
+  showSearch: {
+    type: Boolean,
+    default: false
+  },
+  search: {
+    type: String,
+    default: ''
+  }
 })
 
+const emit = defineEmits(['update:search'])
+
 const userUpdateTrigger = ref(0)
+
+const handleSearchInput = (event) => {
+  emit('update:search', event.target.value)
+}
 
 const getUserFromStorage = () => {
   const userStr = localStorage.getItem('user')
@@ -116,12 +155,44 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   flex: 1;
+  min-width: 0;
 }
 
 .header-actions {
   display: flex;
   align-items: center;
   gap: 20px;
+  padding-left: 20px;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  background-color: #f0f0f0;
+  padding: 10px 15px;
+  border-radius: 20px;
+  width: min(448px, 100%);
+}
+
+.search-icon {
+  width: 16px;
+  height: 16px;
+  color: #888;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.search-bar input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 0.85rem;
+  width: 100%;
+  color: #333;
+}
+
+.search-bar input::placeholder {
+  color: #888;
 }
 
 .profile-section {
@@ -160,5 +231,16 @@ onUnmounted(() => {
   height: 40px;
   border-radius: 50%;
   object-fit: cover;
+}
+
+@media (max-width: 768px) {
+  .top-header {
+    padding: 0 20px;
+    gap: 16px;
+  }
+
+  .search-bar {
+    width: 100%;
+  }
 }
 </style>

@@ -10,6 +10,7 @@
     profile-route="/profil-admin"
     :placeholder="topbarPlaceholder"
     :showSearch="shouldShowSearch"
+    :search="globalSearch"
     @update:search="globalSearch = $event"
   />
 
@@ -27,7 +28,7 @@
 </template>
 
 <script setup>
-import { computed, ref, provide } from 'vue'
+import { computed, ref, provide, watch, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router'
 import Sidebaradmin from './Sidebaradmin.vue'
 import TopbarAdmin from './TopbarAdmin.vue'
@@ -41,8 +42,29 @@ const topbarPlaceholder = computed(() => {
   return route.meta.topbarPlaceholder || 'Cari data...'
 })
 const shouldShowSearch = computed(() => {
-  const hiddenPages = ['KonfigurasiAturan', 'IntegrasiData', 'TambahPengguna', 'ProfileAdminView', 'UserDetail', 'UserEdit']
-  return !hiddenPages.includes(route.name)
+  return route.name === 'ManajemenPengguna'
+})
+
+watch(
+  () => route.name,
+  (routeName) => {
+    if (routeName !== 'ManajemenPengguna') {
+      globalSearch.value = ''
+    }
+  },
+  { immediate: true }
+)
+
+watch(
+  isAdminLayout,
+  (active) => {
+    document.body.classList.toggle('admin-layout-active', active)
+  },
+  { immediate: true }
+)
+
+onBeforeUnmount(() => {
+  document.body.classList.remove('admin-layout-active')
 })
 </script>
 
@@ -52,7 +74,7 @@ const shouldShowSearch = computed(() => {
   width: 100%;
   height: 100vh;
   overflow: hidden;
-  background: #f7f5f1;
+  background: var(--app-bg);
 }
 
 .main-shell {
@@ -61,6 +83,7 @@ const shouldShowSearch = computed(() => {
   height: 100vh;
   display: flex;
   flex-direction: column;
+  background: var(--app-bg);
 }
 
 .main-content {
@@ -69,5 +92,6 @@ const shouldShowSearch = computed(() => {
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
+  background: var(--app-bg);
 }
 </style>
