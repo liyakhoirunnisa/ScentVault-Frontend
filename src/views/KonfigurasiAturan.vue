@@ -198,55 +198,52 @@
       </section>
     </div>
 
-    <transition name="modal-fade">
+    <transition name="toast-fade">
       <div
-        v-if="showModal"
-        class="modal-overlay"
-        @click.self="closeModal"
+        v-if="toast.show"
+        class="toast-notification"
+        :class="toast.type"
+        role="status"
+        aria-live="polite"
       >
-        <div class="success-modal" role="dialog" aria-modal="true" aria-labelledby="success-title">
-          <div class="success-icon-wrap">
-            <div class="success-icon-glow"></div>
-            <div class="success-icon">
-              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path
-                  d="M7 12.5l3.2 3.2L17.5 8.5"
-                  stroke="currentColor"
-                  stroke-width="2.2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            </div>
-          </div>
-
-          <h2 id="success-title">{{ modalContent.title }}</h2>
-          <p>{{ modalContent.message }}</p>
-
-          <div class="modal-actions">
-            <button class="btn btn-solid modal-btn" type="button" @click="closeModal">
-              SELESAI
-            </button>
-          </div>
-        </div>
+        <span class="toast-icon" aria-hidden="true">
+          <svg v-if="toast.type === 'success'" viewBox="0 0 24 24" fill="none">
+            <path d="M7 12.5l3.2 3.2L17.5 8.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <svg v-else viewBox="0 0 24 24" fill="none">
+            <path d="M12 8v5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
+            <circle cx="12" cy="16.5" r="1" fill="currentColor" />
+          </svg>
+        </span>
+        <p>{{ toast.message }}</p>
       </div>
     </transition>
   </section>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onBeforeUnmount, onMounted } from 'vue'
 import api from '@/services/api'
 import imgKonfigurasi from '@/assets/parfum-konfigurasi.png'
 
-const showModal = ref(false)
-const modalContent = ref({
-  title: '',
+const toast = ref({
+  show: false,
   message: '',
+  type: 'success'
 })
+let toastTimeout = null
 
-const closeModal = () => {
-  showModal.value = false
+const showToast = (message, type = 'success') => {
+  toast.value = {
+    show: true,
+    message,
+    type
+  }
+
+  if (toastTimeout) clearTimeout(toastTimeout)
+  toastTimeout = setTimeout(() => {
+    toast.value.show = false
+  }, 3000)
 }
 
 const temperatureRanges = ref([])
@@ -270,6 +267,7 @@ const fetchConfigs = async () => {
       }))
   } catch (err) {
     console.error(err)
+    showToast('Gagal memuat konfigurasi aturan.', 'error')
   }
 }
 
@@ -287,13 +285,10 @@ const saveTemperatureSettings = async () => {
         max_value: range.max
       })
     }
-    modalContent.value = {
-      title: 'Perubahan Suhu Berhasil Disimpan',
-      message: 'Parameter sensor suhu telah diperbarui secara global di seluruh sistem Digital Atelier.'
-    }
-    showModal.value = true
+    showToast('Perubahan suhu berhasil disimpan.')
   } catch(err) {
     console.error(err)
+    showToast('Gagal menyimpan perubahan suhu.', 'error')
   }
 }
 
@@ -309,15 +304,16 @@ const saveTimeSettings = async () => {
         max_value: maxVal
       })
     }
-    modalContent.value = {
-      title: 'Konfigurasi Waktu Berhasil Diperbarui',
-      message: 'Interval waktu operasional untuk kurasi aroma telah berhasil disinkronkan.'
-    }
-    showModal.value = true
+    showToast('Konfigurasi waktu berhasil diperbarui.')
   } catch(err) {
     console.error(err)
+    showToast('Gagal memperbarui konfigurasi waktu.', 'error')
   }
 }
+
+onBeforeUnmount(() => {
+  if (toastTimeout) clearTimeout(toastTimeout)
+})
 </script>
 
 <style scoped>
@@ -703,98 +699,71 @@ const saveTimeSettings = async () => {
   }
 }
 
-.modal-overlay {
+.toast-notification {
   position: fixed;
-  inset: 0;
-  z-index: 70;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 90;
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 24px;
-  background: rgba(33, 27, 21, 0.45);
-  backdrop-filter: blur(4px);
+  gap: 10px;
+  min-width: 260px;
+  max-width: min(90vw, 360px);
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(125, 87, 49, 0.12);
+  box-shadow: 0 18px 34px rgba(41, 31, 21, 0.14);
+  backdrop-filter: blur(8px);
 }
 
-.success-modal {
-  width: min(100%, 462px);
-  padding: 42px 36px 34px;
-  border-radius: 28px;
-  background: rgba(255, 255, 255, 0.98);
-  box-shadow: 0 26px 60px rgba(41, 31, 21, 0.16);
-  text-align: center;
+.toast-notification.success {
+  color: #2f7f46;
 }
 
-.success-icon-wrap {
-  position: relative;
-  width: 72px;
-  height: 72px;
-  margin: 0 auto 16px;
+.toast-notification.error {
+  color: #b84536;
 }
 
-.success-icon-glow {
-  position: absolute;
-  inset: 8px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(101, 214, 122, 0.24) 0%, rgba(101, 214, 122, 0) 72%);
-}
-
-.success-icon {
-  position: absolute;
-  inset: 14px;
+.toast-icon {
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   display: grid;
   place-items: center;
-  color: #4caf62;
-  border: 4px solid currentColor;
+  flex-shrink: 0;
+}
+
+.toast-notification.success .toast-icon {
   background: #e7f7eb;
 }
 
-.success-icon svg {
-  width: 22px;
-  height: 22px;
+.toast-notification.error .toast-icon {
+  background: #fdeaea;
 }
 
-.success-modal h2 {
-  margin: 0 0 12px;
-  color: #2f2c29;
-  font-size: clamp(1.4rem, 2vw, 1.6rem);
-  line-height: 1.35;
-  font-weight: 800;
+.toast-icon svg {
+  width: 16px;
+  height: 16px;
 }
 
-.success-modal p {
-  max-width: 320px;
-  margin: 0 auto;
-  color: #7a726b;
-  font-size: 0.92rem;
-  line-height: 1.65;
+.toast-notification p {
+  margin: 0;
+  color: #3f3833;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.4;
 }
 
-.modal-actions {
-  display: flex;
-  justify-content: center;
-  margin-top: 28px;
-}
-
-.modal-btn {
-  width: 100%;
-  max-width: 280px;
-  letter-spacing: 0.08em;
-  font-size: 0.8rem;
-}
-
-.modal-fade-enter-active,
-.modal-fade-leave-active {
+.toast-fade-enter-active,
+.toast-fade-leave-active {
   transition: opacity 0.22s ease, transform 0.22s ease;
 }
 
-.modal-fade-enter-from,
-.modal-fade-leave-to {
+.toast-fade-enter-from,
+.toast-fade-leave-to {
   opacity: 0;
-}
-
-.modal-fade-enter-from .success-modal,
-.modal-fade-leave-to .success-modal {
-  transform: translateY(10px) scale(0.98);
+  transform: translate(-50%, -8px);
 }
 </style>

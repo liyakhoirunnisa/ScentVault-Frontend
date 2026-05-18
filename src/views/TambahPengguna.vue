@@ -26,6 +26,27 @@
       </div>
     </section>
 
+    <transition name="toast-fade">
+      <div
+        v-if="toast.show"
+        class="toast-notification"
+        :class="toast.type"
+        role="status"
+        aria-live="polite"
+      >
+        <span class="toast-icon" aria-hidden="true">
+          <svg v-if="toast.type === 'success'" viewBox="0 0 24 24" fill="none">
+            <path d="M7 12.5l3.2 3.2L17.5 8.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <svg v-else viewBox="0 0 24 24" fill="none">
+            <path d="M12 8v5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
+            <circle cx="12" cy="16.5" r="1" fill="currentColor" />
+          </svg>
+        </span>
+        <p>{{ toast.message }}</p>
+      </div>
+    </transition>
+
     <section class="form-shell">
       <form class="user-form" @submit.prevent="handleSubmit">
         <div class="form-grid">
@@ -232,10 +253,6 @@
             </svg>
             <span>Buat Pengguna</span>
           </button>
-
-          <button class="btn btn-secondary" type="button" @click="handleCancel">
-            Batal
-          </button>
         </div>
       </form>
     </section>
@@ -309,7 +326,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/services/api'
 
@@ -321,6 +338,25 @@ const provinsis = ref([])
 const kabupatens = ref([])
 const kecamatans = ref([])
 const kelurahans = ref([])
+const toast = ref({
+  show: false,
+  message: '',
+  type: 'success'
+})
+let toastTimeout = null
+
+const showToast = (message, type = 'success') => {
+  toast.value = {
+    show: true,
+    message,
+    type
+  }
+
+  if (toastTimeout) clearTimeout(toastTimeout)
+  toastTimeout = setTimeout(() => {
+    toast.value.show = false
+  }, 3000)
+}
 
 const roleOptions = [
   { value: 'user', label: 'User' },
@@ -442,9 +478,9 @@ const handleSubmit = async () => {
     form.value.password !== form.value.passwordConfirm
   ) {
     if (form.value.password !== form.value.passwordConfirm) {
-      alert('Kata sandi dan konfirmasi kata sandi tidak cocok.')
+      showToast('Kata sandi dan konfirmasi kata sandi tidak cocok.', 'error')
     } else {
-      alert('Mohon lengkapi semua field terlebih dahulu.')
+      showToast('Mohon lengkapi semua field terlebih dahulu.', 'error')
     }
     return
   }
@@ -461,9 +497,9 @@ const handleSubmit = async () => {
     showSuccessModal.value = true
   } catch (error) {
     if(error.response && error.response.data && error.response.data.message) {
-      alert(error.response.data.message)
+      showToast(error.response.data.message, 'error')
     } else {
-      alert('Gagal menambahkan pengguna.')
+      showToast('Gagal menambahkan pengguna.', 'error')
     }
   }
 }
@@ -488,6 +524,10 @@ const goToList = () => {
 
 onMounted(() => {
   fetchProvinces()
+})
+
+onBeforeUnmount(() => {
+  if (toastTimeout) clearTimeout(toastTimeout)
 })
 </script>
 
@@ -517,6 +557,63 @@ onMounted(() => {
   padding: 20px 50px 50px;
   box-sizing: border-box;
   background: transparent;
+}
+
+.toast-notification {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 260px;
+  max-width: min(90vw, 360px);
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(125, 87, 49, 0.12);
+  box-shadow: 0 18px 34px rgba(41, 31, 21, 0.14);
+  backdrop-filter: blur(8px);
+}
+
+.toast-notification.success {
+  color: #2f7f46;
+}
+
+.toast-notification.error {
+  color: #b84536;
+}
+
+.toast-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.toast-notification.success .toast-icon {
+  background: #e7f7eb;
+}
+
+.toast-notification.error .toast-icon {
+  background: #fdeaea;
+}
+
+.toast-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.toast-notification p {
+  margin: 0;
+  color: #3f3833;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.4;
 }
 
 .action-bar {
@@ -793,13 +890,6 @@ onMounted(() => {
   box-shadow: 0 14px 28px rgba(139, 97, 56, 0.18);
 }
 
-.btn-secondary {
-  min-width: 102px;
-  color: var(--primary-dark);
-  border-color: rgba(125, 87, 49, 0.14);
-  background: transparent;
-}
-
 .btn-ghost {
   color: #4a433d;
   background: #efefea;
@@ -813,8 +903,8 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: rgba(33, 27, 21, 0.28);
-  backdrop-filter: blur(3px);
+  background: rgba(24, 18, 14, 0.42);
+  backdrop-filter: blur(6px);
 }
 
 .success-modal {
@@ -896,6 +986,17 @@ onMounted(() => {
 .modal-fade-enter-from .success-modal,
 .modal-fade-leave-to .success-modal {
   transform: translateY(10px) scale(0.98);
+}
+
+.toast-fade-enter-active,
+.toast-fade-leave-active {
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+.toast-fade-enter-from,
+.toast-fade-leave-to {
+  opacity: 0;
+  transform: translate(-50%, -8px);
 }
 
 @media (max-width: 1024px) {

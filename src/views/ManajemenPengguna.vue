@@ -1,5 +1,26 @@
 <template>
   <main class="content-body">
+    <transition name="toast-fade">
+      <div
+        v-if="toast.show"
+        class="toast-notification"
+        :class="toast.type"
+        role="status"
+        aria-live="polite"
+      >
+        <span class="toast-icon" aria-hidden="true">
+          <svg v-if="toast.type === 'success'" viewBox="0 0 24 24" fill="none">
+            <path d="M7 12.5l3.2 3.2L17.5 8.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <svg v-else viewBox="0 0 24 24" fill="none">
+            <path d="M12 8v5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
+            <circle cx="12" cy="16.5" r="1" fill="currentColor" />
+          </svg>
+        </span>
+        <p>{{ toast.message }}</p>
+      </div>
+    </transition>
+
     <div class="page-shell">
       <section class="welcome-section">
         <div>
@@ -161,11 +182,64 @@
         </button>
       </nav>
     </div>
+
+    <transition name="modal-fade">
+      <div
+        v-if="deleteModal.open"
+        class="modal-overlay"
+        @click.self="closeDeleteModal"
+      >
+        <div
+          class="delete-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-modal-title"
+        >
+          <div class="delete-modal-icon">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M5 7h14M9 7V5h6v2m-7 3v7m4-7v7m4-7v7M7 7l1 12h8l1-12"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
+
+          <h2 id="delete-modal-title">Hapus Akun Pengguna?</h2>
+          <p>
+            Apakah Anda yakin ingin menghapus akun ini secara permanen? Tindakan ini akan
+            menghapus seluruh data kurasi dan akses sistem pengguna tersebut.
+          </p>
+
+          <div class="delete-modal-actions">
+            <button
+              class="delete-btn delete-btn-cancel"
+              type="button"
+              :disabled="deleteModal.loading"
+              @click="closeDeleteModal"
+            >
+              Batal
+            </button>
+
+            <button
+              class="delete-btn delete-btn-confirm"
+              type="button"
+              :disabled="deleteModal.loading"
+              @click="confirmDeleteUser"
+            >
+              {{ deleteModal.loading ? 'Menghapus...' : 'Hapus Akun' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
   </main>
 </template>
 
 <script setup>
-import { onMounted, ref, inject, watch } from 'vue'
+import { onBeforeUnmount, onMounted, ref, inject, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/services/api'
 
@@ -177,12 +251,36 @@ const perPage = 5
 const imageErrors = ref({})
 const users = ref([])
 const isLoading = ref(false)
+const toast = ref({
+  show: false,
+  message: '',
+  type: 'success'
+})
+const deleteModal = ref({
+  open: false,
+  loading: false,
+  user: null
+})
+let toastTimeout = null
 const pagination = ref({
   currentPage: 1,
   lastPage: 1,
   perPage,
   total: 0
 })
+
+const showToast = (message, type = 'success') => {
+  toast.value = {
+    show: true,
+    message,
+    type
+  }
+
+  if (toastTimeout) clearTimeout(toastTimeout)
+  toastTimeout = setTimeout(() => {
+    toast.value.show = false
+  }, 3000)
+}
 
 const getImageUrl = (path) => {
   if (!path) return ''
@@ -229,6 +327,7 @@ const loadUsers = async (page = pagination.value.currentPage) => {
       perPage,
       total: 0
     }
+    showToast('Gagal memuat daftar pengguna.', 'error')
   } finally {
     isLoading.value = false
   }
@@ -292,16 +391,30 @@ const markImageError = (userId) => {
 }
 
 const cacheSelectedUser = (user) => {
-  sessionStorage.setItem(
-    `selected-user-${user.id}`,
-    JSON.stringify({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      image: user.image
-    })
-  )
+  const payload = JSON.stringify({
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    image: user.image,
+    photo: user.photo || '',
+    created_at: user.created_at || '',
+    joinedAt: user.joinedAt || '',
+    philosophy: user.philosophy || '',
+    user_id: user.user_id || ''
+  })
+
+  try {
+    sessionStorage.setItem(`selected-user-${user.id}`, payload)
+  } catch (error) {
+    console.warn('Gagal menyimpan cache user ke sessionStorage:', error)
+  }
+
+  try {
+    localStorage.setItem(`selected-user-${user.id}`, payload)
+  } catch (error) {
+    console.warn('Gagal menyimpan cache user ke localStorage:', error)
+  }
 }
 
 const viewUser = (user) => {
@@ -318,18 +431,54 @@ const editUser = (user) => {
   })
 }
 
-const deleteUser = async (user) => {
-  if (!confirm(`Hapus pengguna ${user.name}?`)) return
+const deleteUser = (user) => {
+  deleteModal.value = {
+    open: true,
+    loading: false,
+    user
+  }
+}
+
+const closeDeleteModal = () => {
+  if (deleteModal.value.loading) return
+  deleteModal.value = {
+    open: false,
+    loading: false,
+    user: null
+  }
+}
+
+const resetDeleteModal = () => {
+  deleteModal.value = {
+    open: false,
+    loading: false,
+    user: null
+  }
+}
+
+const confirmDeleteUser = async () => {
+  const selectedUser = deleteModal.value.user
+  if (!selectedUser) return
+
+  deleteModal.value.loading = true
   try {
-    await api.delete(`/admin/users/${user.id}`)
+    await api.delete(`/admin/users/${selectedUser.id}`)
     const targetPage = users.value.length === 1 && pagination.value.currentPage > 1
       ? pagination.value.currentPage - 1
       : pagination.value.currentPage
     await loadUsers(targetPage)
+    resetDeleteModal()
+    showToast(`Pengguna ${selectedUser.name} berhasil dihapus.`)
   } catch(err) {
     console.error(err)
+    deleteModal.value.loading = false
+    showToast(`Gagal menghapus pengguna ${selectedUser.name}.`, 'error')
   }
 }
+
+onBeforeUnmount(() => {
+  if (toastTimeout) clearTimeout(toastTimeout)
+})
 </script>
 
 <style scoped>
@@ -360,6 +509,63 @@ const deleteUser = async (user) => {
   padding: 20px 50px 50px 50px;
   box-sizing: border-box;
   background: transparent;
+}
+
+.toast-notification {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 260px;
+  max-width: min(90vw, 360px);
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(125, 87, 49, 0.12);
+  box-shadow: 0 18px 34px rgba(41, 31, 21, 0.14);
+  backdrop-filter: blur(8px);
+}
+
+.toast-notification.success {
+  color: #2f7f46;
+}
+
+.toast-notification.error {
+  color: #b84536;
+}
+
+.toast-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.toast-notification.success .toast-icon {
+  background: #e7f7eb;
+}
+
+.toast-notification.error .toast-icon {
+  background: #fdeaea;
+}
+
+.toast-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.toast-notification p {
+  margin: 0;
+  color: #3f3833;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.4;
 }
 
 .page-shell {
@@ -674,6 +880,135 @@ const deleteUser = async (user) => {
   cursor: wait;
 }
 
+.toast-fade-enter-active,
+.toast-fade-leave-active {
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+.toast-fade-enter-from,
+.toast-fade-leave-to {
+  opacity: 0;
+  transform: translate(-50%, -8px);
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(24, 18, 14, 0.42);
+  backdrop-filter: blur(6px);
+}
+
+.delete-modal {
+  width: min(100%, 460px);
+  padding: 32px 28px 28px;
+  border-radius: 30px;
+  background: linear-gradient(180deg, #f8f4ef 0%, #fbfaf8 100%);
+  box-shadow: 0 24px 70px rgba(25, 18, 12, 0.28);
+  text-align: center;
+}
+
+.delete-modal-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #ea6a62;
+  background: linear-gradient(180deg, rgba(255, 238, 236, 0.95) 0%, rgba(255, 243, 241, 0.92) 100%);
+  border: 1px solid rgba(234, 106, 98, 0.2);
+}
+
+.delete-modal-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.delete-modal h2 {
+  margin: 0 0 14px;
+  color: #2f2f31;
+  font-size: clamp(1.28rem, 1.8vw, 1.65rem);
+  line-height: 1.18;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.delete-modal p {
+  max-width: 360px;
+  margin: 0 auto;
+  color: #5e6473;
+  font-size: 0.86rem;
+  line-height: 1.62;
+}
+
+.delete-modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.delete-btn {
+  min-width: 132px;
+  height: 48px;
+  padding: 0 22px;
+  border-radius: 999px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease, background 0.2s ease;
+}
+
+.delete-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.delete-btn:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.delete-btn-cancel {
+  color: #d39c67;
+  border-color: rgba(220, 175, 123, 0.45);
+  background: rgba(255, 252, 248, 0.9);
+}
+
+.delete-btn-cancel:hover:not(:disabled) {
+  background: #fff;
+}
+
+.delete-btn-confirm {
+  color: #fff;
+  background: linear-gradient(135deg, #b64023 0%, #cf5730 100%);
+  box-shadow: 0 14px 28px rgba(207, 87, 48, 0.24);
+}
+
+.delete-btn-confirm:hover:not(:disabled) {
+  box-shadow: 0 18px 30px rgba(207, 87, 48, 0.3);
+}
+
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.24s ease;
+}
+
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+}
+
+.modal-fade-enter-from .delete-modal,
+.modal-fade-leave-to .delete-modal {
+  transform: translateY(10px) scale(0.98);
+}
+
 @media (max-width: 1200px) {
   .stats-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -701,6 +1036,19 @@ const deleteUser = async (user) => {
   .btn-gradient {
     width: 100%;
     justify-content: center;
+  }
+
+  .delete-modal {
+    padding: 26px 20px 22px;
+    border-radius: 24px;
+  }
+
+  .delete-modal-actions {
+    flex-direction: column;
+  }
+
+  .delete-btn {
+    width: 100%;
   }
 }
 </style>

@@ -1,5 +1,26 @@
 <template>
   <section class="user-detail-page">
+    <transition name="toast-fade">
+      <div
+        v-if="toast.show"
+        class="toast-notification"
+        :class="toast.type"
+        role="status"
+        aria-live="polite"
+      >
+        <span class="toast-icon" aria-hidden="true">
+          <svg v-if="toast.type === 'success'" viewBox="0 0 24 24" fill="none">
+            <path d="M7 12.5l3.2 3.2L17.5 8.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <svg v-else viewBox="0 0 24 24" fill="none">
+            <path d="M12 8v5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
+            <circle cx="12" cy="16.5" r="1" fill="currentColor" />
+          </svg>
+        </span>
+        <p>{{ toast.message }}</p>
+      </div>
+    </transition>
+
     <div class="action-bar">
       <button class="btn-back" type="button" @click="$router.back()">
         <svg
@@ -197,17 +218,67 @@
         <button type="button" class="btn-outline-cancel" @click="handleCancel">
           Batal
         </button>
-        <button type="button" class="btn-gradient" @click="handleSave">
+        <button type="button" class="btn-gradient" @click="openSaveModal">
           Simpan Perubahan
         </button>
       </div>
     </div>
+
+    <transition name="modal-fade">
+      <div
+        v-if="saveModal.open"
+        class="modal-overlay"
+        @click.self="closeSaveModal"
+      >
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="save-modal-title">
+          <div class="success-icon-wrapper">
+            <div class="success-icon-inner">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#FFFFFF"
+                stroke-width="3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
+          </div>
+
+          <h2 id="save-modal-title" class="modal-title">Yakin Ingin Simpan<br />Perubahan?</h2>
+          <p class="modal-desc">
+            Data pengguna yang telah diperbarui akan langsung tersimpan dan digunakan di sistem.
+          </p>
+
+          <div class="modal-actions-vertical">
+            <button
+              class="btn-gradient w-100"
+              type="button"
+              :disabled="saveModal.loading"
+              @click="handleSave"
+            >
+              {{ saveModal.loading ? 'MENYIMPAN...' : 'IYA' }}
+            </button>
+            <button
+              class="btn-outline-brown w-100"
+              type="button"
+              :disabled="saveModal.loading"
+              @click="closeSaveModal"
+            >
+              TIDAK
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
   </section>
 </template>
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import api from '@/services/api'
 
 const props = defineProps({
   user: {
@@ -530,10 +601,33 @@ const initialMode = computed(() => {
 
 const isEditing = ref(initialMode.value)
 const copied = ref(false)
+const toast = ref({
+  show: false,
+  message: '',
+  type: 'success'
+})
+const saveModal = ref({
+  open: false,
+  loading: false
+})
+let toastTimeout = null
 
 const form = reactive({
   ...emptyUser
 })
+
+function showToast(message, type = 'success') {
+  toast.value = {
+    show: true,
+    message,
+    type
+  }
+
+  if (toastTimeout) clearTimeout(toastTimeout)
+  toastTimeout = setTimeout(() => {
+    toast.value.show = false
+  }, 3000)
+}
 
 const selectedUser = computed(() => {
   const routeId = Number(route.params.id)
@@ -553,12 +647,23 @@ function mapUserToForm(user) {
   Object.assign(form, {
     id: user.id ?? '',
     name: normalizeString(user.name),
-    joinedAt: toISODate(user.createdAt || user.joinedAt || '2023-01-12'),
+    joinedAt: toISODate(
+      user.created_at ||
+      user.createdAt ||
+      user.joined_at ||
+      user.joinedAt ||
+      '2023-01-12'
+    ),
     email: normalizeString(user.email),
-    userId: normalizeString(user.userId || `UID-${String(user.id).padStart(5, '0')}-ATELIER`),
+    userId: normalizeString(
+      user.user_id ||
+      user.userId ||
+      user.uuid ||
+      `UID-${String(user.id).padStart(5, '0')}-ATELIER`
+    ),
     role: resolvedRole,
-    philosophy: normalizeString(user.philosophy),
-    status: normalizeString(user.status || 'aktif'),
+    philosophy: normalizeString(user.philosophy || user.bio || user.description),
+    status: normalizeString(user.status || user.is_active || 'aktif'),
     avatar: getUserPhotoUrl(user.photo || user.image || user.avatar)
   })
 }
@@ -566,6 +671,13 @@ function mapUserToForm(user) {
 function getCachedSelectedUser(userId) {
   try {
     const raw = sessionStorage.getItem(`selected-user-${userId}`)
+    if (raw) return JSON.parse(raw)
+  } catch {
+    // no-op, fallback to localStorage below
+  }
+
+  try {
+    const raw = localStorage.getItem(`selected-user-${userId}`)
     return raw ? JSON.parse(raw) : null
   } catch {
     return null
@@ -579,20 +691,26 @@ async function loadData() {
   const cachedUser = getCachedSelectedUser(routeId)
   if (cachedUser) {
     users.value = [cachedUser]
+    mapUserToForm(cachedUser)
   }
 
   try {
-    const api = (await import('@/services/api')).default
     const res = await api.get(`/admin/users/${routeId}`)
-    const apiUser = res.data.data || {}
+    const apiUser =
+      res.data?.data?.user ||
+      res.data?.data ||
+      res.data?.user ||
+      res.data ||
+      {}
 
-    users.value = [
-      {
-        ...cachedUser,
-        ...apiUser,
-        role: extractRoleValue(apiUser) || extractRoleValue(cachedUser) || 'User'
-      }
-    ]
+    const mergedUser = {
+      ...cachedUser,
+      ...apiUser,
+      role: extractRoleValue(apiUser) || extractRoleValue(cachedUser) || 'User'
+    }
+
+    users.value = [mergedUser]
+    mapUserToForm(mergedUser)
   } catch (e) {
     console.error(e)
   }
@@ -601,6 +719,13 @@ async function loadData() {
 onMounted(() => {
   loadData()
 })
+
+watch(
+  () => route.params.id,
+  () => {
+    loadData()
+  }
+)
 
 watch(
   selectedUser,
@@ -656,24 +781,41 @@ function toggleEdit(forceValue) {
   emit('edit-mode-change', nextValue)
 }
 
+function openSaveModal() {
+  saveModal.value.open = true
+}
+
+function closeSaveModal() {
+  if (saveModal.value.loading) return
+  saveModal.value = {
+    open: false,
+    loading: false
+  }
+}
+
 async function handleSave() {
   const payload = {
     ...form,
     joinedAt: toISODate(form.joinedAt)
   }
 
+  saveModal.value.loading = true
+
   try {
-    const api = (await import('@/services/api')).default;
     await api.patch(`/admin/users/${form.id}`, {
       name: payload.name,
       email: payload.email,
       role: payload.role.toLowerCase()
-    });
+    })
+    closeSaveModal()
     isEditing.value = false
     emit('edit-mode-change', false)
     loadData()
+    showToast('Perubahan pengguna berhasil disimpan.')
   } catch(error) {
     console.error(error)
+    saveModal.value.loading = false
+    showToast(error.response?.data?.message || 'Gagal menyimpan perubahan pengguna.', 'error')
   }
 }
 
@@ -690,11 +832,12 @@ function handleCancel() {
 async function handleDelete() {
   if(confirm('Hapus pengguna ini?')) {
     try {
-      const api = (await import('@/services/api')).default;
-      await api.delete(`/admin/users/${form.id}`);
+      await api.delete(`/admin/users/${form.id}`)
+      showToast('Pengguna berhasil dihapus.')
       emit('delete', { ...form })
     } catch(err) {
-      console.error(err);
+      console.error(err)
+      showToast(err.response?.data?.message || 'Gagal menghapus pengguna.', 'error')
     }
   }
 }
@@ -734,6 +877,7 @@ async function copyUserId() {
 
 onBeforeUnmount(() => {
   if (copyTimeout) clearTimeout(copyTimeout)
+  if (toastTimeout) clearTimeout(toastTimeout)
 })
 </script>
 
@@ -743,6 +887,63 @@ onBeforeUnmount(() => {
   padding: 20px 50px 50px;
   box-sizing: border-box;
   background: transparent;
+}
+
+.toast-notification {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 260px;
+  max-width: min(90vw, 360px);
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(125, 87, 49, 0.12);
+  box-shadow: 0 18px 34px rgba(41, 31, 21, 0.14);
+  backdrop-filter: blur(8px);
+}
+
+.toast-notification.success {
+  color: #2f7f46;
+}
+
+.toast-notification.error {
+  color: #b84536;
+}
+
+.toast-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.toast-notification.success .toast-icon {
+  background: #e7f7eb;
+}
+
+.toast-notification.error .toast-icon {
+  background: #fdeaea;
+}
+
+.toast-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.toast-notification p {
+  margin: 0;
+  color: #3f3833;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.4;
 }
 
 .action-bar {
@@ -1152,6 +1353,137 @@ onBeforeUnmount(() => {
   box-shadow: 0 6px 20px rgba(125, 87, 49, 0.35);
 }
 
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(24, 18, 14, 0.42);
+  backdrop-filter: blur(6px);
+}
+
+.modal-card {
+  background-color: #ffffff;
+  width: min(100%, 400px);
+  padding: 40px 30px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+  animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.success-icon-wrapper {
+  width: 70px;
+  height: 70px;
+  background-color: #f4f4f0;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto 25px auto;
+}
+
+.success-icon-inner {
+  width: 36px;
+  height: 36px;
+  background-color: #7d5731;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.success-icon-inner svg {
+  width: 18px;
+  height: 18px;
+}
+
+.modal-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #7d5731;
+  line-height: 1.3;
+  margin: 0 0 12px;
+}
+
+.modal-desc {
+  font-size: 0.85rem;
+  color: #666;
+  line-height: 1.6;
+  margin: 0 0 30px;
+}
+
+.modal-actions-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.w-100 {
+  width: 100%;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 14px 0;
+}
+
+.btn-outline-brown {
+  background-color: transparent;
+  border: 1px solid #e5e5e5;
+  border-radius: 30px;
+  color: #7d5731;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-outline-brown:hover {
+  border-color: #7d5731;
+  background-color: #fafafa;
+}
+
+.btn-outline-brown:disabled,
+.btn-gradient:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.24s ease;
+}
+
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+}
+
+.toast-fade-enter-active,
+.toast-fade-leave-active {
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+.toast-fade-enter-from,
+.toast-fade-leave-to {
+  opacity: 0;
+  transform: translate(-50%, -8px);
+}
+
 @media (max-width: 900px) {
   .user-detail-page {
     padding: 20px;
@@ -1193,6 +1525,11 @@ onBeforeUnmount(() => {
   .btn-outline-cancel,
   .btn-gradient {
     width: 100%;
+  }
+
+  .modal-card {
+    width: min(100%, 360px);
+    padding: 32px 22px;
   }
 }
 

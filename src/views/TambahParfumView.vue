@@ -221,7 +221,6 @@
             </div>
 
             <div class="form-actions">
-              <button class="btn-outline-cancel" @click="$router.back()">BATAL</button>
               <button class="btn-gradient" @click="submitForm">TAMBAH PARFUM</button>
             </div>
           </div>
@@ -817,22 +816,6 @@ const resetForm = () => {
   align-items: center;
   gap: 15px;
   margin-top: 40px;
-}
-
-.btn-outline-cancel {
-  background-color: transparent;
-  border: 1px solid #d1d5db;
-  border-radius: 30px;
-  padding: 12px 35px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: #7d5731;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.btn-outline-cancel:hover {
-  background-color: #f3f4f6;
-  color: #333;
 }
 
 .btn-gradient {
