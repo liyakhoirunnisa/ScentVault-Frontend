@@ -332,12 +332,39 @@
           </div>
         </div>
       </div>
+
+      <transition name="toast-fade">
+        <div
+          v-if="toast.show"
+          class="toast-notification"
+          :class="toast.type"
+          role="status"
+          aria-live="polite"
+        >
+          <span class="toast-icon" aria-hidden="true">
+            <svg v-if="toast.type === 'success'" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M7 12.5l3.2 3.2L17.5 8.5"
+                stroke="currentColor"
+                stroke-width="2.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <svg v-else viewBox="0 0 24 24" fill="none">
+              <path d="M12 8v5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
+              <circle cx="12" cy="16.5" r="1" fill="currentColor" />
+            </svg>
+          </span>
+          <p>{{ toast.message }}</p>
+        </div>
+      </transition>
     </main>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import Topbar from '@/components/Topbar.vue'
 import Sidebar from '@/components/Sidebar.vue'
 import { useRouter, useRoute } from 'vue-router'
@@ -367,10 +394,30 @@ const formData = ref({
 const categories = ref([])
 const photoPreview = ref(defaultImg)
 const fileInput = ref(null)
+const toast = ref({
+  show: false,
+  message: '',
+  type: 'success',
+})
+let toastTimeout = null
+let redirectTimeout = null
 
 const newTop = ref('')
 const newHeart = ref('')
 const newBase = ref('')
+
+const showToast = (message, type = 'success') => {
+  toast.value = {
+    show: true,
+    message,
+    type,
+  }
+
+  if (toastTimeout) clearTimeout(toastTimeout)
+  toastTimeout = setTimeout(() => {
+    toast.value.show = false
+  }, 3000)
+}
 
 const fetchCategories = async () => {
   try {
@@ -425,8 +472,10 @@ const fetchPerfume = async () => {
     }
   } catch (e) {
     console.error('Failed fetching perfume details', e)
-    alert('Gagal mengambil data parfum.')
-    router.push('/koleksi')
+    showToast('Gagal mengambil data parfum.', 'error')
+    redirectTimeout = setTimeout(() => {
+      router.push('/koleksi')
+    }, 1200)
   }
 }
 
@@ -476,7 +525,7 @@ const promptSave = () => {
 
 const confirmSave = async () => {
   if (!formData.value.name || !formData.value.brand || !formData.value.category_id) {
-    alert('Mohon lengkapi Nama Parfum, Brand, dan Kategori sebelum menyimpan.')
+    showToast('Mohon lengkapi Nama Parfum, Brand, dan Kategori sebelum menyimpan.', 'error')
     showEditModal.value = false
     return
   }
@@ -522,8 +571,10 @@ const confirmSave = async () => {
     })
 
     showEditModal.value = false
-    alert('Perubahan berhasil disimpan!')
-    router.push(`/detail/${perfumeId}`)
+    showToast('Perubahan berhasil disimpan!', 'success')
+    redirectTimeout = setTimeout(() => {
+      router.push(`/detail/${perfumeId}`)
+    }, 1200)
   } catch (e) {
     showEditModal.value = false
 
@@ -543,6 +594,11 @@ const confirmSave = async () => {
 const closeEditModal = () => {
   showEditModal.value = false
 }
+
+onBeforeUnmount(() => {
+  if (toastTimeout) clearTimeout(toastTimeout)
+  if (redirectTimeout) clearTimeout(redirectTimeout)
+})
 </script>
 <style scoped>
 /* =========================================
@@ -1113,6 +1169,76 @@ const closeEditModal = () => {
 .btn-outline-brown:hover {
   border-color: #7d5731;
   background-color: #fafafa;
+}
+
+.toast-notification {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 260px;
+  max-width: min(90vw, 600px);
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(125, 87, 49, 0.12);
+  box-shadow: 0 18px 34px rgba(41, 31, 21, 0.14);
+  backdrop-filter: blur(8px);
+}
+
+.toast-notification.success {
+  color: #2f7f46;
+}
+
+.toast-notification.error {
+  color: #b84536;
+}
+
+.toast-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.toast-notification.success .toast-icon {
+  background: #e7f7eb;
+}
+
+.toast-notification.error .toast-icon {
+  background: #fdeaea;
+}
+
+.toast-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.toast-notification p {
+  margin: 0;
+  color: #3f3833;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.toast-fade-enter-active,
+.toast-fade-leave-active {
+  transition:
+    opacity 0.22s ease,
+    transform 0.22s ease;
+}
+
+.toast-fade-enter-from,
+.toast-fade-leave-to {
+  opacity: 0;
+  transform: translate(-50%, -8px);
 }
 
 /* Responsif */

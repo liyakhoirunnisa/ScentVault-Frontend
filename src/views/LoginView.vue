@@ -20,6 +20,10 @@
           </div>
 
           <form @submit.prevent="handleLogin" class="auth-form">
+            <p v-if="errorMessage" class="login-error-alert" role="alert">
+              {{ errorMessage }}
+            </p>
+
             <div class="form-group">
               <label for="email">ALAMAT EMAIL</label>
               <div class="input-wrapper">
@@ -48,10 +52,7 @@
             </div>
 
             <div class="form-group">
-              <div class="label-row">
-                <label for="password">KATA SANDI</label>
-                <a href="#" class="forgot-link">LUPA KATA SANDI?</a>
-              </div>
+              <label for="password">KATA SANDI</label>
               <div class="input-wrapper">
                 <svg
                   class="input-icon"
@@ -121,7 +122,7 @@
     <footer class="login-footer">
       <div class="footer-left">
         <h3 class="footer-logo">ScentVault</h3>
-        <p>© 2024 SCENTVAULT. CRAFTED FOR THE DIGITAL ATELIER.</p>
+        <p>© 2026 SCENTVAULT. CRAFTED FOR THE DIGITAL ATELIER.</p>
       </div>
     </footer>
   </div>
@@ -177,8 +178,7 @@ const handleLogin = async () => {
     }
   } catch (error) {
     console.error('Login error:', error)
-    errorMessage.value = error.response?.data?.message || 'Email atau password salah'
-    alert(errorMessage.value)
+    errorMessage.value = 'Email atau kata sandi yang Anda masukkan salah'
   } finally {
     isLoading.value = false
   }
@@ -291,6 +291,18 @@ const handleLogin = async () => {
   line-height: 1.5;
 }
 
+.login-error-alert {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #fdeaea;
+  border: 1px solid rgba(184, 69, 54, 0.24);
+  color: #b84536;
+  font-size: 0.85rem;
+  font-weight: 400;
+  line-height: 1.45;
+}
+
 .form-group {
   margin-bottom: 12px;
 }
@@ -302,19 +314,6 @@ const handleLogin = async () => {
   color: #888;
   margin-bottom: 8px;
   letter-spacing: 0.5px;
-}
-
-.label-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.forgot-link {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #7d5731;
-  text-decoration: none;
 }
 
 .input-wrapper {

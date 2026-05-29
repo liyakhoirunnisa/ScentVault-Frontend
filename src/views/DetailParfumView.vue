@@ -85,8 +85,12 @@
           </div>
 
           <div class="product-info-side">
-            <span class="brand-name">{{ perfume.brand?.name || perfume.brand }}</span>
+            <span class="brand-name">{{ perfume.brand_name || perfume.brand?.name || perfume.brand }}</span>
             <h2 class="product-title">{{ perfume.name }}</h2>
+            <div class="product-meta-row">
+              <span>{{ perfume.category_name || perfume.category?.name || 'Kategori aroma' }}</span>
+              <span>{{ perfume.concentration || 'Konsentrasi' }}</span>
+            </div>
 
             <div class="rating-row">
               <div class="stars">
@@ -192,11 +196,38 @@
           </div>
         </div>
       </div>
+
+      <transition name="toast-fade">
+        <div
+          v-if="toast.show"
+          class="toast-notification"
+          :class="toast.type"
+          role="status"
+          aria-live="polite"
+        >
+          <span class="toast-icon" aria-hidden="true">
+            <svg v-if="toast.type === 'success'" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M7 12.5l3.2 3.2L17.5 8.5"
+                stroke="currentColor"
+                stroke-width="2.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <svg v-else viewBox="0 0 24 24" fill="none">
+              <path d="M12 8v5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
+              <circle cx="12" cy="16.5" r="1" fill="currentColor" />
+            </svg>
+          </span>
+          <p>{{ toast.message }}</p>
+        </div>
+      </transition>
     </main>
   </div>
 </template>
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import Topbar from '@/components/Topbar.vue'
 import Sidebar from '@/components/Sidebar.vue'
 import { useRouter, useRoute } from 'vue-router'
@@ -211,6 +242,26 @@ const perfumeId = route.params.id
 
 const perfume = ref(null)
 const loading = ref(true)
+const toast = ref({
+  show: false,
+  message: '',
+  type: 'error',
+})
+let toastTimeout = null
+let redirectTimeout = null
+
+const showToast = (message, type = 'error') => {
+  toast.value = {
+    show: true,
+    message,
+    type,
+  }
+
+  if (toastTimeout) clearTimeout(toastTimeout)
+  toastTimeout = setTimeout(() => {
+    toast.value.show = false
+  }, 3000)
+}
 
 const fetchPerfume = async () => {
   try {
@@ -218,8 +269,10 @@ const fetchPerfume = async () => {
     perfume.value = res.data.data
   } catch (err) {
     console.error('Failed fetching perfume detail', err)
-    alert('Data parfum tidak ditemukan.')
-    router.push('/koleksi')
+    showToast('Data parfum tidak ditemukan.', 'error')
+    redirectTimeout = setTimeout(() => {
+      router.push('/koleksi')
+    }, 1200)
   } finally {
     loading.value = false
   }
@@ -274,10 +327,15 @@ const confirmDelete = async () => {
     router.push('/koleksi')
   } catch (err) {
     console.error('Failed to delete perfume', err)
-    alert('Gagal menghapus parfum.')
+    showToast('Gagal menghapus parfum.', 'error')
     showDeleteModal.value = false
   }
 }
+
+onBeforeUnmount(() => {
+  if (toastTimeout) clearTimeout(toastTimeout)
+  if (redirectTimeout) clearTimeout(redirectTimeout)
+})
 </script>
 <style scoped>
 /* =========================================
@@ -586,8 +644,8 @@ Product Layout (Kiri: Gambar, Kanan: Info)
 /* --- KANAN: Informasi --- */
 .brand-name {
   display: block;
-  font-size: 0.75rem;
-  font-weight: 800;
+  font-size: 1.5rem;
+  font-weight: 600;
   color: #7d5731;
   letter-spacing: 1.5px;
   margin-bottom: 8px;
@@ -597,7 +655,28 @@ Product Layout (Kiri: Gambar, Kanan: Info)
   font-weight: 800;
   color: #303330;
   line-height: 1.1;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
+}
+
+.product-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.product-meta-row span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background-color: #f4f4f0;
+  color: #6d625b;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
 }
 
 .rating-row {
@@ -676,6 +755,76 @@ Product Layout (Kiri: Gambar, Kanan: Info)
   font-weight: 700;
   color: #444;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.01);
+}
+
+.toast-notification {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 260px;
+  max-width: min(90vw, 360px);
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(125, 87, 49, 0.12);
+  box-shadow: 0 18px 34px rgba(41, 31, 21, 0.14);
+  backdrop-filter: blur(8px);
+}
+
+.toast-notification.success {
+  color: #2f7f46;
+}
+
+.toast-notification.error {
+  color: #b84536;
+}
+
+.toast-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.toast-notification.success .toast-icon {
+  background: #e7f7eb;
+}
+
+.toast-notification.error .toast-icon {
+  background: #fdeaea;
+}
+
+.toast-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.toast-notification p {
+  margin: 0;
+  color: #3f3833;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.toast-fade-enter-active,
+.toast-fade-leave-active {
+  transition:
+    opacity 0.22s ease,
+    transform 0.22s ease;
+}
+
+.toast-fade-enter-from,
+.toast-fade-leave-to {
+  opacity: 0;
+  transform: translate(-50%, -8px);
 }
 
 /* Responsif */

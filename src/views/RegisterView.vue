@@ -308,14 +308,41 @@
     <footer class="auth-footer">
       <div class="footer-left">
         <h3 class="footer-logo">ScentVault</h3>
-        <p>© 2024 SCENTVAULT. CRAFTED FOR THE DIGITAL ATELIER.</p>
+        <p>© 2026 SCENTVAULT. CRAFTED FOR THE DIGITAL ATELIER.</p>
       </div>
     </footer>
+
+    <transition name="toast-fade">
+      <div
+        v-if="toast.show"
+        class="toast-notification"
+        :class="toast.type"
+        role="status"
+        aria-live="polite"
+      >
+        <span class="toast-icon" aria-hidden="true">
+          <svg v-if="toast.type === 'success'" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M7 12.5l3.2 3.2L17.5 8.5"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          <svg v-else viewBox="0 0 24 24" fill="none">
+            <path d="M12 8v5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
+            <circle cx="12" cy="16.5" r="1" fill="currentColor" />
+          </svg>
+        </span>
+        <p>{{ toast.message }}</p>
+      </div>
+    </transition>
   </div>
 </template>
 
 <script setup>
-import { reactive, ref, computed, onMounted, watch } from 'vue'
+import { reactive, ref, computed, onMounted, watch, onBeforeUnmount } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import api from '../services/api'
 
@@ -335,6 +362,13 @@ const form = reactive({
 
 const isLoading = ref(false)
 const errorMessage = ref('')
+const toast = ref({
+  show: false,
+  message: '',
+  type: 'success',
+})
+let toastTimeout = null
+let redirectTimeout = null
 
 // UNTUK FITUR MATA (EYE ICON)
 const showPassword = ref(false)
@@ -421,14 +455,27 @@ onMounted(() => {
   fetchProvinces()
 })
 
+const showToast = (message, type = 'success') => {
+  toast.value = {
+    show: true,
+    message,
+    type,
+  }
+
+  if (toastTimeout) clearTimeout(toastTimeout)
+  toastTimeout = setTimeout(() => {
+    toast.value.show = false
+  }, 3000)
+}
+
 const handleRegister = async () => {
   if (passwordError.value) {
-    alert('Mohon pastikan konfirmasi kata sandi Anda sama.')
+    showToast('Mohon pastikan konfirmasi kata sandi Anda sama.', 'error')
     return
   }
 
   if (!form.kelurahan) {
-    alert('Harap pilih Kelurahan/Desa.')
+    showToast('Harap pilih Kelurahan/Desa.', 'error')
     return
   }
 
@@ -447,21 +494,28 @@ const handleRegister = async () => {
     const response = await api.post('/register', payload)
 
     if (response.data) {
-      alert('Registrasi Berhasil! Silakan login dengan akun Anda.')
-      router.push('/')
+      showToast('Registrasi berhasil! Silakan login dengan akun Anda.', 'success')
+      redirectTimeout = setTimeout(() => {
+        router.push('/')
+      }, 1200)
     }
   } catch (error) {
     if (error.response && error.response.data && error.response.data.message) {
       errorMessage.value = error.response.data.message
-      alert(errorMessage.value)
+      showToast(errorMessage.value, 'error')
     } else {
-      alert('Gagal melakukan pendaftaran. Periksa koneksi Anda.')
+      showToast('Gagal melakukan pendaftaran. Periksa koneksi Anda.', 'error')
     }
     console.error('Register error:', error)
   } finally {
     isLoading.value = false
   }
 }
+
+onBeforeUnmount(() => {
+  if (toastTimeout) clearTimeout(toastTimeout)
+  if (redirectTimeout) clearTimeout(redirectTimeout)
+})
 </script>
 
 <style scoped>
@@ -818,5 +872,75 @@ const handleRegister = async () => {
   font-weight: 500;
   letter-spacing: 0.5px;
   margin: 0;
+}
+
+.toast-notification {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 260px;
+  max-width: min(90vw, 500px);
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(125, 87, 49, 0.12);
+  box-shadow: 0 18px 34px rgba(41, 31, 21, 0.14);
+  backdrop-filter: blur(8px);
+}
+
+.toast-notification.success {
+  color: #2f7f46;
+}
+
+.toast-notification.error {
+  color: #b84536;
+}
+
+.toast-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.toast-notification.success .toast-icon {
+  background: #e7f7eb;
+}
+
+.toast-notification.error .toast-icon {
+  background: #fdeaea;
+}
+
+.toast-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.toast-notification p {
+  margin: 0;
+  color: #3f3833;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.toast-fade-enter-active,
+.toast-fade-leave-active {
+  transition:
+    opacity 0.22s ease,
+    transform 0.22s ease;
+}
+
+.toast-fade-enter-from,
+.toast-fade-leave-to {
+  opacity: 0;
+  transform: translate(-50%, -8px);
 }
 </style>

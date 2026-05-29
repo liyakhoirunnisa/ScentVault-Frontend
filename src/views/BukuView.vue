@@ -13,7 +13,7 @@
 
         <div class="diary-grid">
           <div class="left-column">
-            <div class="form-card new-entry-card">
+            <form class="form-card new-entry-card" @submit.prevent="submitEntry">
               <div class="card-header-title">
                 <svg
                   viewBox="0 0 24 24"
@@ -39,7 +39,11 @@
                     <path d="M8.5 14c1.5 1.5 5.5 1.5 7 0"></path>
                   </svg>
                   
-                  <select class="form-control select-custom with-pad" v-model="newEntry.perfume_id">
+                  <select
+                    class="form-control select-custom with-pad"
+                    v-model="newEntry.perfume_id"
+                    required
+                  >
                     <option value="" disabled>Cari koleksi...</option>
                     <option v-for="p in perfumes" :key="p.id" :value="p.id">{{ p.name }}</option>
                   </select>
@@ -58,7 +62,11 @@
                       <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path>
                     </svg>
 
-                    <select class="form-control select-custom with-pad" v-model="newEntry.weather">
+                    <select
+                      class="form-control select-custom with-pad"
+                      v-model="newEntry.weather"
+                      required
+                    >
                       <option value="" disabled>Kondisi saat ini</option>
                       <option v-for="w in weathers" :key="w" :value="w">{{ w }}</option>
                     </select>
@@ -79,7 +87,11 @@
                       <line x1="3" y1="10" x2="21" y2="10"></line>
                     </svg>
 
-                    <select class="form-control select-custom with-pad" v-model="newEntry.occasion_id">
+                    <select
+                      class="form-control select-custom with-pad"
+                      v-model="newEntry.occasion_id"
+                      required
+                    >
                       <option value="" disabled>Tujuan hari ini</option>
                       <option v-for="o in occasions" :key="o.id" :value="o.id">{{ o.name }}</option>
                     </select>
@@ -93,11 +105,16 @@
 
               <div class="input-group">
                 <label>CATATAN AROMA</label>
-                <textarea class="form-control textarea-custom" placeholder="Tulis catatan singkat di sini..." v-model="newEntry.notes_review"></textarea>
+                <textarea
+                  class="form-control textarea-custom"
+                  placeholder="Tulis catatan singkat di sini..."
+                  v-model="newEntry.notes_review"
+                  required
+                ></textarea>
               </div>
 
-              <button class="btn-gradient w-100" @click="submitEntry">SIMPAN ENTRI</button>
-            </div>
+              <button class="btn-gradient w-100" type="submit">SIMPAN ENTRI</button>
+            </form>
           </div>
 
           <div class="right-column">
@@ -194,6 +211,7 @@
         </div>
       </div>
     </main>
+
   </div>
 </template>
 
@@ -205,13 +223,15 @@ import axios from 'axios'
 
 const diaryEntries = ref([])
 const perfumes = ref([])
-const occasions = ref([
-  { id: 1, name: 'Santai / Kasual' },
-  { id: 2, name: 'Bekerja / Kantor' },
-  { id: 3, name: 'Kencan / Romantis' },
-  { id: 4, name: 'Pesta / Malam Hari' },
-  { id: 5, name: 'Olahraga / Outdoor' }
-])
+const defaultOccasions = [
+  { id: 1, name: 'Santai' },
+  { id: 2, name: 'Bekerja' },
+  { id: 3, name: 'Kencan' },
+  { id: 4, name: 'Pesta' },
+  { id: 5, name: 'Olahraga' }
+]
+const defaultOccasionNames = defaultOccasions.map((occasion) => occasion.name)
+const occasions = ref([...defaultOccasions])
 
 const weathers = ['Cerah', 'Berawan', 'Mendung', 'Hujan', 'Sejuk', 'Dingin']
 
@@ -252,17 +272,34 @@ const fetchPerfumes = async () => {
   }
 }
 
+const fetchOccasions = async () => {
+  try {
+    const token = localStorage.getItem('token')
+    if (!token) return
+    const res = await axios.get('http://localhost:8000/api/occasions', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    const apiOccasions = res.data?.data || []
+    const hasCompleteDefaultOccasions = defaultOccasionNames.every((name) =>
+      apiOccasions.some((occasion) => occasion.name === name)
+    )
+
+    if (res.data?.success && hasCompleteDefaultOccasions) {
+      occasions.value = res.data.data
+    }
+  } catch (error) {
+    console.error('Gagal mengambil daftar acara:', error)
+    occasions.value = [...defaultOccasions]
+  }
+}
+
 onMounted(() => {
   fetchScentLogs()
   fetchPerfumes()
+  fetchOccasions()
 })
 
 const submitEntry = async () => {
-  if (!newEntry.value.notes_review.trim() || !newEntry.value.perfume_id || !newEntry.value.occasion_id) {
-    alert("Silakan isi semua pilihan!")
-    return
-  }
-
   try {
     const token = localStorage.getItem('token')
     const payload = {
@@ -272,9 +309,6 @@ const submitEntry = async () => {
       notes_review: newEntry.value.notes_review
     }
     
-    // Asumsi occasion_id belum ada seedernya, jika API error 422 'exists:occasions,id', backend perlu occassion logic.
-    // Tapi kita kirim sesuai request. 
-
     const res = await axios.post('http://localhost:8000/api/scentLog', payload, {
       headers: { Authorization: `Bearer ${token}` }
     })
@@ -483,6 +517,7 @@ const getIconType = (weather) => {
   appearance: none;
   cursor: pointer;
 }
+
 .chevron {
   position: absolute;
   right: 15px;

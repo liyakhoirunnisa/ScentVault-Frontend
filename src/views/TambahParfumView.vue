@@ -24,7 +24,7 @@
 
         <h1 class="page-title">Simpan Aroma Baru Anda</h1>
 
-        <div class="form-grid">
+        <form class="form-grid" novalidate @submit.prevent="submitForm">
           <div class="left-column">
             <div class="upload-placeholder" @click="triggerUpload" :style="photoPreview ? { backgroundImage: `url(${photoPreview})`, backgroundSize: 'cover', backgroundPosition: 'center', border: 'none' } : {}">
               <input type="file" ref="fileInput" @change="handleImageUpload" accept="image/*" style="display: none;" />
@@ -54,6 +54,7 @@
                 <button
                   v-for="(val, label) in { 'EDP': 'eau de parfum', 'EDT': 'eau de toilette', 'Extrait': 'extrait de parfum', 'Cologne': 'eau de cologne' }"
                   :key="label"
+                  type="button"
                   class="pill-btn"
                   :class="{ active: formData.concentration === val }"
                   @click="formData.concentration = val"
@@ -61,6 +62,13 @@
                   {{ label }}
                 </button>
               </div>
+              <input
+                ref="concentrationInput"
+                class="native-validation-proxy"
+                :value="formData.concentration"
+                required
+                aria-label="Konsentrasi"
+              />
             </div>
             <div class="rating-section">
               <label>PERINGKAT KESELURUHAN</label>
@@ -81,6 +89,13 @@
                 </div>
                 <span class="rating-text">{{ formData.rating }}.0 / 5</span>
               </div>
+              <input
+                ref="ratingInput"
+                class="native-validation-proxy"
+                :value="formData.rating > 0 ? formData.rating : ''"
+                required
+                aria-label="Peringkat keseluruhan"
+              />
             </div>
           </div>
 
@@ -89,19 +104,23 @@
               <div class="input-group">
                 <label>NAMA FRAGRANCE</label>
                 <input
+                  ref="nameInput"
                   type="text"
                   class="form-control"
                   v-model="formData.name"
                   placeholder="Contoh: Oud Wood"
+                  required
                 />
               </div>
               <div class="input-group">
                 <label>BRAND / RUMAH PARFUM</label>
                 <input
+                  ref="brandInput"
                   type="text"
                   class="form-control"
                   v-model="formData.brand"
                   placeholder="Contoh: Tom Ford"
+                  required
                 />
               </div>
             </div>
@@ -109,7 +128,12 @@
             <div class="input-group">
               <label>KATEGORI AROMA</label>
               <div class="select-wrapper">
-                <select class="form-control select-custom" v-model="formData.category_id">
+                <select
+                  ref="categoryInput"
+                  class="form-control select-custom"
+                  v-model="formData.category_id"
+                  required
+                >
                   <option value="" disabled selected>Pilih kategori</option>
                   <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
                 </select>
@@ -167,7 +191,7 @@
                     </span>
                   </div>
                   <div class="input-with-add">
-                    <input type="text" class="input-add-note" v-model="newTop" placeholder="Tambah bahan..." @keyup.enter="addNote('top')" />
+                    <input type="text" class="input-add-note" v-model="newTop" placeholder="Tambah bahan..." @keydown.enter.prevent="addNote('top')" />
                     <button type="button" class="btn-add-small" @click="addNote('top')">+ TAMBAH</button>
                   </div>
                 </div>
@@ -190,7 +214,7 @@
                     </span>
                   </div>
                   <div class="input-with-add">
-                    <input type="text" class="input-add-note" v-model="newHeart" placeholder="Tambah bahan..." @keyup.enter="addNote('heart')" />
+                    <input type="text" class="input-add-note" v-model="newHeart" placeholder="Tambah bahan..." @keydown.enter.prevent="addNote('heart')" />
                     <button type="button" class="btn-add-small" @click="addNote('heart')">+ TAMBAH</button>
                   </div>
                 </div>
@@ -213,18 +237,25 @@
                     </span>
                   </div>
                   <div class="input-with-add">
-                    <input type="text" class="input-add-note" v-model="newBase" placeholder="Tambah bahan..." @keyup.enter="addNote('base')" />
+                    <input type="text" class="input-add-note" v-model="newBase" placeholder="Tambah bahan..." @keydown.enter.prevent="addNote('base')" />
                     <button type="button" class="btn-add-small" @click="addNote('base')">+ TAMBAH</button>
                   </div>
                 </div>
               </div>
+              <input
+                ref="notesInput"
+                class="native-validation-proxy"
+                :value="notesValidationValue"
+                required
+                aria-label="Notes"
+              />
             </div>
 
             <div class="form-actions">
-              <button class="btn-gradient" @click="submitForm">TAMBAH PARFUM</button>
+              <button class="btn-gradient" type="submit">TAMBAH PARFUM</button>
             </div>
           </div>
-        </div>
+        </form>
       </div>
 
       <div v-if="showSuccessModal" class="modal-overlay" @click.self="resetForm">
@@ -257,12 +288,39 @@
           </div>
         </div>
       </div>
+
+      <transition name="toast-fade">
+        <div
+          v-if="toast.show"
+          class="toast-notification"
+          :class="toast.type"
+          role="status"
+          aria-live="polite"
+        >
+          <span class="toast-icon" aria-hidden="true">
+            <svg v-if="toast.type === 'success'" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M7 12.5l3.2 3.2L17.5 8.5"
+                stroke="currentColor"
+                stroke-width="2.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <svg v-else viewBox="0 0 24 24" fill="none">
+              <path d="M12 8v5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
+              <circle cx="12" cy="16.5" r="1" fill="currentColor" />
+            </svg>
+          </span>
+          <p>{{ toast.message }}</p>
+        </div>
+      </transition>
     </main>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import Topbar from '@/components/Topbar.vue'
 import Sidebar from '@/components/Sidebar.vue'
 import api from '../services/api'
@@ -274,7 +332,7 @@ const formData = ref({
   name: '',
   brand: '',
   category_id: '',
-  concentration: 'eau de parfum',
+  concentration: '',
   rating: 0,
   description: '',
   topNotes: [],
@@ -286,10 +344,35 @@ const formData = ref({
 const categories = ref([])
 const photoPreview = ref(null)
 const fileInput = ref(null)
+const toast = ref({
+  show: false,
+  message: '',
+  type: 'error'
+})
+let toastTimeout = null
+const nameInput = ref(null)
+const brandInput = ref(null)
+const categoryInput = ref(null)
+const notesInput = ref(null)
+const concentrationInput = ref(null)
+const ratingInput = ref(null)
 
 const newTop = ref('')
 const newHeart = ref('')
 const newBase = ref('')
+
+const notesValidationValue = computed(() => {
+  const hasSavedNotes =
+    formData.value.topNotes.length ||
+    formData.value.heartNotes.length ||
+    formData.value.baseNotes.length
+  const hasPendingNotes =
+    newTop.value.trim() ||
+    newHeart.value.trim() ||
+    newBase.value.trim()
+
+  return hasSavedNotes || hasPendingNotes ? 'filled' : ''
+})
 
 const fetchCategories = async () => {
   try {
@@ -303,6 +386,19 @@ const fetchCategories = async () => {
 onMounted(() => fetchCategories())
 
 const triggerUpload = () => fileInput.value.click()
+
+const showToast = (message, type = 'error') => {
+  toast.value = {
+    show: true,
+    message,
+    type
+  }
+
+  if (toastTimeout) clearTimeout(toastTimeout)
+  toastTimeout = setTimeout(() => {
+    toast.value.show = false
+  }, 3000)
+}
 
 const handleImageUpload = (e) => {
   const file = e.target.files[0]
@@ -333,11 +429,37 @@ const removeNote = (type, index) => {
 
 const showSuccessModal = ref(false)
 
-const submitForm = async () => {
-  if(!formData.value.name || !formData.value.brand || !formData.value.category_id) {
-    alert('Harap lengkapi nama, brand, dan kategori terlebih dahulu.')
-    return
+const commitPendingNotes = () => {
+  addNote('top')
+  addNote('heart')
+  addNote('base')
+}
+
+const validateRequiredFields = () => {
+  const requiredFields = [
+    nameInput,
+    brandInput,
+    categoryInput,
+    notesInput,
+    concentrationInput,
+    ratingInput
+  ]
+
+  for (const field of requiredFields) {
+    const input = field.value
+    if (input && !input.checkValidity()) {
+      input.reportValidity()
+      return false
+    }
   }
+
+  return true
+}
+
+const submitForm = async () => {
+  if (!validateRequiredFields()) return
+
+  commitPendingNotes()
 
   const fd = new FormData()
   fd.append('name', formData.value.name)
@@ -372,7 +494,7 @@ const submitForm = async () => {
     await api.post('/perfumes', fd, { headers: { 'Content-Type': 'multipart/form-data' }})
     showSuccessModal.value = true
   } catch (e) {
-    alert('Gagal menyimpan parfum. Silakan periksa kembali data Anda.')
+    showToast('Gagal menyimpan parfum. Silakan periksa kembali data Anda.', 'error')
     console.error(e)
   }
 }
@@ -383,12 +505,21 @@ const resetForm = () => {
   formData.value.brand = ''
   formData.value.description = ''
   formData.value.category_id = ''
+  formData.value.concentration = ''
+  formData.value.rating = 0
   formData.value.topNotes = []
   formData.value.heartNotes = []
   formData.value.baseNotes = []
   formData.value.image = null
+  newTop.value = ''
+  newHeart.value = ''
+  newBase.value = ''
   photoPreview.value = null
 }
+
+onBeforeUnmount(() => {
+  if (toastTimeout) clearTimeout(toastTimeout)
+})
 </script>
 
 <style scoped>
@@ -467,6 +598,7 @@ const resetForm = () => {
   grid-template-columns: 1fr 2.1fr;
   gap: 40px;
   align-items: start;
+  margin: 0;
 }
 
 /* =========================================
@@ -507,6 +639,10 @@ const resetForm = () => {
   font-weight: 500;
 }
 
+.concentration-section {
+  position: relative;
+}
+
 .concentration-section label {
   display: block;
   font-size: 0.65rem;
@@ -540,10 +676,19 @@ const resetForm = () => {
   color: #7d5731;
 }
 
+.native-validation-proxy {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
 /* =========================================
    TAMBAHAN: GAYA RATING KESELURUHAN
    ========================================= */
 .rating-section {
+  position: relative;
   background-color: #ffffff;
   border-radius: 20px;
   padding: 25px 30px;
@@ -676,6 +821,7 @@ const resetForm = () => {
 }
 
 .pyramid-edit-card {
+  position: relative;
   background-color: #f4f4f0;
   box-shadow: none;
   padding: 35px 40px;
@@ -934,6 +1080,76 @@ const resetForm = () => {
 .btn-outline-brown:hover {
   border-color: #7d5731;
   background-color: #fafafa;
+}
+
+.toast-notification {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 260px;
+  max-width: min(90vw, 500px);
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(125, 87, 49, 0.12);
+  box-shadow: 0 18px 34px rgba(41, 31, 21, 0.14);
+  backdrop-filter: blur(8px);
+}
+
+.toast-notification.success {
+  color: #2f7f46;
+}
+
+.toast-notification.error {
+  color: #b84536;
+}
+
+.toast-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.toast-notification.success .toast-icon {
+  background: #e7f7eb;
+}
+
+.toast-notification.error .toast-icon {
+  background: #fdeaea;
+}
+
+.toast-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.toast-notification p {
+  margin: 0;
+  color: #3f3833;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.toast-fade-enter-active,
+.toast-fade-leave-active {
+  transition:
+    opacity 0.22s ease,
+    transform 0.22s ease;
+}
+
+.toast-fade-enter-from,
+.toast-fade-leave-to {
+  opacity: 0;
+  transform: translate(-50%, -8px);
 }
 
 /* Responsif */
