@@ -151,7 +151,7 @@ const handleLogout = async () => {
     localStorage.removeItem('token')
     localStorage.removeItem('user')
     localStorage.removeItem('lastActiveMenu')
-    router.push('/login')
+    router.push('/')
   } finally {
     isLoggingOut.value = false
   }
@@ -216,7 +216,7 @@ const handleLogout = async () => {
 
 .nav-item:hover {
   background-color: #e5e2dc;
-  color: #271c1c;
+  color: #7d5731;
 }
 
 /* CLASS ACTIVE SEKARANG DIKENDALIKAN MURNI OLEH LOGIKA KITA */
