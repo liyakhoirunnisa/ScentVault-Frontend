@@ -82,7 +82,20 @@
           <label>KATA SANDI SAAT INI</label>
           <div class="password-wrapper">
             <svg class="icon-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-            <input :type="showCurrentPassword ? 'text' : 'password'" class="form-control input-password" v-model="adminProfile.currentPassword" placeholder="••••••••" />
+            <input
+              :type="showCurrentPassword ? 'text' : 'password'"
+              class="form-control input-password"
+              v-model="adminProfile.currentPassword"
+              autocomplete="new-password"
+              name="scentvault-admin-current-password"
+              readonly
+              @focus="$event.target.removeAttribute('readonly')"
+              placeholder="••••••••"
+            />
+            <button type="button" class="btn-toggle-password" @click="showCurrentPassword = !showCurrentPassword">
+              <svg v-if="!showCurrentPassword" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+            </button>
           </div>
         </div>
 
@@ -90,8 +103,8 @@
           <label>UBAH KATA SANDI</label>
           <div class="password-wrapper">
             <svg class="icon-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-            <input :type="showPassword ? 'text' : 'password'" class="form-control input-password" v-model="adminProfile.password" placeholder="••••••••" />
-            <button class="btn-toggle-password" @click="showPassword = !showPassword">
+            <input :type="showPassword ? 'text' : 'password'" class="form-control input-password" v-model="adminProfile.password" autocomplete="new-password" name="scentvault-admin-new-password" placeholder="••••••••" />
+            <button type="button" class="btn-toggle-password" @click="showPassword = !showPassword">
               <svg v-if="!showPassword" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
               <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
             </button>
@@ -102,12 +115,13 @@
           <label>KONFIRMASI KATA SANDI</label>
           <div class="password-wrapper">
             <svg class="icon-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>
-            <input :type="showConfirmPassword ? 'text' : 'password'" class="form-control input-password" v-model="adminProfile.passwordConfirm" placeholder="••••••••" />
-            <button class="btn-toggle-password" @click="showConfirmPassword = !showConfirmPassword">
+            <input :type="showConfirmPassword ? 'text' : 'password'" class="form-control input-password" :class="{ 'is-invalid': passwordMismatch }" v-model="adminProfile.passwordConfirm" autocomplete="new-password" name="scentvault-admin-confirm-password" placeholder="••••••••" />
+            <button type="button" class="btn-toggle-password" @click="showConfirmPassword = !showConfirmPassword">
               <svg v-if="!showConfirmPassword" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
               <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
             </button>
           </div>
+          <p v-if="passwordMismatch" class="field-error">Kata sandi tidak cocok.</p>
         </div>
 
         <div class="input-group">
@@ -186,8 +200,8 @@ import api from '@/services/api'
 import defaultAvatar from '@/assets/profil.jpg'
 
 const defaultProfile = {
-  fullName: 'Brando',
-  email: 'Elenavance@gmail.com',
+  fullName: 'Admin',
+  email: 'admin@gmail.com',
   role: 'admin',
   currentPassword: '',
   password: '',
@@ -206,12 +220,28 @@ const showModal = ref(false)
 const showCurrentPassword = ref(false)
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
+const passwordMismatch = computed(() => {
+  return Boolean(
+    adminProfile.password &&
+      adminProfile.passwordConfirm &&
+      adminProfile.password !== adminProfile.passwordConfirm,
+  )
+})
 const toast = ref({
   show: false,
   message: '',
   type: 'success'
 })
 let toastTimeout = null
+
+const clearPasswordFields = () => {
+  adminProfile.currentPassword = ''
+  adminProfile.password = ''
+  adminProfile.passwordConfirm = ''
+  showCurrentPassword.value = false
+  showPassword.value = false
+  showConfirmPassword.value = false
+}
 
 const closeModal = () => {
   showModal.value = false
@@ -394,7 +424,9 @@ const loadProfile = async () => {
     if (village) {
       adminProfile.kelurahan = village.code
     }
-    
+
+    clearPasswordFields()
+     
     Object.assign(originalProfile, adminProfile)
   } catch(err) {
     console.error(err)
@@ -407,6 +439,7 @@ onMounted(() => {
 })
 
 const promptSave = () => {
+  if (passwordMismatch.value) return
   showModal.value = true
 }
 
@@ -681,6 +714,17 @@ onBeforeUnmount(() => {
 .form-control:focus {
   border-color: #7d5731;
   outline: none;
+}
+
+.form-control.is-invalid {
+  border-color: #ef4444;
+}
+
+.field-error {
+  margin: 8px 0 0;
+  color: #ef4444;
+  font-size: 0.82rem;
+  line-height: 1.35;
 }
 
 .select-wrapper {

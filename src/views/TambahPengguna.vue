@@ -48,7 +48,7 @@
     </transition>
 
     <section class="form-shell">
-      <form class="user-form" @submit.prevent="handleSubmit">
+      <form ref="userForm" class="user-form" autocomplete="off" novalidate @submit.prevent="handleSubmit">
         <div class="form-grid">
           <div class="field-group">
             <label for="fullName">Nama Lengkap</label>
@@ -56,7 +56,7 @@
               id="fullName"
               v-model="form.name"
               type="text"
-              placeholder="Contoh: Jean-Claude Ellena"
+              required
             />
           </div>
 
@@ -64,9 +64,14 @@
             <label for="email">Email</label>
             <input
               id="email"
+              name="scentvault-new-user-email"
               v-model="form.email"
               type="email"
-              placeholder="nama@scentvault.com"
+              autocomplete="new-password"
+              readonly
+              @focus="$event.target.removeAttribute('readonly')"
+              placeholder="nama@gmail.com"
+              required
             />
           </div>
 
@@ -75,9 +80,14 @@
             <div class="password-wrap">
               <input
                 id="password"
+                name="scentvault-new-user-password"
                 v-model="form.password"
                 :type="showPassword ? 'text' : 'password'"
-                placeholder="••••••••"
+                autocomplete="new-password"
+                readonly
+                @focus="$event.target.removeAttribute('readonly')"
+                @input="syncPasswordValidity"
+                required
               />
               <button
                 class="input-action"
@@ -111,9 +121,15 @@
             <div class="password-wrap">
               <input
                 id="passwordConfirm"
+                name="scentvault-new-user-password-confirm"
                 v-model="form.passwordConfirm"
                 :type="showPasswordConfirm ? 'text' : 'password'"
-                placeholder="••••••••"
+                :class="{ 'is-invalid': passwordMismatch }"
+                autocomplete="new-password"
+                readonly
+                @focus="$event.target.removeAttribute('readonly')"
+                @input="syncPasswordValidity"
+                required
               />
               <button
                 class="input-action"
@@ -140,12 +156,13 @@
                 </svg>
               </button>
             </div>
+            <p v-if="passwordMismatch" class="field-error">Kata sandi tidak cocok.</p>
           </div>
 
           <div class="field-group">
             <label for="role">Pilih Peran</label>
             <div class="select-wrap">
-              <select id="role" v-model="form.role">
+              <select id="role" v-model="form.role" required>
                 <option value="" disabled></option>
                 <option
                   v-for="option in roleOptions"
@@ -170,7 +187,7 @@
           <div class="field-group">
             <label for="provinsi">Provinsi</label>
             <div class="select-wrap">
-              <select id="provinsi" v-model="form.provinsi" @change="onProvinsiChange">
+              <select id="provinsi" v-model="form.provinsi" @change="onProvinsiChange" required>
                 <option value="" disabled>Pilih Provinsi</option>
                 <option v-for="p in provinsis" :key="p.code" :value="p.code">{{ p.name }}</option>
               </select>
@@ -188,6 +205,7 @@
                 v-model="form.kabupaten"
                 :disabled="!form.provinsi"
                 @change="onKabupatenChange"
+                required
               >
                 <option value="" disabled>Pilih Kabupaten/Kota</option>
                 <option v-for="k in kabupatens" :key="k.code" :value="k.code">{{ k.name }}</option>
@@ -206,6 +224,7 @@
                 v-model="form.kecamatan"
                 :disabled="!form.kabupaten"
                 @change="onKecamatanChange"
+                required
               >
                 <option value="" disabled>Pilih Kecamatan</option>
                 <option v-for="c in kecamatans" :key="c.code" :value="c.code">{{ c.name }}</option>
@@ -219,7 +238,7 @@
           <div class="field-group">
             <label for="kelurahan">Kelurahan/Desa</label>
             <div class="select-wrap">
-              <select id="kelurahan" v-model="form.kelurahan" :disabled="!form.kecamatan">
+              <select id="kelurahan" v-model="form.kelurahan" :disabled="!form.kecamatan" required>
                 <option value="" disabled>Pilih Kelurahan/Desa</option>
                 <option v-for="v in kelurahans" :key="v.code" :value="v.code">{{ v.name }}</option>
               </select>
@@ -326,7 +345,7 @@
 </template>
 
 <script setup>
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/services/api'
 
@@ -334,6 +353,7 @@ const router = useRouter()
 const showPassword = ref(false)
 const showPasswordConfirm = ref(false)
 const showSuccessModal = ref(false)
+const userForm = ref(null)
 const provinsis = ref([])
 const kabupatens = ref([])
 const kecamatans = ref([])
@@ -377,6 +397,14 @@ const defaultForm = () => ({
 
 const form = ref(defaultForm())
 
+const passwordMismatch = computed(() => {
+  return Boolean(
+    form.value.password &&
+      form.value.passwordConfirm &&
+      form.value.password !== form.value.passwordConfirm,
+  )
+})
+
 const resetForm = () => {
   form.value = defaultForm()
   kabupatens.value = []
@@ -384,6 +412,48 @@ const resetForm = () => {
   kelurahans.value = []
   showPassword.value = false
   showPasswordConfirm.value = false
+}
+
+const syncPasswordValidity = () => {
+  const passwordConfirmInput = userForm.value?.querySelector('#passwordConfirm')
+  if (!passwordConfirmInput) return
+
+  passwordConfirmInput.setCustomValidity(
+    passwordMismatch.value ? 'Kata sandi dan konfirmasi kata sandi tidak cocok.' : '',
+  )
+}
+
+const validateForm = () => {
+  const formElement = userForm.value
+  if (!formElement) return true
+
+  formElement.querySelectorAll('[readonly]').forEach((input) => {
+    input.removeAttribute('readonly')
+  })
+
+  syncPasswordValidity()
+
+  const validationOrder = [
+    'fullName',
+    'email',
+    'password',
+    'passwordConfirm',
+    'role',
+    'provinsi',
+    'kabupaten',
+    'kecamatan',
+    'kelurahan',
+  ]
+
+  for (const fieldId of validationOrder) {
+    const field = formElement.querySelector(`#${fieldId}`)
+    if (field && !field.checkValidity()) {
+      field.reportValidity()
+      return false
+    }
+  }
+
+  return true
 }
 
 const fetchProvinces = async () => {
@@ -469,21 +539,7 @@ const saveUserToLocalStorage = () => {
 }
 
 const handleSubmit = async () => {
-  if (
-    !form.value.name.trim() ||
-    !form.value.email.trim() ||
-    !form.value.role ||
-    !form.value.password.trim() ||
-    !form.value.passwordConfirm.trim() ||
-    form.value.password !== form.value.passwordConfirm
-  ) {
-    if (form.value.password !== form.value.passwordConfirm) {
-      showToast('Kata sandi dan konfirmasi kata sandi tidak cocok.', 'error')
-    } else {
-      showToast('Mohon lengkapi semua field terlebih dahulu.', 'error')
-    }
-    return
-  }
+  if (!validateForm()) return
 
   try {
     await api.post('/admin/users', {
@@ -722,6 +778,17 @@ onBeforeUnmount(() => {
   background: #f2f1ed;
   color: var(--field-text);
   -webkit-text-fill-color: var(--field-text);
+}
+
+.field-group input.is-invalid {
+  border-color: #ef4444;
+}
+
+.field-error {
+  margin: 8px 0 0;
+  color: #ef4444;
+  font-size: 0.82rem;
+  line-height: 1.35;
 }
 
 .field-group input:-webkit-autofill,

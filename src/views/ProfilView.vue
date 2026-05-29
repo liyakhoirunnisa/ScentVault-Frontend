@@ -202,6 +202,7 @@
                 <input
                   :type="showConfirmPassword ? 'text' : 'password'"
                   class="form-control input-password"
+                  :class="{ 'is-invalid': passwordMismatch }"
                   v-model="userData.password_confirmation"
                   autocomplete="new-password"
                   name="scentvault-confirm-password"
@@ -240,6 +241,7 @@
                   </svg>
                 </button>
               </div>
+              <p v-if="passwordMismatch" class="field-error">Kata sandi tidak cocok.</p>
             </div>
 
             <div class="input-group">
@@ -445,6 +447,14 @@ const showCurrentPassword = ref(false)
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
 
+const passwordMismatch = computed(() => {
+  return Boolean(
+    userData.value.password &&
+      userData.value.password_confirmation &&
+      userData.value.password !== userData.value.password_confirmation,
+  )
+})
+
 const showSaveModal = ref(false)
 const toast = ref({
   show: false,
@@ -614,6 +624,7 @@ onMounted(() => {
 
 // Memunculkan modal saat tombol diklik
 const promptSave = () => {
+  if (passwordMismatch.value) return
   showSaveModal.value = true
 }
 
@@ -918,6 +929,17 @@ onBeforeUnmount(() => {
 .form-control:focus {
   border-color: #7d5731;
   outline: none;
+}
+
+.form-control.is-invalid {
+  border-color: #ef4444;
+}
+
+.field-error {
+  margin: 8px 0 0;
+  color: #ef4444;
+  font-size: 0.82rem;
+  line-height: 1.35;
 }
 
 .select-wrapper {

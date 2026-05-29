@@ -375,11 +375,9 @@ const formatRole = (role) => {
     user: 'User',
     kurator: 'User',
     admin: 'Admin',
-    operator: 'Operator',
     User: 'User',
     Kurator: 'User',
     Admin: 'Admin',
-    Operator: 'Operator',
     system_admin: 'Admin',
     curator: 'User'
   }

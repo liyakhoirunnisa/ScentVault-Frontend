@@ -293,8 +293,7 @@ const props = defineProps({
     type: Array,
     default: () => ([
       'User',
-      'Admin',
-      'Operator'
+      'Admin'
     ])
   }
 })
@@ -568,7 +567,6 @@ function normalizeRoleValue(value) {
     user: 'User',
     kurator: 'User',
     curator: 'User',
-    operator: 'Operator',
     system_admin: 'Admin'
   }
 
@@ -596,10 +594,10 @@ function extractRoleValue(user) {
 
 const initialMode = computed(() => {
   if (props.mode) return String(props.mode).toLowerCase() === 'edit'
-  return route.name === 'UserEdit'
+  return route.name === 'UserEdit' || route.path.startsWith('/manajemen-pengguna/edit/')
 })
 
-const isEditing = ref(initialMode.value)
+const isEditing = ref(false)
 const copied = ref(false)
 const toast = ref({
   show: false,
@@ -735,9 +733,18 @@ watch(
   { immediate: true }
 )
 
-watch(initialMode, (value) => {
-  isEditing.value = value
-})
+watch(
+  [initialMode, () => route.fullPath],
+  ([value]) => {
+    if (isEditing.value && !value) {
+      mapUserToForm(selectedUser.value)
+    }
+
+    isEditing.value = value
+    copied.value = false
+  },
+  { immediate: true },
+)
 
 const avatarSrc = computed(() => form.avatar || '')
 
@@ -794,12 +801,17 @@ function closeSaveModal() {
 }
 
 async function handleSave() {
+  if (saveModal.value.loading) return
+
   const payload = {
     ...form,
     joinedAt: toISODate(form.joinedAt)
   }
 
-  saveModal.value.loading = true
+  saveModal.value = {
+    open: false,
+    loading: true
+  }
 
   try {
     await api.patch(`/admin/users/${form.id}`, {
@@ -807,15 +819,15 @@ async function handleSave() {
       email: payload.email,
       role: payload.role.toLowerCase()
     })
-    closeSaveModal()
     isEditing.value = false
     emit('edit-mode-change', false)
-    loadData()
+    await loadData()
     showToast('Perubahan pengguna berhasil disimpan.')
   } catch(error) {
     console.error(error)
-    saveModal.value.loading = false
     showToast(error.response?.data?.message || 'Gagal menyimpan perubahan pengguna.', 'error')
+  } finally {
+    saveModal.value.loading = false
   }
 }
 

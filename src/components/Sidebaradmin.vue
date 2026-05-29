@@ -229,7 +229,7 @@ const handleLogout = async () => {
 
 .nav-item:hover {
   background-color: #e5e2dc;
-  color: #271c1c;
+  color: #7d5731;
 }
 
 /* CLASS ACTIVE SEKARANG DIKENDALIKAN MURNI OLEH LOGIKA KITA */
