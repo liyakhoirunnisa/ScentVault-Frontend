@@ -448,20 +448,29 @@ const confirmSave = async () => {
   if (!adminId) return
 
   try {
-    const formData = new FormData()
-    formData.append('_method', 'PATCH')
-    formData.append('name', adminProfile.fullName)
-    formData.append('email', adminProfile.email)
+    const wantsPasswordChange =
+      adminProfile.currentPassword ||
+      adminProfile.password ||
+      adminProfile.passwordConfirm
 
-    if (adminProfile.password) {
+    if (wantsPasswordChange) {
+      if (!adminProfile.currentPassword || !adminProfile.password || !adminProfile.passwordConfirm) {
+        showModal.value = false
+        showToast('Mohon lengkapi kata sandi saat ini, kata sandi baru, dan konfirmasi kata sandi.', 'error')
+        return
+      }
+
       if (adminProfile.password !== adminProfile.passwordConfirm) {
         showModal.value = false
         showToast('Kata sandi tidak cocok.', 'error')
         return
       }
-      formData.append('password', adminProfile.password)
-      formData.append('password_confirmation', adminProfile.passwordConfirm)
     }
+
+    const formData = new FormData()
+    formData.append('_method', 'PATCH')
+    formData.append('name', adminProfile.fullName)
+    formData.append('email', adminProfile.email)
 
     if (adminProfile.kelurahan) {
       formData.append('region_code', adminProfile.kelurahan)
@@ -469,6 +478,14 @@ const confirmSave = async () => {
 
     if (selectedImageFile.value) {
       formData.append('photo', selectedImageFile.value)
+    }
+
+    if (wantsPasswordChange) {
+      await api.patch('/me/password', {
+        current_password: adminProfile.currentPassword,
+        password: adminProfile.password,
+        password_confirmation: adminProfile.passwordConfirm,
+      })
     }
 
     await api.post(`/admin/users/${adminId}`, formData, {

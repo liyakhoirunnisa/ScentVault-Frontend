@@ -519,25 +519,6 @@ const onKecamatanChange = async () => {
   }
 }
 
-const saveUserToLocalStorage = () => {
-  const existingUsers = JSON.parse(localStorage.getItem('scentvault_users') || '[]')
-
-  const selectedRole = roleOptions.find((item) => item.value === form.value.role)
-
-  const newUser = {
-    id: Date.now(),
-    name: form.value.name.trim(),
-    email: form.value.email.trim(),
-    role: selectedRole ? selectedRole.label : form.value.role,
-    status: 'active',
-    image: '',
-    image: '',
-  }
-
-  existingUsers.unshift(newUser)
-  localStorage.setItem('scentvault_users', JSON.stringify(existingUsers))
-}
-
 const handleSubmit = async () => {
   if (!validateForm()) return
 

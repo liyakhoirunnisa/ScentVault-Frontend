@@ -132,7 +132,7 @@
                   </div>
                   <div class="entry-date-group">
                     <span class="entry-date-text">{{ formatDate(entry.created_at) }}</span>
-                    <button class="btn-delete-small" @click="deleteEntry(entry.id)">
+                    <button class="btn-delete-small" @click="promptDelete(entry.id)">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M3 6h18"></path>
                         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -210,13 +210,78 @@
           </div>
         </div>
       </div>
+
+      <div v-if="showDeleteModal" class="modal-overlay" @click.self="closeDeleteModal">
+        <div class="modal-card">
+          <div class="modal-icon-wrapper">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="modal-icon"
+            >
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path
+                d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+              ></path>
+              <line x1="10" y1="11" x2="10" y2="17"></line>
+              <line x1="14" y1="11" x2="14" y2="17"></line>
+            </svg>
+          </div>
+
+          <h3 class="modal-title">Hapus Catatan Aroma?</h3>
+          <p class="modal-desc">
+            Apakah Anda yakin ingin menghapus catatan ini?<br />
+            Tindakan ini tidak dapat dibatalkan dan isi catatan akan hilang.
+          </p>
+
+          <div class="modal-actions">
+            <button class="btn-modal-cancel" :disabled="isDeletingEntry" @click="closeDeleteModal">
+              BATAL
+            </button>
+            <button class="btn-modal-confirm" :disabled="isDeletingEntry" @click="confirmDelete">
+              {{ isDeletingEntry ? 'MENGHAPUS...' : 'HAPUS CATATAN' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <transition name="toast-fade">
+        <div
+          v-if="toast.show"
+          class="toast-notification"
+          :class="toast.type"
+          role="status"
+          aria-live="polite"
+        >
+          <span class="toast-icon" aria-hidden="true">
+            <svg v-if="toast.type === 'success'" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M7 12.5l3.2 3.2L17.5 8.5"
+                stroke="currentColor"
+                stroke-width="2.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <svg v-else viewBox="0 0 24 24" fill="none">
+              <path d="M12 8v5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
+              <circle cx="12" cy="16.5" r="1" fill="currentColor" />
+            </svg>
+          </span>
+          <p>{{ toast.message }}</p>
+        </div>
+      </transition>
     </main>
 
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import Topbar from '@/components/Topbar.vue'
 import Sidebar from '@/components/Sidebar.vue'
 import axios from 'axios'
@@ -241,6 +306,28 @@ const newEntry = ref({
   occasion_id: '',
   notes_review: ''
 })
+const toast = ref({
+  show: false,
+  message: '',
+  type: 'error'
+})
+const showDeleteModal = ref(false)
+const selectedEntryId = ref(null)
+const isDeletingEntry = ref(false)
+let toastTimeout = null
+
+const showToast = (message, type = 'error') => {
+  toast.value = {
+    show: true,
+    message,
+    type
+  }
+
+  if (toastTimeout) clearTimeout(toastTimeout)
+  toastTimeout = setTimeout(() => {
+    toast.value.show = false
+  }, 3000)
+}
 
 const fetchScentLogs = async () => {
   try {
@@ -328,16 +415,35 @@ const submitEntry = async () => {
   }
 }
 
-const deleteEntry = async (id) => {
-  if (!confirm('Hapus catatan aroma ini?')) return
+const promptDelete = (id) => {
+  selectedEntryId.value = id
+  showDeleteModal.value = true
+}
+
+const closeDeleteModal = () => {
+  if (isDeletingEntry.value) return
+  showDeleteModal.value = false
+  selectedEntryId.value = null
+}
+
+const confirmDelete = async () => {
+  if (!selectedEntryId.value || isDeletingEntry.value) return
+
+  isDeletingEntry.value = true
   try {
     const token = localStorage.getItem('token')
-    await axios.delete(`http://localhost:8000/api/scentLog/${id}`, {
+    await axios.delete(`http://localhost:8000/api/scentLog/${selectedEntryId.value}`, {
       headers: { Authorization: `Bearer ${token}` }
     })
-    diaryEntries.value = diaryEntries.value.filter(e => e.id !== id)
+    diaryEntries.value = diaryEntries.value.filter(e => e.id !== selectedEntryId.value)
+    showDeleteModal.value = false
+    selectedEntryId.value = null
+    showToast('Catatan berhasil dihapus.', 'success')
   } catch (error) {
     console.error('Gagal menghapus entry:', error)
+    showToast('Gagal menghapus catatan. Silakan coba lagi.', 'error')
+  } finally {
+    isDeletingEntry.value = false
   }
 }
 
@@ -361,6 +467,10 @@ const getIconType = (weather) => {
   const isCloudy = ['Berawan', 'Mendung', 'Hujan'].includes(weather)
   return isCloudy ? 'cloud' : 'moon'
 }
+
+onBeforeUnmount(() => {
+  if (toastTimeout) clearTimeout(toastTimeout)
+})
 </script>
 
 <style scoped>
@@ -708,6 +818,188 @@ const getIconType = (weather) => {
 }
 
 /* =========================================
+   MODAL KONFIRMASI & TOAST
+   ========================================= */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-card {
+  background-color: #ffffff;
+  width: 450px;
+  padding: 40px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+  animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modal-icon-wrapper {
+  width: 64px;
+  height: 64px;
+  background-color: #fcdccf;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto 20px auto;
+}
+
+.modal-icon {
+  width: 28px;
+  height: 28px;
+  stroke: #b24b30;
+}
+
+.modal-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin-bottom: 15px;
+}
+
+.modal-desc {
+  font-size: 0.85rem;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 30px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.btn-modal-cancel,
+.btn-modal-confirm {
+  flex: 1;
+  padding: 14px 0;
+  border-radius: 30px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-modal-cancel:disabled,
+.btn-modal-confirm:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.btn-modal-cancel {
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  color: #6b7280;
+}
+.btn-modal-cancel:hover:not(:disabled) {
+  background-color: #f3f4f6;
+  color: #111827;
+}
+
+.btn-modal-confirm {
+  background-color: #a73b21;
+  border: 1px solid #a73b21;
+  color: #ffffff;
+}
+.btn-modal-confirm:hover:not(:disabled) {
+  background-color: #8c3a24;
+}
+
+.toast-notification {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 260px;
+  max-width: min(90vw, 360px);
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(125, 87, 49, 0.12);
+  box-shadow: 0 18px 34px rgba(41, 31, 21, 0.14);
+  backdrop-filter: blur(8px);
+}
+
+.toast-notification.success {
+  color: #2f7f46;
+}
+
+.toast-notification.error {
+  color: #b84536;
+}
+
+.toast-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.toast-notification.success .toast-icon {
+  background: #e7f7eb;
+}
+
+.toast-notification.error .toast-icon {
+  background: #fdeaea;
+}
+
+.toast-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.toast-notification p {
+  margin: 0;
+  color: #3f3833;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.toast-fade-enter-active,
+.toast-fade-leave-active {
+  transition:
+    opacity 0.22s ease,
+    transform 0.22s ease;
+}
+
+.toast-fade-enter-from,
+.toast-fade-leave-to {
+  opacity: 0;
+  transform: translate(-50%, -8px);
+}
+
+/* =========================================
    ANIMASI TRANSISI LIST (VIEW MORE)
    ========================================= */
 /* Durasi dan jenis transisi */
@@ -735,6 +1027,15 @@ const getIconType = (weather) => {
   }
   .entry-card-top {
     padding-left: 0; /* Menghilangkan indentasi di layar kecil */
+  }
+
+  .modal-card {
+    width: calc(100vw - 32px);
+    padding: 32px 24px;
+  }
+
+  .modal-actions {
+    flex-direction: column;
   }
 }
 </style>

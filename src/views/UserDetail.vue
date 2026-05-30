@@ -272,12 +272,65 @@
         </div>
       </div>
     </transition>
+
+    <transition name="modal-fade">
+      <div
+        v-if="deleteModal.open"
+        class="modal-overlay"
+        @click.self="closeDeleteModal"
+      >
+        <div
+          class="delete-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-modal-title"
+        >
+          <div class="delete-modal-icon">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M5 7h14M9 7V5h6v2m-7 3v7m4-7v7m4-7v7M7 7l1 12h8l1-12"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
+
+          <h2 id="delete-modal-title">Hapus Akun Pengguna?</h2>
+          <p>
+            Apakah Anda yakin ingin menghapus akun ini secara permanen? Tindakan ini akan
+            menghapus seluruh data kurasi dan akses sistem pengguna tersebut.
+          </p>
+
+          <div class="delete-modal-actions">
+            <button
+              class="delete-btn delete-btn-cancel"
+              type="button"
+              :disabled="deleteModal.loading"
+              @click="closeDeleteModal"
+            >
+              Batal
+            </button>
+
+            <button
+              class="delete-btn delete-btn-confirm"
+              type="button"
+              :disabled="deleteModal.loading"
+              @click="confirmDelete"
+            >
+              {{ deleteModal.loading ? 'Menghapus...' : 'Hapus Akun' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
   </section>
 </template>
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import api from '@/services/api'
 
 const props = defineProps({
@@ -307,145 +360,8 @@ const emit = defineEmits([
 ])
 
 const route = useRoute()
-const defaultUsers = [
-  {
-    id: 1,
-    name: 'Clara Amandine',
-    email: 'clara.a@scentvault.com',
-    role: 'User',
-    status: 'active',
-    image: 'https://i.pravatar.cc/120?img=32',
-    joinedAt: '2023-01-12',
-    philosophy: ''
-  },
-  {
-    id: 2,
-    name: 'Julian Sterling',
-    email: 'sterling.j@scentvault.com',
-    role: 'Admin',
-    status: 'active',
-    image: 'https://i.pravatar.cc/120?img=12',
-    joinedAt: '2023-01-12',
-    philosophy: '“Setiap wewangian adalah narasi cair yang belum selesai...”'
-  },
-  {
-    id: 3,
-    name: 'Elara Vance',
-    email: 'evance@scentvault.com',
-    role: 'User',
-    status: 'inactive',
-    image: 'https://i.pravatar.cc/120?img=47',
-    joinedAt: '2023-01-12',
-    philosophy: ''
-  },
-  {
-    id: 4,
-    name: 'Marcus Thorne',
-    email: 'm.thorne@scentvault.com',
-    role: 'User',
-    status: 'active',
-    image: 'https://i.pravatar.cc/120?img=14',
-    joinedAt: '2023-01-12',
-    philosophy: ''
-  },
-  {
-    id: 5,
-    name: 'Sophia Lazar',
-    email: 's.lazar@scentvault.com',
-    role: 'User',
-    status: 'active',
-    image: 'https://i.pravatar.cc/120?img=48',
-    joinedAt: '2023-01-12',
-    philosophy: ''
-  },
-  {
-    id: 6,
-    name: 'Noah Bellamy',
-    email: 'n.bellamy@scentvault.com',
-    role: 'Admin',
-    status: 'active',
-    image: 'https://i.pravatar.cc/120?img=19',
-    joinedAt: '2023-01-12',
-    philosophy: ''
-  },
-  {
-    id: 7,
-    name: 'Isla Moreau',
-    email: 'imoreau@scentvault.com',
-    role: 'User',
-    status: 'inactive',
-    image: 'https://i.pravatar.cc/120?img=25',
-    joinedAt: '2023-01-12',
-    philosophy: ''
-  },
-  {
-    id: 8,
-    name: 'Theo Arden',
-    email: 'theo.arden@scentvault.com',
-    role: 'User',
-    status: 'active',
-    image: 'https://i.pravatar.cc/120?img=67',
-    joinedAt: '2023-01-12',
-    philosophy: ''
-  },
-  {
-    id: 9,
-    name: 'Aurora Flint',
-    email: 'aurora.f@scentvault.com',
-    role: 'User',
-    status: 'active',
-    image: 'https://i.pravatar.cc/120?img=44',
-    joinedAt: '2023-01-12',
-    philosophy: ''
-  },
-  {
-    id: 10,
-    name: 'Elias Hart',
-    email: 'elias.h@scentvault.com',
-    role: 'Admin',
-    status: 'inactive',
-    image: 'https://i.pravatar.cc/120?img=60',
-    joinedAt: '2023-01-12',
-    philosophy: ''
-  },
-  {
-    id: 11,
-    name: 'Luna Cervantes',
-    email: 'l.cervantes@scentvault.com',
-    role: 'User',
-    status: 'active',
-    image: 'https://i.pravatar.cc/120?img=39',
-    joinedAt: '2023-01-12',
-    philosophy: ''
-  },
-  {
-    id: 12,
-    name: 'Milo Vesper',
-    email: 'mvesper@scentvault.com',
-    role: 'User',
-    status: 'active',
-    image: 'https://i.pravatar.cc/120?img=15',
-    joinedAt: '2023-01-12',
-    philosophy: ''
-  },
-  {
-    id: 13,
-    name: 'Freya Solene',
-    email: 'freya.s@scentvault.com',
-    role: 'User',
-    status: 'inactive',
-    image: 'https://i.pravatar.cc/120?img=50',
-    joinedAt: '2023-01-12',
-    philosophy: ''
-  }
-]
-
+const router = useRouter()
 const users = ref([])
-
-function loadUsers() {
-  const savedUsers = JSON.parse(localStorage.getItem('scentvault_users') || '[]')
-  users.value = [...savedUsers, ...defaultUsers]
-}
 
 const emptyUser = {
   id: '',
@@ -608,6 +524,10 @@ const saveModal = ref({
   open: false,
   loading: false
 })
+const deleteModal = ref({
+  open: false,
+  loading: false
+})
 let toastTimeout = null
 
 const form = reactive({
@@ -671,15 +591,10 @@ function getCachedSelectedUser(userId) {
     const raw = sessionStorage.getItem(`selected-user-${userId}`)
     if (raw) return JSON.parse(raw)
   } catch {
-    // no-op, fallback to localStorage below
+    // no-op, API remains the source of truth
   }
 
-  try {
-    const raw = localStorage.getItem(`selected-user-${userId}`)
-    return raw ? JSON.parse(raw) : null
-  } catch {
-    return null
-  }
+  return null
 }
 
 async function loadData() {
@@ -841,16 +756,39 @@ function handleCancel() {
   emit('cancel')
 }
 
-async function handleDelete() {
-  if(confirm('Hapus pengguna ini?')) {
-    try {
-      await api.delete(`/admin/users/${form.id}`)
-      showToast('Pengguna berhasil dihapus.')
-      emit('delete', { ...form })
-    } catch(err) {
-      console.error(err)
-      showToast(err.response?.data?.message || 'Gagal menghapus pengguna.', 'error')
-    }
+function handleDelete() {
+  deleteModal.value.open = true
+}
+
+function closeDeleteModal() {
+  if (deleteModal.value.loading) return
+  deleteModal.value = {
+    open: false,
+    loading: false
+  }
+}
+
+async function confirmDelete() {
+  if (deleteModal.value.loading) return
+
+  deleteModal.value.loading = true
+  try {
+    await api.delete(`/admin/users/${form.id}`)
+    deleteModal.value.open = false
+    sessionStorage.setItem(
+      'scentvault-admin-toast',
+      JSON.stringify({
+        message: `Pengguna ${form.name || ''} berhasil dihapus.`.replace(/\s+/g, ' ').trim(),
+        type: 'success'
+      })
+    )
+    emit('delete', { ...form })
+    router.push('/manajemen-pengguna')
+  } catch(err) {
+    console.error(err)
+    showToast(err.response?.data?.message || 'Gagal menghapus pengguna.', 'error')
+  } finally {
+    deleteModal.value.loading = false
   }
 }
 
@@ -1469,6 +1407,97 @@ onBeforeUnmount(() => {
   background-color: #fafafa;
 }
 
+.delete-modal {
+  width: min(100%, 460px);
+  padding: 32px 28px 28px;
+  border-radius: 30px;
+  background: linear-gradient(180deg, #f8f4ef 0%, #fbfaf8 100%);
+  box-shadow: 0 24px 70px rgba(25, 18, 12, 0.28);
+  text-align: center;
+}
+
+.delete-modal-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #ea6a62;
+  background: linear-gradient(180deg, rgba(255, 238, 236, 0.95) 0%, rgba(255, 243, 241, 0.92) 100%);
+  border: 1px solid rgba(234, 106, 98, 0.2);
+}
+
+.delete-modal-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.delete-modal h2 {
+  margin: 0 0 14px;
+  color: #2f2f31;
+  font-size: clamp(1.28rem, 1.8vw, 1.65rem);
+  line-height: 1.18;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.delete-modal p {
+  max-width: 360px;
+  margin: 0 auto;
+  color: #5e6473;
+  font-size: 0.86rem;
+  line-height: 1.62;
+}
+
+.delete-modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.delete-btn {
+  min-width: 132px;
+  height: 48px;
+  padding: 0 22px;
+  border-radius: 999px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease, background 0.2s ease;
+}
+
+.delete-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.delete-btn:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.delete-btn-cancel {
+  color: #d39c67;
+  border-color: rgba(220, 175, 123, 0.45);
+  background: rgba(255, 252, 248, 0.9);
+}
+
+.delete-btn-cancel:hover:not(:disabled) {
+  background: #fff;
+}
+
+.delete-btn-confirm {
+  color: #fff;
+  background: linear-gradient(135deg, #b64023 0%, #cf5730 100%);
+  box-shadow: 0 14px 28px rgba(207, 87, 48, 0.24);
+}
+
+.delete-btn-confirm:hover:not(:disabled) {
+  box-shadow: 0 18px 30px rgba(207, 87, 48, 0.3);
+}
+
 .btn-outline-brown:disabled,
 .btn-gradient:disabled {
   opacity: 0.7;
@@ -1483,6 +1512,11 @@ onBeforeUnmount(() => {
 .modal-fade-enter-from,
 .modal-fade-leave-to {
   opacity: 0;
+}
+
+.modal-fade-enter-from .delete-modal,
+.modal-fade-leave-to .delete-modal {
+  transform: translateY(10px) scale(0.98);
 }
 
 .toast-fade-enter-active,
@@ -1542,6 +1576,19 @@ onBeforeUnmount(() => {
   .modal-card {
     width: min(100%, 360px);
     padding: 32px 22px;
+  }
+
+  .delete-modal {
+    padding: 26px 20px 22px;
+    border-radius: 24px;
+  }
+
+  .delete-modal-actions {
+    flex-direction: column;
+  }
+
+  .delete-btn {
+    width: 100%;
   }
 }
 

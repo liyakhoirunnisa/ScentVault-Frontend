@@ -282,6 +282,22 @@ const showToast = (message, type = 'success') => {
   }, 3000)
 }
 
+const showPendingToast = () => {
+  try {
+    const rawToast = sessionStorage.getItem('scentvault-admin-toast')
+    if (!rawToast) return
+
+    sessionStorage.removeItem('scentvault-admin-toast')
+    const pendingToast = JSON.parse(rawToast)
+    if (pendingToast?.message) {
+      showToast(pendingToast.message, pendingToast.type || 'success')
+    }
+  } catch (error) {
+    sessionStorage.removeItem('scentvault-admin-toast')
+    console.warn('Gagal menampilkan notifikasi tertunda:', error)
+  }
+}
+
 const getImageUrl = (path) => {
   if (!path) return ''
   if (path.startsWith('http://') || path.startsWith('https://')) return path
@@ -335,6 +351,7 @@ const loadUsers = async (page = pagination.value.currentPage) => {
 
 onMounted(() => {
   loadUsers()
+  showPendingToast()
 })
 
 watch(searchQuery, () => {
