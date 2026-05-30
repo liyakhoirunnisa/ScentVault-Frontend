@@ -533,11 +533,8 @@ const handleSubmit = async () => {
     })
     showSuccessModal.value = true
   } catch (error) {
-    if(error.response && error.response.data && error.response.data.message) {
-      showToast(error.response.data.message, 'error')
-    } else {
-      showToast('Gagal menambahkan pengguna.', 'error')
-    }
+    console.error(error)
+    showToast('Gagal menambahkan pengguna.', 'error')
   }
 }
 

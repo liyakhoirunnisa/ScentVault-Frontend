@@ -430,7 +430,7 @@ const confirmDelete = async () => {
     // Refresh data koleksi di halaman yang sama
     await fetchCollection(pagination.value.current_page)
   } catch (e) {
-    showToast('Gagal menghapus parfum. Silakan coba lagi.', 'error')
+    showToast('Gagal menghapus parfum.', 'error')
     console.error(e)
     showDeleteModal.value = false
   }

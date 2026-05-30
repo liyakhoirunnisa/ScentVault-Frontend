@@ -504,7 +504,7 @@ const handleRegister = async () => {
       errorMessage.value = error.response.data.message
       showToast(errorMessage.value, 'error')
     } else {
-      showToast('Gagal melakukan pendaftaran. Periksa koneksi Anda.', 'error')
+      showToast('Gagal melakukan pendaftaran.', 'error')
     }
     console.error('Register error:', error)
   } finally {

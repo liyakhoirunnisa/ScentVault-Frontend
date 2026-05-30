@@ -494,7 +494,7 @@ const submitForm = async () => {
     await api.post('/perfumes', fd, { headers: { 'Content-Type': 'multipart/form-data' }})
     showSuccessModal.value = true
   } catch (e) {
-    showToast('Gagal menyimpan parfum. Silakan periksa kembali data Anda.', 'error')
+    showToast('Gagal menyimpan parfum.', 'error')
     console.error(e)
   }
 }

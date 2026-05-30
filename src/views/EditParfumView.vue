@@ -580,13 +580,13 @@ const confirmSave = async () => {
 
     if (e.response && e.response.status === 422) {
       const errors = e.response.data.errors
-      let errorMessage = 'Laravel menolak penyimpanan karena:\n\n'
+      let errorMessage = 'Gagal menyimpan perubahan.'
       for (let field in errors) {
         errorMessage += `• ${errors[field][0]}\n`
       }
-      alert(errorMessage)
+      showToast(errorMessage, 'error')
     } else {
-      alert('Terjadi kesalahan pada server.')
+      showToast('Gagal menyimpan perubahan.', 'error')
     }
   }
 }

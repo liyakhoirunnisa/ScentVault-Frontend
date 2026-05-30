@@ -409,9 +409,7 @@ const submitEntry = async () => {
     }
   } catch (error) {
     console.error('Gagal menyimpan entry:', error)
-    if(error.response?.data?.message) {
-      alert("Error: " + error.response.data.message)
-    }
+    showToast(error.response?.data?.message || 'Gagal menyimpan catatan.', 'error')
   }
 }
 
@@ -441,7 +439,7 @@ const confirmDelete = async () => {
     showToast('Catatan berhasil dihapus.', 'success')
   } catch (error) {
     console.error('Gagal menghapus entry:', error)
-    showToast('Gagal menghapus catatan. Silakan coba lagi.', 'error')
+    showToast('Gagal menghapus catatan.', 'error')
   } finally {
     isDeletingEntry.value = false
   }

@@ -499,7 +499,7 @@ const confirmSave = async () => {
     showModal.value = false
   } catch(err) {
     console.error(err)
-    showToast(err.response?.data?.message || 'Gagal menyimpan perubahan.', 'error')
+    showToast('Gagal menyimpan perubahan.', 'error')
     showModal.value = false
   }
 }

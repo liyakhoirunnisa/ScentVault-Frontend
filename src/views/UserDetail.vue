@@ -740,7 +740,7 @@ async function handleSave() {
     showToast('Perubahan pengguna berhasil disimpan.')
   } catch(error) {
     console.error(error)
-    showToast(error.response?.data?.message || 'Gagal menyimpan perubahan pengguna.', 'error')
+    showToast('Gagal menyimpan perubahan pengguna.', 'error')
   } finally {
     saveModal.value.loading = false
   }
@@ -786,7 +786,7 @@ async function confirmDelete() {
     router.push('/manajemen-pengguna')
   } catch(err) {
     console.error(err)
-    showToast(err.response?.data?.message || 'Gagal menghapus pengguna.', 'error')
+    showToast('Gagal menghapus pengguna.', 'error')
   } finally {
     deleteModal.value.loading = false
   }
